@@ -87,23 +87,23 @@
 
         .team-marker {
             position: absolute;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             background: rgba(0, 0, 0, 0.8);
-            padding: 4px;
+            padding: 8px;
             border-radius: 8px;
-            transform: translate(-50%, -50%);
+            z-index: 2;
         }
 
         .team-marker img {
-            width: 35px;
-            height: 35px;
+            width: 40px;
+            height: 40px;
             object-fit: contain;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
 
         .team-marker .team-name {
@@ -358,13 +358,12 @@
             const wheel = document.querySelector('.wheel');
             const totalTeams = remainingTeams.length;
             const wheelRadius = 600; // wheel diameter
-            const markerRadius = 210; // distance from center to markers
+            const markerRadius = 225; // slightly increased distance from center
             
             // Clear existing markers
             wheel.innerHTML = '';
             
             // Create the conic gradient for segments
-            // Start from -90 degrees (top) and go clockwise
             let gradientString = 'conic-gradient(from -90deg,';
             remainingTeams.forEach((team, index) => {
                 const startAngle = (index * (360 / totalTeams));
@@ -380,7 +379,7 @@
                 marker.className = 'team-marker';
                 
                 // Calculate position - start from top (-90 degrees) and go clockwise
-                const angleInDegrees = (index * (360 / totalTeams));
+                const angleInDegrees = (index * (360 / totalTeams)) + (360 / totalTeams / 2); // Center in slice
                 const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180;
                 
                 // Calculate marker position
@@ -392,10 +391,12 @@
                 // Position marker
                 marker.style.left = `${x}px`;
                 marker.style.top = `${y}px`;
+                // Rotate marker to align with slice
+                marker.style.transform = `translate(-50%, -50%) rotate(${angleInDegrees}deg)`;
                 
                 marker.innerHTML = `
-                    <img src="${team.logo}" alt="${team.name}">
-                    <div class="team-name">${team.name}</div>
+                    <img src="${team.logo}" alt="${team.name}" style="transform: rotate(-${angleInDegrees}deg)">
+                    <div class="team-name" style="transform: rotate(-${angleInDegrees}deg)">${team.name}</div>
                 `;
                 
                 wheel.appendChild(marker);
@@ -467,7 +468,7 @@
             const spinButton = document.getElementById('spinButton');
             spinButton.disabled = true;
 
-            // Generate random rotation between 5-10 full spins
+            // Generate random rotation between 5-10 full spins plus random degrees
             const rotations = 5 + Math.random() * 5;
             const randomDegrees = Math.random() * 360;
             const finalAngle = (rotations * 360) + randomDegrees;
@@ -477,23 +478,16 @@
 
             // After spin animation
             setTimeout(() => {
-                // Get final position (0-360 degrees)
+                // Calculate which segment is at the top
                 const finalRotation = finalAngle % 360;
-                
-                // Since the wheel rotates clockwise and we want to know which segment
-                // is at the top (0 degrees), we need to:
-                // 1. The wheel rotation gives us how far it turned clockwise
-                // 2. To find which segment is at the top, we need to go backwards (counterclockwise) 
-                //    from the first segment by that amount
                 const segmentSize = 360 / remainingTeams.length;
                 
-                // Convert the clockwise rotation to an array index
-                // We use remainingTeams.length - ... because the rotation is clockwise
-                // but array indices go counterclockwise from the top
-                let selectedIndex = remainingTeams.length - Math.floor(finalRotation / segmentSize);
+                // Calculate the selected index
+                // Add 180 to account for the fact that we want the segment at the top
+                let selectedIndex = Math.floor(((360 - (finalRotation % 360) + 180) % 360) / segmentSize);
                 
-                // Normalize the index to wrap around
-                selectedIndex = selectedIndex % remainingTeams.length;
+                // Ensure the index is within bounds
+                selectedIndex = (selectedIndex + remainingTeams.length) % remainingTeams.length;
                 
                 // Get the selected team
                 const selectedTeam = remainingTeams[selectedIndex];
@@ -519,7 +513,14 @@
                 document.querySelectorAll('.player-tag').forEach(tag => tag.classList.remove('selected'));
 
                 // Recreate wheel with remaining teams
-                createWheel();
+                setTimeout(() => {
+                    wheel.style.transition = 'none';
+                    wheel.style.transform = 'rotate(0deg)';
+                    setTimeout(() => {
+                        wheel.style.transition = 'transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+                        createWheel();
+                    }, 50);
+                }, 100);
             }, 5000);
         }
 
