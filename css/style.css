@@ -88,8 +88,8 @@ body::after {
 @media (max-width: 768px) {
     .container {
         padding: 10px;
-        border-width: 3px;
         margin: 10px;
+        border-width: 3px;
     }
 }
 
@@ -113,7 +113,8 @@ h1 {
 
 @media (max-width: 768px) {
     h1 {
-        font-size: 2em;
+        font-size: 1.8em;
+        padding: 0 5px;
     }
 }
 
@@ -157,10 +158,11 @@ nav {
 
 @media (max-width: 768px) {
     .nav-button {
-        flex: 0 1 calc(50% - 20px);
-        min-width: 120px;
-        padding: 8px 12px;
+        flex: 1 1 calc(50% - 10px);
+        min-width: 140px;
+        padding: 8px;
         margin: 3px;
+        font-size: 0.9em;
     }
 }
 
@@ -350,8 +352,6 @@ footer {
 @media (max-width: 768px) {
     .team-member-box {
         padding: 15px;
-        margin: 0 auto;
-        max-width: 100%;
     }
 }
 
@@ -426,20 +426,22 @@ footer {
 
 @media (max-width: 768px) {
     .team-container {
-        padding: 12px;
+        padding: 15px;
     }
 }
 
 .wheel-container {
-    max-width: 100%;
-    overflow: hidden;
-    margin: 0 auto;
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    overflow: visible;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 769px) {
     .wheel-container {
-        transform: scale(0.8);
-        margin: -50px auto;
+        width: 600px;
+        height: 600px;
     }
 }
 
@@ -493,4 +495,91 @@ html, body {
     0% { text-shadow: 2px 2px #000000, -2px -2px #ffffff, 0 0 10px #FFA500; }
     50% { text-shadow: 2px 2px #000000, -2px -2px #ffffff, 0 0 20px #FFA500; }
     100% { text-shadow: 2px 2px #000000, -2px -2px #ffffff, 0 0 10px #FFA500; }
+}
+
+/* Improve mobile navigation */
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+    width: 100%;
+}
+
+/* Ensure images scale properly */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Fix container scaling */
+.container {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Improve form elements on mobile */
+input, select, textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Fix button touch targets */
+button {
+    min-width: 44px;
+    min-height: 44px;
+}
+
+/* Ensure wheel is visible on mobile */
+.wheel-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    overflow: visible;
+}
+
+@media (min-width: 769px) {
+    .wheel-container {
+        width: 600px;
+        height: 600px;
+    }
+}
+
+/* Improve mobile navigation */
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+    width: 100%;
+}
+
+/* Improve touch targets */
+.nav-button a,
+.player-tag,
+button {
+    padding: 12px;
+    min-height: 44px;
+}
+
+/* Fix scrolling issues */
+body {
+    overflow-x: hidden;
+}
+
+/* Ensure content is centered */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Improve readability */
+p, li {
+    font-size: 1em;
+    line-height: 1.5;
 } 
