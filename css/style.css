@@ -2,13 +2,15 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: "Comic Sans MS", cursive;
+    font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", "Marker Felt", cursive;
     background-color: #000;
     color: #fff;
     position: relative;
     min-height: 100vh;
     overflow-x: hidden;
     -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Background pattern with 40% opacity */
@@ -462,7 +464,7 @@ footer {
 
 /* Maintain consistent font throughout */
 * {
-    font-family: "Comic Sans MS", cursive;
+    font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", "Marker Felt", cursive;
 }
 
 /* Fix for mobile tap highlight */
