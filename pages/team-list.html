@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team List - NRL Magic Round 2025</title>
+    <link rel="icon" type="image/webp" href="../BC/wests-tigers-2005-nrl-retro-jersey-804.webp">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .rainbow-text {
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: rainbow 3s linear infinite, bounce 2s infinite;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .rainbow-text {
+                font-size: 2em;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(20px); }
+        }
+
+        .team-member-box {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #ff0;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .team-member-box {
+                padding: 15px;
+            }
+        }
+
+        .team-member-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(255, 255, 0, 0.5);
+        }
+
+        .team-member-box:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, 
+                rgba(255, 165, 0, 0.8),
+                rgba(255, 69, 0, 0.6),
+                rgba(255, 0, 0, 0.4),
+                transparent);
+            animation: fireEffect 2s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        .team-member-box:hover::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, 
+                rgba(255, 255, 0, 0.4),
+                rgba(255, 165, 0, 0.3),
+                transparent);
+            animation: fireEffect 2.5s ease-in-out infinite;
+            animation-delay: 0.5s;
+            z-index: 1;
+        }
+
+        .team-member-box:hover .spark {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            animation: sparkEffect 1.5s ease-out infinite;
+            z-index: 2;
+        }
+
+        .team-member-box:hover .spark:nth-child(1) { left: 20%; animation-delay: 0.2s; }
+        .team-member-box:hover .spark:nth-child(2) { left: 40%; animation-delay: 0.4s; }
+        .team-member-box:hover .spark:nth-child(3) { left: 60%; animation-delay: 0.6s; }
+        .team-member-box:hover .spark:nth-child(4) { left: 80%; animation-delay: 0.8s; }
+
+        @keyframes fireEffect {
+            0% {
+                transform: translateY(100%) scaleX(1);
+                opacity: 0;
+            }
+            25% {
+                transform: translateY(50%) scaleX(1.2);
+                opacity: 0.8;
+            }
+            50% {
+                transform: translateY(0%) scaleX(1);
+                opacity: 0.6;
+            }
+            75% {
+                transform: translateY(-50%) scaleX(0.8);
+                opacity: 0.4;
+            }
+            100% {
+                transform: translateY(-100%) scaleX(1);
+                opacity: 0;
+            }
+        }
+
+        @keyframes sparkEffect {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(0);
+                opacity: 0;
+            }
+        }
+
+        .team-member-image {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #333;
+            border: 2px solid #ff0;
+            border-radius: 10px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 1.2em;
+            position: relative;
+            z-index: 2;
+        }
+
+        @media (max-width: 768px) {
+            .team-member-image {
+                width: 100%;
+                aspect-ratio: 1/1;
+            }
+        }
+
+        .team-member-name {
+            color: #ff0;
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin: 20px 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        @media (max-width: 768px) {
+            .team-member-name {
+                font-size: 1.5em;
+                margin: 10px 0;
+            }
+        }
+
+        .team-members-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 60px;
+            padding: 20px;
+            max-width: 2000px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1200px) {
+            .team-members-grid {
+                gap: 30px;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .team-members-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="rainbow-text">Team List</h1>
+            <div class="flame-divider"></div>
+            <nav>
+                <div class="nav-button"><a href="../index.html">🏠 Home</a></div>
+                <div class="nav-button"><a href="weekend-details.html">📅 Weekend Details</a></div>
+                <div class="nav-button"><a href="team-list.html">📋 Team List</a></div>
+                <div class="nav-button"><a href="see-it-sip-it.html">🍺 See it, Sip it</a></div>
+                <div class="nav-button"><a href="spin-wheel.html">🎲 Spin the Wheel</a></div>
+                <div class="nav-button"><a href="fun-facts.html">✨ Fun Facts</a></div>
+            </nav>
+            <div class="flame-divider"></div>
+        </header>
+
+        <main>
+            <div class="news-ticker">
+                <marquee>
+                    🏉 Team Lists Coming Soon - Check back closer to Magic Round for confirmed lineups! 🔄
+                </marquee>
+            </div>
+
+            <div class="legend-feature">
+                <h3>🌟 The Crew 🌟</h3>
+                <p class="blink">Give 'em a hover to see what they're made of! 🔥</p>
+            </div>
+
+            <div class="team-members-grid">
+                <div class="team-member-box">
+                    <div class="team-member-image">
+                        <img src="../BC/Team/matt.jpeg" alt="Matt E" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    </div>
+                    <h3 class="team-member-name">Matt E</h3>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                </div>
+
+                <div class="team-member-box">
+                    <div class="team-member-image" style="background: #000; overflow: hidden;">
+                        <video 
+                            id="laraVideo"
+                            style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block; aspect-ratio: 1/1;"
+                            controls
+                            autoplay 
+                            loop 
+                            playsinline
+                        >
+                            <source src="../BC/Team/1CA8AADB-172B-4A78-84BC-B674E92A124F.MOV" type="video/quicktime">
+                            <source src="../BC/Team/1CA8AADB-172B-4A78-84BC-B674E92A124F.MOV" type="video/mp4">
+                        </video>
+                    </div>
+                    <h3 class="team-member-name">Lara</h3>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                </div>
+
+                <div class="team-member-box">
+                    <div class="team-member-image">
+                        <img src="../BC/Team/IMG_5446.jpg" alt="Michael" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    </div>
+                    <h3 class="team-member-name">Michael</h3>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                </div>
+
+                <div class="team-member-box">
+                    <div class="team-member-image">
+                        <img src="../BC/Team/IMG_5452.jpg" alt="Brendan" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    </div>
+                    <h3 class="team-member-name">Brendan</h3>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                </div>
+
+                <div class="team-member-box">
+                    <div class="team-member-image">
+                        <img src="../BC/Team/george.png" alt="George" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    </div>
+                    <h3 class="team-member-name">George</h3>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                </div>
+
+                <div class="team-member-box">
+                    <div class="team-member-image">
+                        <img src="../BC/Team/IMG_5443.jpg" alt="Ben" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    </div>
+                    <h3 class="team-member-name">Ben</h3>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                </div>
+
+                <div class="team-member-box">
+                    <div class="team-member-image">
+                        <img src="../BC/Team/won.JPEG" alt="Matt W" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    </div>
+                    <h3 class="team-member-name">Matt W</h3>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                </div>
+
+                <div class="team-member-box">
+                    <div class="team-member-image">
+                        <img src="../BC/Team/SCR-20250322-hfqn.jpeg" alt="Rachel" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    </div>
+                    <h3 class="team-member-name">Rachel</h3>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                </div>
+
+                <div class="team-member-box">
+                    <div class="team-member-image">
+                        <img src="../BC/Team/SCR-20250322-gyfb.jpeg" alt="Phil" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    </div>
+                    <h3 class="team-member-name">Phil</h3>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                </div>
+
+                <div class="team-member-box">
+                    <div class="team-member-image">
+                        <img src="../BC/Team/gibbs.jpeg" alt="Gibbs" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    </div>
+                    <h3 class="team-member-name">Gibbs (maybe)</h3>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                </div>
+            </div>
+
+            <script>
+                // Ensure video plays and handle any loading issues
+                document.addEventListener('DOMContentLoaded', function() {
+                    const video = document.getElementById('laraVideo');
+                    
+                    video.addEventListener('loadeddata', function() {
+                        // Don't autoplay with sound unless user interacts
+                        video.volume = 1.0; // Set volume to 100%
+                        video.play().catch(function(error) {
+                            console.log("Video autoplay failed:", error);
+                        });
+                    });
+
+                    video.addEventListener('error', function(e) {
+                        console.log("Video error:", e);
+                        // If video fails, show the poster image
+                        video.poster = '../BC/Team/lara.jpeg';
+                    });
+                });
+            </script>
+        </main>
+
+        <footer>
+            <div class="flame-divider"></div>
+            <p>© 2025 NRL Magic Round. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html> 

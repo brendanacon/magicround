@@ -1,0 +1,288 @@
+/* 2000s Retro Styling with Wests Tigers Theme */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Comic Sans MS", cursive;
+    background-color: #000;
+    color: #fff;
+    position: relative;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Background pattern with 40% opacity */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('../BC/jersey-cursor.png') repeat;
+    background-size: 100px;
+    background-position: center;
+    opacity: 0.4;
+    z-index: -2;
+    pointer-events: none;
+}
+
+/* Left side scrolling tigers */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('../images/team-logos/WestsTigers2000.png') repeat;
+    background-size: 200px;
+    opacity: 0.03;
+    z-index: -1;
+    animation: scrollBackground 60s linear infinite;
+}
+
+/* Right side scrolling tigers */
+.background-right {
+    content: '';
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 100%;
+    background: url('../images/team-logos/WestsTigers2000.png') repeat;
+    background-size: 200px;
+    opacity: 0.03;
+    z-index: -1;
+    animation: scrollBackground 60s linear infinite reverse;
+    transform: scaleX(-1);
+    pointer-events: none;
+}
+
+@keyframes scrollBackground {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: 200px 200px;
+    }
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.9);
+    border: 5px solid #FFA500;
+    border-radius: 10px;
+    box-shadow: 
+        0 0 10px #FFA500,
+        0 0 20px #FFA500,
+        0 0 30px #FFA500;
+    position: relative;
+    z-index: 1;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+h1 {
+    color: #FFA500;
+    text-shadow: 
+        2px 2px #000000,
+        -2px -2px #ffffff,
+        0 0 10px #FFA500;
+    font-size: 2.5em;
+    animation: tigerGlow 3s linear infinite;
+}
+
+@keyframes tigerGlow {
+    0% { text-shadow: 2px 2px #000000, -2px -2px #ffffff, 0 0 10px #FFA500; }
+    50% { text-shadow: 2px 2px #000000, -2px -2px #ffffff, 0 0 20px #FFA500; }
+    100% { text-shadow: 2px 2px #000000, -2px -2px #ffffff, 0 0 10px #FFA500; }
+}
+
+.flame-divider {
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent 0%,
+        #FFA500 20%,
+        #ffffff 40%,
+        #FFA500 60%,
+        #ffffff 80%,
+        transparent 100%);
+    margin: 20px 0;
+    animation: flameMove 2s linear infinite;
+}
+
+@keyframes flameMove {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+nav {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.nav-button {
+    background: linear-gradient(to bottom, #FFA500, #000000);
+    padding: 10px;
+    border-radius: 10px;
+    border: 3px outset #ffffff;
+    margin: 5px;
+    transition: all 0.3s ease;
+}
+
+.nav-button:active {
+    border-style: inset;
+}
+
+.nav-button a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: bold;
+    text-shadow: 1px 1px #000000;
+}
+
+.nav-button:hover {
+    background: linear-gradient(to bottom, #000000, #FFA500);
+    transform: scale(1.1);
+    box-shadow: 0 0 10px #FFA500;
+}
+
+.welcome-section {
+    text-align: center;
+    margin: 30px 0;
+}
+
+.spinning-logo {
+    width: 150px;
+    height: 150px;
+    background: linear-gradient(45deg, #ff0000, #00ff00, #0000ff);
+    border-radius: 50%;
+    margin: 20px auto;
+    animation: spin 5s linear infinite;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.blink {
+    animation: blinker 1s linear infinite;
+    font-size: 1.2em;
+    color: #ff0;
+}
+
+@keyframes blinker {
+    50% { opacity: 0; }
+}
+
+.counter {
+    margin: 20px 0;
+    text-align: center;
+    background: #000000;
+    padding: 10px;
+    border: 2px solid #FFA500;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.counter-number {
+    font-family: "Digital", monospace;
+    color: #FFA500;
+    font-size: 1.5em;
+    text-shadow: 0 0 5px #FFA500;
+}
+
+.news-ticker {
+    background: #000000;
+    padding: 10px;
+    border: 2px solid #FFA500;
+    margin: 20px 0;
+}
+
+footer {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 0.8em;
+}
+
+.construction-banner {
+    background: #FFA500;
+    color: #000000;
+    padding: 10px;
+    margin: 20px auto;
+    border: 2px dashed #000000;
+    width: fit-content;
+    animation: flash 1s infinite;
+}
+
+@keyframes flash {
+    0% { border-color: #000000; }
+    50% { border-color: #ffffff; }
+    100% { border-color: #000000; }
+}
+
+.legend-feature {
+    margin: 30px 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-radius: 15px;
+    border: 3px solid #FFA500;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.legend-feature img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    border: 5px solid #FFA500;
+    box-shadow: 0 0 20px rgba(255, 165, 0, 0.5);
+    transition: transform 0.3s ease;
+}
+
+.legend-feature img:hover {
+    transform: scale(1.05);
+}
+
+.legend-feature h3 {
+    color: #FFA500;
+    text-shadow: 2px 2px #000000;
+    margin: 20px 0;
+    font-size: 1.8em;
+    animation: tigerGlow 3s linear infinite;
+}
+
+.legend-feature p {
+    color: #ffffff;
+    font-size: 1.2em;
+    margin: 15px 0;
+    text-shadow: 1px 1px #000000;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+    .container {
+        margin: 10px;
+        padding: 10px;
+    }
+    
+    nav {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .nav-button {
+        width: 80%;
+        margin: 5px 0;
+    }
+} 

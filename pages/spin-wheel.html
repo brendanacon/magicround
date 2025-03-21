@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin the Wheel - NRL Magic Round 2025</title>
+    <link rel="icon" type="image/webp" href="../BC/wests-tigers-2005-nrl-retro-jersey-804.webp">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .wheel-container {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            margin: 50px auto;
+        }
+
+        /* Pointer marker */
+        .wheel-pointer {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-top: 40px solid #ff0;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 0, 0.8));
+            z-index: 10;
+        }
+
+        .team-logos-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff0;
+            border-radius: 10px;
+        }
+
+        .team-logo {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
+        }
+
+        .team-logo:hover {
+            transform: scale(1.2);
+            filter: drop-shadow(2px 2px 8px rgba(255,255,0,0.8));
+        }
+
+        .wheel {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 10px solid #ff0;
+            box-shadow: 0 0 30px rgba(255, 255, 0, 0.5);
+            transition: transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            transform: rotate(0deg);
+            background: conic-gradient(
+                from 0deg,
+                #CC0000 0deg calc(360deg/17),
+                #570D10 calc(360deg/17) calc(2*360deg/17),
+                #00008B calc(2*360deg/17) calc(3*360deg/17),
+                #00529B calc(3*360deg/17) calc(4*360deg/17),
+                #E31837 calc(4*360deg/17) calc(5*360deg/17),
+                #FFCC00 calc(5*360deg/17) calc(6*360deg/17),
+                #CC0000 calc(6*360deg/17) calc(7*360deg/17),
+                #000000 calc(7*360deg/17) calc(8*360deg/17),
+                #004C2C calc(8*360deg/17) calc(9*360deg/17),
+                #9CC94B calc(9*360deg/17) calc(10*360deg/17),
+                #E31837 calc(10*360deg/17) calc(11*360deg/17),
+                #7A263A calc(11*360deg/17) calc(12*360deg/17),
+                #00B7EB calc(12*360deg/17) calc(13*360deg/17),
+                #461D7C calc(13*360deg/17) calc(14*360deg/17),
+                #FC4C02 calc(14*360deg/17) calc(15*360deg/17),
+                #00B7EB calc(15*360deg/17) calc(16*360deg/17),
+                #C60C30 calc(16*360deg/17) 360deg
+            );
+        }
+
+        .team-marker {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 4px;
+            border-radius: 8px;
+            transform: translate(-50%, -50%);
+        }
+
+        .team-marker img {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+            margin-bottom: 2px;
+        }
+
+        .team-marker .team-name {
+            color: white;
+            font-size: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .spin-button {
+            background: linear-gradient(45deg, #ff0, #ffa500);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            margin: 20px;
+            cursor: pointer;
+            animation: glow 1s ease-in-out infinite alternate;
+        }
+
+        .spin-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            animation: none;
+        }
+
+        .player-section {
+            background: #000;
+            border: 2px solid #ff0;
+            padding: 20px;
+            margin: 20px 0;
+            flex: 1;
+        }
+
+        .player-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .player-input input {
+            flex: 1;
+            padding: 10px;
+            font-size: 1em;
+            background: #333;
+            border: 1px solid #ff0;
+            color: white;
+        }
+
+        .assignments {
+            text-align: left;
+            color: #fff;
+        }
+
+        .assignment {
+            margin: 10px 0;
+            padding: 10px;
+            background: #222;
+            border: 1px solid #ff0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .assignment.new {
+            animation: highlight 2s ease-in-out;
+        }
+
+        @keyframes highlight {
+            0%, 100% { background: #222; }
+            50% { background: #663300; }
+        }
+
+        #result {
+            font-size: 1.5em;
+            color: #ff0;
+            margin: 20px;
+            min-height: 60px;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        .blink {
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .players-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px auto;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff0;
+            border-radius: 10px;
+            max-width: 800px;
+        }
+
+        .player-tag {
+            background: #333;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 1px solid #ff0;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        .player-tag:hover {
+            transform: scale(1.1);
+            background: #444;
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+        }
+
+        .player-tag.selected {
+            background: #ff0;
+            color: #000;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.5);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 5px solid #FFA500;
+            border-radius: 10px;
+            box-shadow: 
+                0 0 10px #FFA500,
+                0 0 20px #FFA500,
+                0 0 30px #FFA500;
+            position: relative;
+            z-index: 1;
+        }
+
+        .rainbow-text {
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: rainbow 3s linear infinite, bounce 2s infinite;
+            margin-bottom: 30px;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(20px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Spin the Wheel</h1>
+            <div class="flame-divider"></div>
+            <nav>
+                <div class="nav-button"><a href="../index.html">🏠 Home</a></div>
+                <div class="nav-button"><a href="weekend-details.html">📅 Weekend Details</a></div>
+                <div class="nav-button"><a href="team-list.html">📋 Team List</a></div>
+                <div class="nav-button"><a href="see-it-sip-it.html">🍺 See it, Sip it</a></div>
+                <div class="nav-button"><a href="spin-wheel.html">🎲 Spin the Wheel</a></div>
+                <div class="nav-button"><a href="fun-facts.html">✨ Fun Facts</a></div>
+            </nav>
+            <div class="flame-divider"></div>
+        </header>
+
+        <main>
+            <div class="team-logos-container">
+                <img src="../images/team-logos/Broncos.gif" alt="Broncos" class="team-logo">
+                <img src="../images/team-logos/Bulldogs.gif" alt="Bulldogs" class="team-logo">
+                <img src="../images/team-logos/Cowboys.gif" alt="Cowboys" class="team-logo">
+                <img src="../images/team-logos/Dolphins.png" alt="Dolphins" class="team-logo">
+                <img src="../images/team-logos/Dragons.gif" alt="Dragons" class="team-logo">
+                <img src="../images/team-logos/Eels.gif" alt="Eels" class="team-logo">
+                <img src="../images/team-logos/Knights.gif" alt="Knights" class="team-logo">
+                <img src="../images/team-logos/Panthers.gif" alt="Panthers" class="team-logo">
+                <img src="../images/team-logos/Rabbitohs.gif" alt="Rabbitohs" class="team-logo">
+                <img src="../images/team-logos/Raiders.gif" alt="Raiders" class="team-logo">
+                <img src="../images/team-logos/Roosters.gif" alt="Roosters" class="team-logo">
+                <img src="../images/team-logos/Sea Eagles.gif" alt="Sea Eagles" class="team-logo">
+                <img src="../images/team-logos/Sharks.gif" alt="Sharks" class="team-logo">
+                <img src="../images/team-logos/Storm.gif" alt="Storm" class="team-logo">
+                <img src="../images/team-logos/Tigers.gif" alt="Tigers" class="team-logo">
+                <img src="../images/team-logos/Titans.gif" alt="Titans" class="team-logo">
+                <img src="../images/team-logos/Warriors.gif" alt="Warriors" class="team-logo">
+            </div>
+
+            <div class="players-list">
+                <div class="player-tag" onclick="selectPlayer('Matt')">Matt</div>
+                <div class="player-tag" onclick="selectPlayer('Michael')">Michael</div>
+                <div class="player-tag" onclick="selectPlayer('Brendan')">Brendan</div>
+                <div class="player-tag" onclick="selectPlayer('Lara')">Lara</div>
+                <div class="player-tag" onclick="selectPlayer('George')">George</div>
+                <div class="player-tag" onclick="selectPlayer('Ben')">Ben</div>
+                <div class="player-tag" onclick="selectPlayer('Phil')">Phil</div>
+                <div class="player-tag" onclick="selectPlayer('Rachel')">Rachel</div>
+            </div>
+
+            <div class="wheel-container">
+                <div class="wheel-pointer"></div>
+                <div class="wheel"></div>
+                <button id="spinButton" class="spin-button" onclick="spinWheel()">🎲 SPIN THE WHEEL! 🎲</button>
+                <div id="result"></div>
+            </div>
+
+            <div class="player-section">
+                <h2>🎯 Team Assignments</h2>
+                <div id="assignments" class="assignments">
+                    <p>Click a player's name and spin the wheel to assign their team!</p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="flame-divider"></div>
+            <p>© 2025 NRL Magic Round. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        const availableTeams = [
+            { name: 'Dragons', color: '#CC0000', logo: '../images/team-logos/Dragons.gif' },
+            { name: 'Broncos', color: '#570D10', logo: '../images/team-logos/Broncos.gif' },
+            { name: 'Bulldogs', color: '#00008B', logo: '../images/team-logos/Bulldogs.gif' },
+            { name: 'Cowboys', color: '#00529B', logo: '../images/team-logos/Cowboys.gif' },
+            { name: 'Dolphins', color: '#E31837', logo: '../images/team-logos/Dolphins.png' },
+            { name: 'Eels', color: '#FFCC00', logo: '../images/team-logos/Eels.gif' },
+            { name: 'Knights', color: '#CC0000', logo: '../images/team-logos/Knights.gif' },
+            { name: 'Panthers', color: '#000000', logo: '../images/team-logos/Panthers.gif' },
+            { name: 'Rabbitohs', color: '#004C2C', logo: '../images/team-logos/Rabbitohs.gif' },
+            { name: 'Raiders', color: '#9CC94B', logo: '../images/team-logos/Raiders.gif' },
+            { name: 'Roosters', color: '#E31837', logo: '../images/team-logos/Roosters.gif' },
+            { name: 'Sea Eagles', color: '#7A263A', logo: '../images/team-logos/Sea Eagles.gif' },
+            { name: 'Sharks', color: '#00B7EB', logo: '../images/team-logos/Sharks.gif' },
+            { name: 'Storm', color: '#461D7C', logo: '../images/team-logos/Storm.gif' },
+            { name: 'Tigers', color: '#FC4C02', logo: '../images/team-logos/Tigers.gif' },
+            { name: 'Titans', color: '#00B7EB', logo: '../images/team-logos/Titans.gif' },
+            { name: 'Warriors', color: '#C60C30', logo: '../images/team-logos/Warriors.gif' }
+        ];
+
+        let remainingTeams = [...availableTeams];
+        let assignments = {};
+        let selectedPlayer = null;
+        let isSpinning = false;
+
+        function createWheel() {
+            const wheel = document.querySelector('.wheel');
+            const totalTeams = remainingTeams.length;
+            const wheelRadius = 600; // wheel diameter
+            const markerRadius = 210; // distance from center to markers
+            
+            // Clear existing markers
+            wheel.innerHTML = '';
+            
+            // Create the conic gradient for segments
+            // Start from -90 degrees (top) and go clockwise
+            let gradientString = 'conic-gradient(from -90deg,';
+            remainingTeams.forEach((team, index) => {
+                const startAngle = (index * (360 / totalTeams));
+                const endAngle = ((index + 1) * (360 / totalTeams));
+                gradientString += `${team.color} ${startAngle}deg ${endAngle}deg${index < totalTeams - 1 ? ',' : ''}`; 
+            });
+            gradientString += ')';
+            wheel.style.background = gradientString;
+            
+            // Add team markers
+            remainingTeams.forEach((team, index) => {
+                const marker = document.createElement('div');
+                marker.className = 'team-marker';
+                
+                // Calculate position - start from top (-90 degrees) and go clockwise
+                const angleInDegrees = (index * (360 / totalTeams));
+                const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180;
+                
+                // Calculate marker position
+                const centerX = wheelRadius / 2;
+                const centerY = wheelRadius / 2;
+                const x = centerX + markerRadius * Math.cos(angleInRadians);
+                const y = centerY + markerRadius * Math.sin(angleInRadians);
+                
+                // Position marker
+                marker.style.left = `${x}px`;
+                marker.style.top = `${y}px`;
+                
+                marker.innerHTML = `
+                    <img src="${team.logo}" alt="${team.name}">
+                    <div class="team-name">${team.name}</div>
+                `;
+                
+                wheel.appendChild(marker);
+            });
+        }
+
+        function selectPlayer(name) {
+            if (assignments[name]) {
+                alert('This player already has a team!');
+                return;
+            }
+            
+            selectedPlayer = name;
+            document.querySelectorAll('.player-tag').forEach(tag => {
+                tag.classList.remove('selected');
+                if (tag.textContent === name) {
+                    tag.classList.add('selected');
+                }
+            });
+        }
+
+        function updateAssignments(player, team) {
+            const assignmentsDiv = document.getElementById('assignments');
+            const assignment = document.createElement('div');
+            assignment.className = 'assignment new';
+            assignment.innerHTML = `
+                <div class="assignment-content">
+                    <img src="${team.logo}" alt="${team.name}" style="width: 30px; height: 30px; margin-right: 10px;">
+                    <span style="color: #ff0; font-weight: bold;">${player}</span>
+                    <span style="margin: 0 10px;">→</span>
+                    <span style="color: ${team.color};">${team.name}</span>
+                </div>
+            `;
+            assignmentsDiv.appendChild(assignment);
+
+            // Update the assignments display style
+            const assignmentStyle = document.createElement('style');
+            assignmentStyle.textContent = `
+                .assignment {
+                    background: rgba(0, 0, 0, 0.8);
+                    margin: 10px 0;
+                    padding: 15px;
+                    border-radius: 10px;
+                    border: 1px solid #ff0;
+                }
+                .assignment-content {
+                    display: flex;
+                    align-items: center;
+                }
+                .assignment.new {
+                    animation: highlight 1s ease-in-out;
+                }
+            `;
+            document.head.appendChild(assignmentStyle);
+        }
+
+        function spinWheel() {
+            if (isSpinning || !selectedPlayer) {
+                alert('Please select a player first!');
+                return;
+            }
+            if (remainingTeams.length === 0) {
+                alert('All teams have been assigned!');
+                return;
+            }
+
+            isSpinning = true;
+            const wheel = document.querySelector('.wheel');
+            const spinButton = document.getElementById('spinButton');
+            spinButton.disabled = true;
+
+            // Generate random rotation between 5-10 full spins
+            const rotations = 5 + Math.random() * 5;
+            const randomDegrees = Math.random() * 360;
+            const finalAngle = (rotations * 360) + randomDegrees;
+            
+            // Apply rotation
+            wheel.style.transform = `rotate(${finalAngle}deg)`;
+
+            // After spin animation
+            setTimeout(() => {
+                // Get final position (0-360 degrees)
+                const finalRotation = finalAngle % 360;
+                
+                // Since the wheel rotates clockwise and we want to know which segment
+                // is at the top (0 degrees), we need to:
+                // 1. The wheel rotation gives us how far it turned clockwise
+                // 2. To find which segment is at the top, we need to go backwards (counterclockwise) 
+                //    from the first segment by that amount
+                const segmentSize = 360 / remainingTeams.length;
+                
+                // Convert the clockwise rotation to an array index
+                // We use remainingTeams.length - ... because the rotation is clockwise
+                // but array indices go counterclockwise from the top
+                let selectedIndex = remainingTeams.length - Math.floor(finalRotation / segmentSize);
+                
+                // Normalize the index to wrap around
+                selectedIndex = selectedIndex % remainingTeams.length;
+                
+                // Get the selected team
+                const selectedTeam = remainingTeams[selectedIndex];
+                
+                // Log for debugging
+                console.log('Final rotation:', finalRotation);
+                console.log('Segment size:', segmentSize);
+                console.log('Selected index:', selectedIndex);
+                console.log('Selected team:', selectedTeam.name);
+                console.log('All teams:', remainingTeams.map(t => t.name));
+                
+                // Update assignments
+                assignments[selectedPlayer] = selectedTeam;
+                remainingTeams = remainingTeams.filter(t => t !== selectedTeam);
+
+                // Update assignments display
+                updateAssignments(selectedPlayer, selectedTeam);
+
+                // Reset for next spin
+                isSpinning = false;
+                spinButton.disabled = false;
+                selectedPlayer = null;
+                document.querySelectorAll('.player-tag').forEach(tag => tag.classList.remove('selected'));
+
+                // Recreate wheel with remaining teams
+                createWheel();
+            }, 5000);
+        }
+
+        // Initialize the wheel
+        createWheel();
+    </script>
+</body>
+</html> 

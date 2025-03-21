@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>See it, Sip it - NRL Magic Round 2025</title>
+    <link rel="icon" type="image/webp" href="../BC/wests-tigers-2005-nrl-retro-jersey-804.webp">
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Comic Sans MS', cursive;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            cursor: url('../images/jersey-cursor.png'), auto;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('../images/team-logos/WestsTigers2000.png') repeat;
+            opacity: 0.1;
+            z-index: -1;
+            animation: scrollBackground 60s linear infinite;
+        }
+
+        @keyframes scrollBackground {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: 100% 100%;
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 5px solid #FFA500;
+            border-radius: 10px;
+            box-shadow: 
+                0 0 10px #FFA500,
+                0 0 20px #FFA500,
+                0 0 30px #FFA500;
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-rules {
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            border: 3px solid #ff0;
+            margin: 20px 0;
+            text-align: center;
+            animation: glow 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ff0; }
+            to { box-shadow: 0 0 20px #fff, 0 0 30px #ff0, 0 0 40px #ff0; }
+        }
+
+        .team-triggers {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            padding: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .team-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 25px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            border: 2px solid #ff0;
+            transition: all 0.3s ease;
+            height: 100%;
+            justify-content: flex-start;
+        }
+
+        .team-logo {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            margin: 0 auto 20px;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+            transition: transform 0.3s ease;
+        }
+
+        .team-container h3 {
+            font-size: 1.4em;
+            color: #fff;
+            margin: 0 0 15px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .trigger-text {
+            color: #888;
+            font-style: italic;
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+
+        .trigger-list {
+            margin: 15px 0 0 0;
+            font-size: 1em;
+            color: #fff;
+            text-align: left;
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        .trigger-list li {
+            margin: 8px 0;
+            list-style-type: none;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .trigger-list li:before {
+            content: "•";
+            color: #ff0;
+            position: absolute;
+            left: 0;
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            .team-triggers {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+            
+            .team-container {
+                padding: 20px;
+            }
+
+            .team-logo {
+                width: 120px;
+                height: 120px;
+            }
+        }
+
+        #floating-matt {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 200px;
+            height: auto;
+            cursor: pointer;
+            z-index: 1000;
+            animation: float 3s ease-in-out infinite;
+            transition: transform 0.3s ease;
+        }
+
+        #floating-matt:hover {
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(-50%) translateY(0px);
+            }
+            50% {
+                transform: translateY(-50%) translateY(-20px);
+            }
+            100% {
+                transform: translateY(-50%) translateY(0px);
+            }
+        }
+
+        #tigers-confetti {
+            display: none;
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .rules-section, .special-rules-section {
+            background: url('../images/stars.gif') repeat;
+            border: 5px solid #ff0;
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 1000px;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.3);
+        }
+
+        .rules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .rule-card {
+            background: linear-gradient(45deg, #000080, #4B0082);
+            border: 3px solid #ff00ff;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+        }
+
+        .rule-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('../images/stars.gif') repeat;
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        .rule-card:hover {
+            transform: scale(1.05);
+            border-color: #00ff00;
+            box-shadow: 0 0 25px rgba(255, 0, 255, 0.5);
+        }
+
+        .rule-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            animation: bounce 2s infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        .rule-title {
+            color: #00ff00;
+            font-size: 1.5em;
+            text-shadow: 0 0 10px #00ff00;
+            margin: 10px 0;
+            animation: glow 2s infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        .rule-description {
+            color: #ffff00;
+            font-size: 1.2em;
+            text-shadow: 0 0 5px #ffff00;
+            margin: 10px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .special-rule {
+            background: linear-gradient(45deg, #000080, #4B0082);
+            border: 3px solid #ff00ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 600px;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .special-rule::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('../images/stars.gif') repeat;
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        .special-rule h3 {
+            color: #00ff00;
+            font-size: 1.5em;
+            text-shadow: 0 0 10px #00ff00;
+            margin-bottom: 15px;
+            animation: glow 2s infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        .special-rule p {
+            color: #ffff00;
+            font-size: 1.2em;
+            text-shadow: 0 0 5px #ffff00;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        .special-rule .drinking-rule {
+            color: #ff0;
+            font-size: 1.2em;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(20px); }
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 10px #00ff00; }
+            50% { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00; }
+        }
+
+        .rainbow-text {
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: rainbow 3s linear infinite, bounce 2s infinite;
+            margin-bottom: 30px;
+        }
+
+        @keyframes rainbow {
+            0% { color: #ff0000; }
+            20% { color: #ff00ff; }
+            40% { color: #0000ff; }
+            60% { color: #00ffff; }
+            80% { color: #00ff00; }
+            100% { color: #ff0000; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>See it, Sip it</h1>
+            <div class="flame-divider"></div>
+            <nav>
+                <div class="nav-button"><a href="../index.html">🏠 Home</a></div>
+                <div class="nav-button"><a href="weekend-details.html">📅 Weekend Details</a></div>
+                <div class="nav-button"><a href="team-list.html">📋 Team List</a></div>
+                <div class="nav-button"><a href="see-it-sip-it.html">🍺 See it, Sip it</a></div>
+                <div class="nav-button"><a href="spin-wheel.html">🎲 Spin the Wheel</a></div>
+                <div class="nav-button"><a href="fun-facts.html">✨ Fun Facts</a></div>
+            </nav>
+            <div class="flame-divider"></div>
+        </header>
+
+        <main>
+            <div class="news-ticker">
+                <marquee>
+                    🍺 THE ULTIMATE MAGIC ROUND DRINKING GAME! PICK YOUR TEAM AND GET READY TO SIP! 🎮
+                </marquee>
+            </div>
+
+            <div class="game-rules">
+                <h3>🎮 How to Play 🎮</h3>
+                <ol>
+                    <li>Each player is allocated an NRL team by spinning the wheel</li>
+                    <li>When someone spots anything related to your team's triggers, DRINK! 🍺</li>
+                    <li>No cheating - other players must verify the sighting! 👀</li>
+                </ol>
+            </div>
+
+            <div class="team-triggers">
+                <div class="team-container">
+                    <img src="../images/team-logos/Dolphins.png" alt="The Dolphins Logo" class="team-logo">
+                    <h3>The Dolphins</h3>
+                    <p class="trigger-text">Take a sip when you spot:</p>
+                    <ul class="trigger-list">
+                        <li>Water imagery</li>
+                        <li>Pools</li>
+                        <li>Water bottles</li>
+                        <li>Surf gear</li>
+                        <li>Rain ponchos</li>
+                    </ul>
+                </div>
+                <div class="team-container">
+                    <img src="../images/team-logos/Broncos.gif" alt="Brisbane Broncos Logo" class="team-logo">
+                    <h3>Brisbane Broncos</h3>
+                    <p class="trigger-text">Take a sip when you spot:</p>
+                    <ul class="trigger-list">
+                        <li>Horse visuals</li>
+                        <li>Horse toys</li>
+                        <li>Horse merch</li>
+                        <li>Team logos</li>
+                        <li>Cowboy themes</li>
+                    </ul>
+                </div>
+                <div class="team-container">
+                    <img src="../images/team-logos/Storm.gif" alt="Melbourne Storm Logo" class="team-logo">
+                    <h3>Melbourne Storm</h3>
+                    <p class="trigger-text">Take a sip when you spot:</p>
+                    <ul class="trigger-list">
+                        <li>Lightning</li>
+                        <li>Storm clouds</li>
+                        <li>Umbrellas</li>
+                        <li>Storm graphics</li>
+                    </ul>
+                </div>
+                <div class="team-container">
+                    <img src="../images/team-logos/Sharks.gif" alt="Cronulla Sharks Logo" class="team-logo">
+                    <h3>Cronulla Sharks</h3>
+                    <p class="trigger-text">Take a sip when you spot:</p>
+                    <ul class="trigger-list">
+                        <li>Shark fins</li>
+                        <li>Ocean scenes</li>
+                        <li>Beach scenes</li>
+                        <li>Shark merchandise</li>
+                    </ul>
+                </div>
+                <div class="team-container">
+                    <img src="../images/team-logos/Rabbitohs.gif" alt="South Sydney Rabbitohs Logo" class="team-logo">
+                    <h3>South Sydney Rabbitohs</h3>
+                    <p class="trigger-text">Take a sip when you spot:</p>
+                    <ul class="trigger-list">
+                        <li>Bunny ears</li>
+                        <li>Bunny toys</li>
+                        <li>Bunny shirts</li>
+                        <li>Easter themes</li>
+                    </ul>
+                </div>
+                <div class="team-container">
+                    <img src="../images/team-logos/Roosters.gif" alt="Sydney Roosters Logo" class="team-logo">
+                    <h3>Sydney Roosters</h3>
+                    <p class="trigger-text">Take a sip when you spot:</p>
+                    <ul class="trigger-list">
+                        <li>Rooster prints</li>
+                        <li>Feather boas</li>
+                        <li>Farm animals</li>
+                    </ul>
+                </div>
+                <div class="team-container">
+                    <img src="../images/team-logos/Panthers.gif" alt="Penrith Panthers Logo" class="team-logo">
+                    <h3>Penrith Panthers</h3>
+                    <p class="trigger-text">Take a sip when you spot:</p>
+                    <ul class="trigger-list">
+                        <li>Big cats</li>
+                        <li>Panther prints</li>
+                        <li>Leopard prints</li>
+                        <li>Tiger prints</li>
+                    </ul>
+                </div>
+                <div class="team-container">
+                    <img src="../images/team-logos/Raiders.gif" alt="Canberra Raiders Logo" class="team-logo">
+                    <h3>Canberra Raiders</h3>
+                    <p class="trigger-text">Take a sip when you spot:</p>
+                    <ul class="trigger-list">
+                        <li>Viking helmets</li>
+                        <li>Face paint</li>
+                        <li>Fantasy armor</li>
+                    </ul>
+                </div>
+                <div class="team-container">
+                    <img src="../images/team-logos/Titans.gif" alt="Gold Coast Titans Logo" class="team-logo">
+                    <h3>Gold Coast Titans</h3>
+                    <p class="trigger-text">Take a sip when you spot:</p>
+                    <ul class="trigger-list">
+                        <li>Greek god symbols</li>
+                        <li>Swords</li>
+                        <li>Superhero outfits</li>
+                    </ul>
+                </div>
+                <div class="team-container">
+                    <img src="../images/team-logos/Knights.gif" alt="Newcastle Knights Logo" class="team-logo">
+                    <h3>Newcastle Knights</h3>
+                    <p class="trigger-text">Take a sip when you spot:</p>
+                    <ul class="trigger-list">
+                        <li>Armor</li>
+                        <li>Medieval gear</li>
+                        <li>Swords/shields</li>
+                    </ul>
+                </div>
+                <div class="team-container">
+                    <img src="../images/team-logos/Warriors.gif" alt="New Zealand Warriors Logo" class="team-logo">
+                    <h3>New Zealand Warriors</h3>
+                    <p class="trigger-text">Take a sip when you spot:</p>
+                    <ul class="trigger-list">
+                        <li>Tribal tattoos</li>
+                        <li>Maori symbols</li>
+                        <li>Haka visuals</li>
+                    </ul>
+                </div>
+                <div class="team-container">
+                    <img src="../images/team-logos/Cowboys.gif" alt="North Queensland Cowboys Logo" class="team-logo">
+                    <h3>North Queensland Cowboys</h3>
+                    <p class="trigger-text">Take a sip when you spot:</p>
+                    <ul class="trigger-list">
+                        <li>Cowboy hats</li>
+                        <li>Boots</li>
+                        <li>Belt buckles</li>
+                    </ul>
+                </div>
+                <div class="team-container">
+                    <img src="../images/team-logos/Sea Eagles.gif" alt="Manly Sea Eagles Logo" class="team-logo">
+                    <h3>Manly Sea Eagles</h3>
+                    <p class="trigger-text">Take a sip when you spot:</p>
+                    <ul class="trigger-list">
+                        <li>Eagles</li>
+                        <li>Seagulls</li>
+                        <li>Birds of prey</li>
+                    </ul>
+                </div>
+                <div class="team-container">
+                    <img src="../images/team-logos/Eels.gif" alt="Parramatta Eels Logo" class="team-logo">
+                    <h3>Parramatta Eels</h3>
+                    <p class="trigger-text">Take a sip when you spot:</p>
+                    <ul class="trigger-list">
+                        <li>Fish tanks</li>
+                        <li>Snake-like toys</li>
+                        <li>Slimy stuff</li>
+                    </ul>
+                </div>
+                <div class="team-container">
+                    <img src="../images/team-logos/Bulldogs.gif" alt="Canterbury Bulldogs Logo" class="team-logo">
+                    <h3>Canterbury Bulldogs</h3>
+                    <p class="trigger-text">Take a sip when you spot:</p>
+                    <ul class="trigger-list">
+                        <li>Actual dogs</li>
+                        <li>Bulldog merch</li>
+                        <li>Paw prints</li>
+                    </ul>
+                </div>
+                <div class="team-container">
+                    <img src="../images/team-logos/Tigers.gif" alt="Wests Tigers Logo" class="team-logo">
+                    <h3>Wests Tigers</h3>
+                    <p class="trigger-text">Take a sip when you spot:</p>
+                    <ul class="trigger-list">
+                        <li>Tiger stripes</li>
+                        <li>Jungle patterns</li>
+                        <li>Wild cat visuals</li>
+                    </ul>
+                </div>
+                <div class="team-container">
+                    <img src="../images/team-logos/Dragons.gif" alt="St George Illawarra Dragons Logo" class="team-logo">
+                    <h3>St George Illawarra Dragons</h3>
+                    <p class="trigger-text">Take a sip when you spot:</p>
+                    <ul class="trigger-list">
+                        <li>Dragon art</li>
+                        <li>Fantasy shirts</li>
+                        <li>Fire symbols</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="rules-section">
+                <h2 class="rainbow-text">🍺 SEE IT, SIP IT RULES 🍺</h2>
+                <div class="rules-grid">
+                    <div class="rule-card">
+                        <div class="rule-icon">🏉</div>
+                        <h3 class="rule-title">TRY SCORED</h3>
+                        <p class="rule-description">Take a sip when your team scores a try!</p>
+                    </div>
+                    <div class="rule-card">
+                        <div class="rule-icon">⚡</div>
+                        <h3 class="rule-title">CONVERSION</h3>
+                        <p class="rule-description">Take a sip when your team converts a try!</p>
+                    </div>
+                    <div class="rule-card">
+                        <div class="rule-icon">🎯</div>
+                        <h3 class="rule-title">PENALTY GOAL</h3>
+                        <p class="rule-description">Take a sip when your team scores a penalty goal!</p>
+                    </div>
+                    <div class="rule-card">
+                        <div class="rule-icon">🏃</div>
+                        <h3 class="rule-title">LINE BREAK</h3>
+                        <p class="rule-description">Take a sip when your team makes a line break!</p>
+                    </div>
+                    <div class="rule-card">
+                        <div class="rule-icon">🔄</div>
+                        <h3 class="rule-title">40/20</h3>
+                        <p class="rule-description">Take a sip when your team kicks a 40/20!</p>
+                    </div>
+                    <div class="rule-card">
+                        <div class="rule-icon">🎨</div>
+                        <h3 class="rule-title">SPECIAL MOMENTS</h3>
+                        <p class="rule-description">Take a sip for any special moments or great plays!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="special-rules-section">
+                <h2 class="rainbow-text">🌟 SPECIAL RULES 🌟</h2>
+                <div class="special-rule">
+                    <h3>👑 Benji Marshall Special Rule 👑</h3>
+                    <p>Whenever Benji Marshall is mentioned or shown on screen, everyone must take a sip!</p>
+                    <p class="drinking-rule">DRINKING RULE: Benji = Drink! 🍺</p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="flame-divider"></div>
+            <p>© 2025 NRL Magic Round. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html> 

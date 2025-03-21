@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fun Facts - NRL Magic Round 2025</title>
+    <link rel="icon" type="image/webp" href="../BC/wests-tigers-2005-nrl-retro-jersey-804.webp">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 5px solid #FFA500;
+            border-radius: 10px;
+            box-shadow: 
+                0 0 10px #FFA500,
+                0 0 20px #FFA500,
+                0 0 30px #FFA500;
+            position: relative;
+            z-index: 1;
+        }
+
+        .facts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .fact-card {
+            background: linear-gradient(45deg, #000080, #4B0082);
+            border: 3px solid #ff00ff;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+            cursor: pointer;
+        }
+
+        .fact-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('../images/stars.gif') repeat;
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        .fact-card:hover {
+            transform: scale(1.05) rotate(2deg);
+            border-color: #00ff00;
+            box-shadow: 0 0 25px rgba(255, 0, 255, 0.5);
+        }
+
+        .fact-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            animation: bounce 2s infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        .fact-title {
+            color: #00ff00;
+            font-size: 1.5em;
+            text-shadow: 0 0 10px #00ff00;
+            margin: 10px 0;
+            animation: glow 2s infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        .fact-content {
+            color: #ffff00;
+            font-size: 1.2em;
+            text-shadow: 0 0 5px #ffff00;
+            margin: 10px 0;
+            position: relative;
+            z-index: 1;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .fact-card.revealed .fact-content {
+            display: block;
+            opacity: 1;
+        }
+
+        .fact-card.revealed {
+            animation: rainbow-border 2s infinite;
+        }
+
+        .rainbow-text {
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: rainbow 3s linear infinite;
+            margin-bottom: 30px;
+        }
+
+        .counter {
+            font-size: 2em;
+            color: #ff0;
+            text-shadow: 0 0 10px #ff0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes rainbow-border {
+            0% { border-color: #ff0000; }
+            20% { border-color: #ff00ff; }
+            40% { border-color: #0000ff; }
+            60% { border-color: #00ffff; }
+            80% { border-color: #00ff00; }
+            100% { border-color: #ff0000; }
+        }
+
+        @keyframes rainbow {
+            0% { color: #ff0000; }
+            20% { color: #ff00ff; }
+            40% { color: #0000ff; }
+            60% { color: #00ffff; }
+            80% { color: #00ff00; }
+            100% { color: #ff0000; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 10px #00ff00; }
+            50% { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00; }
+        }
+
+        .facts-revealed {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.5em;
+            color: #ff0;
+            text-shadow: 0 0 10px #ff0;
+        }
+
+        .construction-banner {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.2em;
+            color: #ff0;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .game-section {
+            text-align: center;
+            margin: 40px 0;
+            padding: 20px;
+            background: linear-gradient(45deg, #000080, #4B0082);
+            border: 3px solid #ff00ff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #gameCanvas {
+            background: #000;
+            border: 3px solid #00ff00;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .game-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .game-button {
+            background: linear-gradient(45deg, #ff0000, #ff00ff);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            border-radius: 5px;
+            cursor: pointer;
+            text-shadow: 0 0 5px #fff;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+            transition: transform 0.2s ease;
+        }
+
+        .game-button:hover {
+            transform: scale(1.1);
+        }
+
+        .score {
+            font-size: 1.5em;
+            color: #ff0;
+            text-shadow: 0 0 10px #ff0;
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <marquee behavior="alternate" scrollamount="10">
+                <h1>🎮 FUN FACTS 🐯</h1>
+            </marquee>
+            <div class="flame-divider"></div>
+        </header>
+
+        <nav>
+            <div class="nav-button">
+                <a href="../index.html">🏠 Home</a>
+            </div>
+            <div class="nav-button">
+                <a href="weekend-details.html">📅 Weekend Details</a>
+            </div>
+            <div class="nav-button">
+                <a href="see-it-sip-it.html">🍺 See it, Sip it</a>
+            </div>
+            <div class="nav-button">
+                <a href="fun-facts.html">🎯 Fun Facts</a>
+            </div>
+            <div class="nav-button">
+                <a href="team-list.html">👥 Team List</a>
+            </div>
+            <div class="nav-button">
+                <a href="spin-wheel.html">🎡 Spin the Wheel</a>
+            </div>
+        </nav>
+
+        <div class="facts-revealed">
+            Facts Revealed: <span class="counter">0</span>/16
+        </div>
+
+        <div class="facts-container">
+            <div class="fact-card">
+                <div class="fact-icon">🏟️</div>
+                <h3 class="fact-title">Suncorp Stadium</h3>
+                <div class="fact-content">
+                    The stadium was built on the site of the old Lang Park cemetery! 👻
+                </div>
+            </div>
+
+            <div class="fact-card">
+                <div class="fact-icon">🎯</div>
+                <h3 class="fact-title">First Magic Round</h3>
+                <div class="fact-content">
+                    The first Magic Round was held in 2019 and was so successful it became an annual event! 🌟
+                </div>
+            </div>
+
+            <div class="fact-card">
+                <div class="fact-icon">🏉</div>
+                <h3 class="fact-title">Record Attendance</h3>
+                <div class="fact-content">
+                    The highest attendance for a Magic Round was 136,000 fans in 2023! 👥
+                </div>
+            </div>
+
+            <div class="fact-card">
+                <div class="fact-icon">🎨</div>
+                <h3 class="fact-title">Jersey Colors</h3>
+                <div class="fact-content">
+                    Teams wear special jerseys for Magic Round - some even glow in the dark! ✨
+                </div>
+            </div>
+
+            <div class="fact-card">
+                <div class="fact-icon">🎭</div>
+                <h3 class="fact-title">Fan Costumes</h3>
+                <div class="fact-content">
+                    Fans dress up in crazy costumes - from superheroes to inflatable mascots! 🦸‍♂️
+                </div>
+            </div>
+
+            <div class="fact-card">
+                <div class="fact-icon">🎪</div>
+                <h3 class="fact-title">Fan Zone</h3>
+                <div class="fact-content">
+                    The fan zone has carnival rides, food trucks, and even a mechanical bull! 🎡
+                </div>
+            </div>
+
+            <div class="fact-card">
+                <div class="fact-icon">🎵</div>
+                <h3 class="fact-title">Half-time Shows</h3>
+                <div class="fact-content">
+                    Each day features amazing half-time shows with fireworks and music! 🎆
+                </div>
+            </div>
+
+            <div class="fact-card">
+                <div class="fact-icon">🍔</div>
+                <h3 class="fact-title">Food Records</h3>
+                <div class="fact-content">
+                    Fans eat over 50,000 hot dogs during Magic Round weekend! 🌭
+                </div>
+            </div>
+
+            <div class="fact-card">
+                <div class="fact-icon">🎪</div>
+                <h3 class="fact-title">Mascot Battle</h3>
+                <div class="fact-content">
+                    All team mascots have a special battle royale during the weekend! 🦁
+                </div>
+            </div>
+
+            <div class="fact-card">
+                <div class="fact-icon">🎨</div>
+                <h3 class="fact-title">Graffiti Wall</h3>
+                <div class="fact-content">
+                    There's a special wall where fans can leave their mark with spray paint! 🎨
+                </div>
+            </div>
+
+            <div class="fact-card">
+                <div class="fact-icon">🎮</div>
+                <h3 class="fact-title">Gaming Zone</h3>
+                <div class="fact-content">
+                    Fans can play NRL video games against each other in a special gaming zone! 🎮
+                </div>
+            </div>
+
+            <div class="fact-card">
+                <div class="fact-icon">🎪</div>
+                <h3 class="fact-title">Circus Acts</h3>
+                <div class="fact-content">
+                    Professional circus performers entertain fans between matches! 🤹‍♂️
+                </div>
+            </div>
+
+            <div class="fact-card">
+                <div class="fact-icon">🎭</div>
+                <h3 class="fact-title">Face Painting</h3>
+                <div class="fact-content">
+                    Free face painting stations help fans show their team spirit! 🎨
+                </div>
+            </div>
+
+            <div class="fact-card">
+                <div class="fact-icon">🎪</div>
+                <h3 class="fact-title">Street Parade</h3>
+                <div class="fact-content">
+                    Teams parade through Brisbane streets before the weekend starts! 🎭
+                </div>
+            </div>
+
+            <div class="fact-card">
+                <div class="fact-icon">🎨</div>
+                <h3 class="fact-title">Art Gallery</h3>
+                <div class="fact-content">
+                    Local artists create amazing NRL-themed artwork on display! 🎨
+                </div>
+            </div>
+
+            <div class="fact-card">
+                <div class="fact-icon">🎪</div>
+                <h3 class="fact-title">Fan Zone</h3>
+                <div class="fact-content">
+                    The fan zone has carnival rides, food trucks, and even a mechanical bull! 🎡
+                </div>
+            </div>
+        </div>
+
+        <div class="construction-banner">
+            🚧 UNDER CONSTRUCTION - MORE FACTS COMING SOON! 🚧
+        </div>
+
+        <div class="game-section">
+            <h2 class="rainbow-text">🎮 Flappy Bird 🎮</h2>
+            <div class="game-container">
+                <canvas id="gameCanvas" width="400" height="600"></canvas>
+                <div class="game-controls">
+                    <button id="startButton" class="game-button">Start Game</button>
+                    <div class="score">Score: <span id="score">0</span></div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>💫 Best viewed in Internet Explorer 6.0 or Netscape Navigator 💫</p>
+            <p>© 2025 NRL Magic Round - Made with 💖 and lots of animations</p>
+            <div class="visitor-counter">
+                <span>Visitors: </span>
+                <span class="counter">000001</span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Visitor counter functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const counterElement = document.querySelector('.counter');
+            let visitorCount = parseInt(localStorage.getItem('visitorCount')) || 1;
+            counterElement.textContent = visitorCount.toString().padStart(6, '0');
+            visitorCount++;
+            localStorage.setItem('visitorCount', visitorCount.toString());
+
+            // Facts counter functionality
+            let factCounter = 0;
+            const factCounterElement = document.getElementById('factCounter');
+            factCounterElement.textContent = `Facts Found: ${factCounter}`;
+
+            function revealFact(element) {
+                if (!element.classList.contains('revealed')) {
+                    element.classList.add('revealed');
+                    factCounter++;
+                    factCounterElement.textContent = `Facts Found: ${factCounter}`;
+                    
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                }
+            }
+
+            // Add click handlers to all fact cards
+            document.querySelectorAll('.fact-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    revealFact(this);
+                });
+            });
+        });
+
+        // Flappy Bird Game
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startButton = document.getElementById('startButton');
+        const scoreElement = document.getElementById('score');
+
+        let animationFrameId;
+        let score = 0;
+        let isGameRunning = false;
+
+        const bird = {
+            x: 50,
+            y: canvas.height / 2,
+            width: 40,
+            height: 40,
+            velocity: 0,
+            gravity: 0.3,
+            jump: -10,
+            image: new Image()
+        };
+
+        // Load the Greg Bird image
+        bird.image.src = '../BC/greg-bird.png';
+
+        const pipes = [];
+        const pipeWidth = 60;
+        const pipeGap = 200;
+        const pipeSpeed = 1.5;
+        const pipeSpacing = 400;
+
+        function createPipe() {
+            const gapY = Math.random() * (canvas.height - pipeGap - 100) + 50;
+            pipes.push({
+                x: canvas.width,
+                gapY: gapY,
+                passed: false
+            });
+        }
+
+        function drawBird() {
+            // Draw the Greg Bird image
+            ctx.drawImage(bird.image, bird.x, bird.y, bird.width, bird.height);
+        }
+
+        function drawPipes() {
+            ctx.fillStyle = '#00ff00';
+            pipes.forEach(pipe => {
+                // Upper pipe
+                ctx.fillRect(pipe.x, 0, pipeWidth, pipe.gapY);
+                // Lower pipe
+                ctx.fillRect(pipe.x, pipe.gapY + pipeGap, pipeWidth, canvas.height);
+            });
+        }
+
+        function update() {
+            // Update bird position
+            bird.velocity += bird.gravity;
+            bird.y += bird.velocity;
+
+            // Allow bird to sit on bottom
+            if (bird.y + bird.height > canvas.height) {
+                bird.y = canvas.height - bird.height;
+                bird.velocity = 0;
+            }
+
+            // Update pipes
+            pipes.forEach(pipe => {
+                pipe.x -= pipeSpeed;
+            });
+
+            // Remove off-screen pipes
+            while(pipes.length > 0 && pipes[0].x + pipeWidth < 0) {
+                pipes.shift();
+            }
+
+            // Add new pipes with more spacing
+            if(pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - pipeSpacing) {
+                createPipe();
+            }
+
+            // Check collisions with a bit more forgiveness
+            pipes.forEach(pipe => {
+                if(bird.x + bird.width > pipe.x && bird.x < pipe.x + pipeWidth) {
+                    if(bird.y < pipe.gapY || bird.y + bird.height > pipe.gapY + pipeGap) {
+                        gameOver();
+                    }
+                }
+                if(!pipe.passed && pipe.x + pipeWidth < bird.x) {
+                    pipe.passed = true;
+                    score++;
+                    scoreElement.textContent = score;
+                }
+            });
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPipes();
+            drawBird();
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function gameOver() {
+            isGameRunning = false;
+            cancelAnimationFrame(animationFrameId);
+            alert(`Game Over! Score: ${score}`);
+            // Reset the game state after alert
+            bird.y = canvas.height / 2;
+            bird.velocity = 0;
+            pipes.length = 0;
+            score = 0;
+            scoreElement.textContent = score;
+            startButton.textContent = 'Start Game';
+            // Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function startGame() {
+            if(isGameRunning) return;
+            
+            // Reset game state
+            bird.y = canvas.height / 2;
+            bird.velocity = 0;
+            pipes.length = 0;
+            score = 0;
+            scoreElement.textContent = score;
+            isGameRunning = true;
+            startButton.textContent = 'Restart Game';
+            // Clear any existing animation frame
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+            gameLoop();
+        }
+
+        // Event listeners
+        startButton.addEventListener('click', startGame);
+        document.addEventListener('keydown', (e) => {
+            if(e.code === 'Space' && isGameRunning) {
+                bird.velocity = bird.jump;
+            }
+        });
+        canvas.addEventListener('click', () => {
+            if(isGameRunning) {
+                bird.velocity = bird.jump;
+            }
+        });
+    </script>
+</body>
+</html> 

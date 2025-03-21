@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Lists - NRL Magic Round 2025</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .team-section {
+            background: linear-gradient(45deg, #000080, #4B0082);
+            border: 3px solid #ff00ff;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .team-name {
+            text-align: center;
+            color: #00ff00;
+            text-shadow: 2px 2px #000000;
+            animation: rainbow 3s infinite, bounce 2s infinite;
+        }
+
+        @keyframes rainbow {
+            0% { color: #ff0000; }
+            33% { color: #00ff00; }
+            66% { color: #0000ff; }
+            100% { color: #ff0000; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(20px); }
+        }
+
+        .player-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .player-list li {
+            background: rgba(0, 0, 0, 0.5);
+            margin: 5px 0;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .player-number {
+            color: #ffff00;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 5px solid #FFA500;
+            border-radius: 10px;
+            box-shadow: 
+                0 0 10px #FFA500,
+                0 0 20px #FFA500,
+                0 0 30px #FFA500;
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="star-background">
+        <div class="container">
+            <header>
+                <marquee behavior="alternate" scrollamount="10">
+                    <h1>👥 Team Lists - Magic Round 2025 👥</h1>
+                </marquee>
+                <div class="flame-divider"></div>
+            </header>
+
+            <nav>
+                <div class="nav-button">
+                    <a href="../index.html">🏠 Home</a>
+                </div>
+                <div class="nav-button">
+                    <a href="schedule.html">📅 Schedule</a>
+                </div>
+                <div class="nav-button">
+                    <a href="teams.html">👥 Team Lists</a>
+                </div>
+                <div class="nav-button">
+                    <a href="insights.html">🔍 Key Insights</a>
+                </div>
+            </nav>
+
+            <main>
+                <div class="news-ticker">
+                    <marquee>
+                        🏉 Team lists subject to change - Check back closer to game day for final confirmations! 🔄
+                    </marquee>
+                </div>
+
+                <div class="team-grid">
+                    <div class="team-section">
+                        <h2 class="team-name">Brisbane Broncos</h2>
+                        <ul class="player-list">
+                            <li><span class="player-number">1.</span> Reece Walsh</li>
+                            <li><span class="player-number">2.</span> Jesse Arthars</li>
+                            <li><span class="player-number">3.</span> Kotoni Staggs</li>
+                            <li><span class="player-number">4.</span> Selwyn Cobbo</li>
+                            <li><span class="player-number">5.</span> Corey Oates</li>
+                            <li><span class="player-number">6.</span> Ezra Mam</li>
+                            <li><span class="player-number">7.</span> Adam Reynolds (c)</li>
+                            <li><span class="player-number">8.</span> Payne Haas</li>
+                            <li><span class="player-number">9.</span> Billy Walters</li>
+                            <li><span class="player-number">10.</span> Patrick Carrigan</li>
+                        </ul>
+                    </div>
+
+                    <div class="team-section">
+                        <h2 class="team-name">Melbourne Storm</h2>
+                        <ul class="player-list">
+                            <li><span class="player-number">1.</span> Ryan Papenhuyzen</li>
+                            <li><span class="player-number">2.</span> Will Warbrick</li>
+                            <li><span class="player-number">3.</span> Justin Olam</li>
+                            <li><span class="player-number">4.</span> Nick Meaney</li>
+                            <li><span class="player-number">5.</span> Xavier Coates</li>
+                            <li><span class="player-number">6.</span> Cameron Munster</li>
+                            <li><span class="player-number">7.</span> Jahrome Hughes</li>
+                            <li><span class="player-number">8.</span> Christian Welch</li>
+                            <li><span class="player-number">9.</span> Harry Grant</li>
+                            <li><span class="player-number">10.</span> Nelson Asofa-Solomona</li>
+                        </ul>
+                    </div>
+
+                    <!-- Add more team sections as needed -->
+                </div>
+
+                <div class="team-section">
+                    <h3>⚠️ Note:</h3>
+                    <p>Only showing key players for each team. Full squad lists will be updated closer to the event!</p>
+                </div>
+            </main>
+
+            <footer>
+                <p>💫 Best viewed in Internet Explorer 6.0 or Netscape Navigator 💫</p>
+                <p>© 2025 NRL Magic Round - Made with 💖 and lots of GIFs</p>
+                <img src="../images/under-construction.gif" alt="Under Construction" class="construction">
+            </footer>
+        </div>
+    </div>
+</body>
+</html> 
