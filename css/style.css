@@ -435,7 +435,7 @@ footer {
     width: 100%;
     max-width: 600px;
     margin: 20px auto;
-    overflow: visible;
+    padding: 20px 0;
 }
 
 @media (min-width: 769px) {
@@ -582,4 +582,141 @@ body {
 p, li {
     font-size: 1em;
     line-height: 1.5;
+}
+
+/* Digital Timer Styles */
+.digital-timer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin: 30px auto;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 15px;
+    max-width: 800px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .digital-timer {
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .time-unit {
+        flex: 1 1 calc(50% - 20px);
+        min-width: 120px;
+    }
+
+    .time-box {
+        padding: 10px 15px;
+        min-width: 80px;
+    }
+
+    .time-box span {
+        font-size: 2em;
+    }
+
+    .time-separator {
+        display: none;
+    }
+
+    .label {
+        font-size: 1em;
+    }
+}
+
+.time-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.time-box {
+    background: linear-gradient(45deg, #000000, #333333);
+    border: 3px solid #FFA500;
+    border-radius: 10px;
+    padding: 20px 30px;
+    min-width: 120px;
+    text-align: center;
+    box-shadow: 
+        0 0 10px #FFA500,
+        0 0 20px #FFA500,
+        inset 0 0 10px rgba(255, 165, 0, 0.5);
+}
+
+.time-box span {
+    font-family: 'Digital', monospace;
+    font-size: 3.5em;
+    color: #FFA500;
+    text-shadow: 0 0 10px #FFA500;
+    font-weight: bold;
+}
+
+.time-separator {
+    font-size: 3.5em;
+    color: #FFA500;
+    text-shadow: 0 0 10px #FFA500;
+    margin: 0 10px;
+    animation: blink 1s infinite;
+}
+
+.label {
+    color: #FFA500;
+    font-size: 1.2em;
+    text-shadow: 0 0 5px #FFA500;
+    font-weight: bold;
+}
+
+/* Spin Wheel Improvements */
+.wheel-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px 0;
+}
+
+@media (max-width: 768px) {
+    .wheel-container {
+        transform: scale(0.8);
+        transform-origin: top center;
+        margin: -40px auto;
+        padding: 0;
+    }
+
+    .wheel-pointer {
+        top: 0;
+    }
+
+    .team-logos-container {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .team-logo {
+        width: 40px;
+        height: 40px;
+    }
+
+    .player-tag {
+        padding: 8px 16px;
+        font-size: 0.9em;
+    }
+
+    .players-list {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    #spinButton {
+        padding: 15px 30px;
+        font-size: 1.2em;
+        margin: 20px auto;
+        display: block;
+        width: 80%;
+        max-width: 300px;
+    }
 } 
