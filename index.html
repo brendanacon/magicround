@@ -1,602 +1,1149 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NRL Magic Round 2025</title>
-    <link rel="icon" type="image/webp" href="BC/wests-tigers-2005-nrl-retro-jersey-804.webp">
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Pool Doubles Tournament</title>
+  <style>
+    :root{
+      --bg0:#070A12;
+      --bg1:#0B1020;
+      --glass: rgba(255,255,255,0.10);
+      --glass2: rgba(255,255,255,0.06);
+      --stroke: rgba(255,255,255,0.18);
+      --stroke2: rgba(255,255,255,0.10);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.68);
+      --muted2: rgba(255,255,255,0.52);
+      --accent: #5AC8FA; /* iOS-ish blue */
+      --green: #34C759;
+      --red: #FF453A;
+      --orange: #FF9F0A;
+      --radius: 18px;
+      --radius2: 24px;
+      --shadow: 0 18px 50px rgba(0,0,0,.45);
+      --shadow2: 0 10px 30px rgba(0,0,0,.35);
+      --pad: 16px;
+      --pad2: 20px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, system-ui, sans-serif;
+    }
+
+    *{ box-sizing:border-box; }
+    html, body{ height:100%; }
+    body{
+      margin:0;
+      font-family: var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 20% 10%, rgba(90,200,250,.20), transparent 55%),
+        radial-gradient(900px 600px at 85% 25%, rgba(255,159,10,.16), transparent 55%),
+        radial-gradient(900px 600px at 55% 90%, rgba(52,199,89,.14), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      -webkit-font-smoothing: antialiased;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+
+    .app{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 18px 14px 24px;
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+    }
+
+    header{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 6px 4px 2px;
+    }
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+    }
+    h1{
+      margin:0;
+      font-size: 20px;
+      letter-spacing: .2px;
+      font-weight: 720;
+      line-height: 1.1;
+    }
+    .sub{
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.25;
+    }
+
+    .topActions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      appearance:none;
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+      color: var(--text);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 650;
+      letter-spacing:.15px;
+      box-shadow: var(--shadow2);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .08s ease, filter .2s ease, border-color .2s ease;
+      white-space:nowrap;
+    }
+    .btn:active{ transform: scale(.98); }
+    .btn.primary{
+      border-color: rgba(90,200,250,.55);
+      background: linear-gradient(180deg, rgba(90,200,250,.35), rgba(90,200,250,.12));
+    }
+    .btn.danger{
+      border-color: rgba(255,69,58,.55);
+      background: linear-gradient(180deg, rgba(255,69,58,.28), rgba(255,69,58,.10));
+    }
+    .btn.ghost{
+      border-color: var(--stroke2);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+      color: var(--muted);
+    }
+    .pill{
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 4px 8px;
+      border: 1px solid var(--stroke2);
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 14px;
+    }
+    @media (max-width: 860px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      border-radius: var(--radius2);
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      overflow:hidden;
+    }
+    .cardHeader{
+      padding: 14px 16px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .cardHeader h2{
+      margin:0;
+      font-size: 14px;
+      font-weight: 750;
+      letter-spacing: .2px;
+    }
+    .cardHeader .hint{
+      font-size: 12px;
+      color: var(--muted2);
+      line-height:1.2;
+      text-align:right;
+    }
+    .cardBody{ padding: 14px 16px 16px; }
+
+    /* People chips */
+    .people{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+      align-items:flex-start;
+    }
+    .chip{
+      border-radius: 999px;
+      padding: 10px 12px;
+      border: 1px solid var(--stroke2);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 650;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .08s ease, border-color .2s ease, background .2s ease, filter .2s ease;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+    }
+    .chip:active{ transform: scale(.98); }
+    .chip .dot{
+      width:10px; height:10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.35);
+      box-shadow: 0 0 0 3px rgba(255,255,255,.06);
+    }
+    .chip.selected{
+      border-color: rgba(52,199,89,.55);
+      background: linear-gradient(180deg, rgba(52,199,89,.20), rgba(52,199,89,.08));
+    }
+    .chip.selected .dot{
+      background: var(--green);
+      box-shadow: 0 0 0 3px rgba(52,199,89,.12);
+    }
+    .chip.disabled{
+      opacity:.45;
+      pointer-events:none;
+      filter: grayscale(.25);
+    }
+
+    /* Wheel area */
+    .wheelWrap{
+      display:grid;
+      grid-template-columns: 260px 1fr;
+      gap: 14px;
+      align-items:center;
+    }
+    @media (max-width: 520px){
+      .wheelWrap{ grid-template-columns: 1fr; }
+    }
+
+    .wheelStage{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap: 10px;
+    }
+    canvas{
+      width: 260px;
+      height: 260px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.12), rgba(255,255,255,.05));
+      box-shadow: 0 18px 55px rgba(0,0,0,.55);
+      touch-action: manipulation;
+    }
+    .pointer{
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 18px solid rgba(255,255,255,.86);
+      filter: drop-shadow(0 8px 8px rgba(0,0,0,.45));
+      margin-top: -6px;
+    }
+
+    .wheelControls{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      align-items:stretch;
+    }
+
+    .kv{
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: var(--radius);
+      padding: 12px;
+      background: rgba(0,0,0,.12);
+    }
+    .kv .k{
+      font-size: 12px;
+      color: var(--muted2);
+      margin-bottom: 6px;
+    }
+    .kv .v{
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing:.1px;
+      display:flex;
+      flex-wrap:wrap;
+      gap: 8px;
+      align-items:center;
+    }
+    .tag{
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+    }
+
+    /* Teams list */
+    .teams{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .teamRow{
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      padding: 10px 12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+    }
+    .teamRow .names{
+      font-weight: 750;
+      font-size: 13px;
+      line-height:1.25;
+    }
+    .teamRow .meta{
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+
+    /* Bracket */
+    .bracket{
+      overflow:auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .bracketGrid{
+      display:grid;
+      grid-template-columns: 280px 280px 280px;
+      gap: 14px;
+      align-items:start;
+      min-width: 860px;
+    }
+    .roundTitle{
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing:.2px;
+      margin: 2px 0 8px;
+    }
+    .match{
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      padding: 10px;
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+    .slot{
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      padding: 10px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .08s ease, border-color .2s ease, background .2s ease;
+      min-height: 44px;
+    }
+    .slot:active{ transform: scale(.99); }
+    .slot .label{
+      font-size: 13px;
+      font-weight: 740;
+      color: var(--text);
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width: 200px;
+    }
+    .slot .status{
+      font-size: 11px;
+      color: var(--muted2);
+      font-family: var(--mono);
+      white-space:nowrap;
+    }
+    .slot.empty{
+      cursor: default;
+      opacity: .55;
+    }
+    .slot.winner{
+      border-color: rgba(90,200,250,.55);
+      background: linear-gradient(180deg, rgba(90,200,250,.14), rgba(0,0,0,.16));
+    }
+    .slot.bye{
+      border-color: rgba(255,159,10,.55);
+      background: linear-gradient(180deg, rgba(255,159,10,.12), rgba(0,0,0,.16));
+    }
+
+    .champ{
+      margin-top: 6px;
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .champ .cup{
+      font-size: 18px;
+      filter: drop-shadow(0 10px 16px rgba(0,0,0,.45));
+    }
+    .champ .name{
+      font-weight: 820;
+      letter-spacing:.2px;
+    }
+
+    .note{
+      font-size: 12px;
+      color: var(--muted2);
+      line-height: 1.35;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <marquee behavior="alternate" scrollamount="10">
-                <h1>🏉 Welcome to Magic Round 2025! 🏉</h1>
-            </marquee>
-            <div class="flame-divider"></div>
-        </header>
+  <div class="app">
+    <header>
+      <div class="title">
+        <h1>Pool Doubles Tournament</h1>
+        <div class="sub">Tap players to include them, spin to create partner teams, then run an 8-slot knockout bracket.</div>
+      </div>
+      <div class="topActions">
+        <span class="pill" id="countsPill">0 selected · 0 teams</span>
+        <button class="btn ghost" id="btnDemoFill" title="Select all 12">Select all</button>
+        <button class="btn danger" id="btnReset" title="Clear everything">Reset</button>
+      </div>
+    </header>
 
-        <div class="news-ticker">
-            <marquee>
-                🎉 BREAKING NEWS: NRL LEGEND BENJI MARSHALL CONFIRMED AS SPECIAL GUEST FOR MAGIC ROUND 2025! 🎉
-            </marquee>
+    <div class="grid">
+      <!-- Left: People + Wheel + Teams -->
+      <section class="card">
+        <div class="cardHeader">
+          <h2>Players + Partner Spin</h2>
+          <div class="hint">Spin picks two from selected players<br/>and locks them into a team.</div>
         </div>
+        <div class="cardBody">
+          <div class="people" id="people"></div>
 
-        <nav>
-            <div class="nav-button"><a href="index.html">🏠 Home</a></div>
-            <div class="nav-button"><a href="pages/weekend-details.html">📅 Weekend Details</a></div>
-            <div class="nav-button"><a href="pages/team-list.html">📋 Team List</a></div>
-            <div class="nav-button"><a href="pages/see-it-sip-it.html">🍺 See it, Sip it</a></div>
-            <div class="nav-button"><a href="pages/spin-wheel.html">🎲 Spin the Wheel</a></div>
-            <div class="nav-button"><a href="pages/fun-facts.html">✨ Fun Facts</a></div>
-        </nav>
+          <div style="height:14px"></div>
 
-        <div class="welcome-message">
-            <h2 class="rainbow-text">🌟 Get Ready for the Ultimate Rugby League Experience! 🌟</h2>
-            <p class="welcome-text">Welcome to the official website of NRL. Prepare yourself for an unforgettable weekend of non-stop rugby league action at Suncorp Stadium.</p>
+          <div class="wheelWrap">
+            <div class="wheelStage">
+              <div class="pointer"></div>
+              <canvas id="wheel" width="520" height="520" aria-label="Spin wheel"></canvas>
+            </div>
+
+            <div class="wheelControls">
+              <div class="kv">
+                <div class="k">Wheel pool</div>
+                <div class="v" id="poolTags"></div>
+              </div>
+
+              <button class="btn primary" id="btnSpin">Spin for partner team</button>
+
+              <div class="kv">
+                <div class="k">Last team created</div>
+                <div class="v" id="lastTeam">–</div>
+              </div>
+
+              <div class="kv">
+                <div class="k">Teams</div>
+                <div class="teams" id="teams"></div>
+              </div>
+
+              <div class="note">
+                Notes:
+                <div>• You can select any number of players, but spinning requires at least 2 available players.</div>
+                <div>• Players used in a team are removed from the wheel pool (until reset).</div>
+                <div>• Bracket uses 8 slots: your teams fill in order, and remaining slots become BYEs.</div>
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div class="countdown">
-            <h3 class="rainbow-text">⏰ Countdown to Kick-off ⏰</h3>
-            <div id="timer" class="digital-timer">
-                <div class="time-unit">
-                    <div class="time-box">
-                        <span id="days">365</span>
-                    </div>
-                    <span class="label">DAYS</span>
-                </div>
-                <div class="time-separator">:</div>
-                <div class="time-unit">
-                    <div class="time-box">
-                        <span id="hours">24</span>
-                    </div>
-                    <span class="label">HOURS</span>
-                </div>
-                <div class="time-separator">:</div>
-                <div class="time-unit">
-                    <div class="time-box">
-                        <span id="minutes">60</span>
-                    </div>
-                    <span class="label">MINUTES</span>
-                </div>
-                <div class="time-separator">:</div>
-                <div class="time-unit">
-                    <div class="time-box">
-                        <span id="seconds">60</span>
-                    </div>
-                    <span class="label">SECONDS</span>
-                </div>
-            </div>
+      <!-- Right: Bracket -->
+      <section class="card">
+        <div class="cardHeader">
+          <h2>Knockout Bracket</h2>
+          <div class="hint">Tap a slot to mark the winner<br/>and advance automatically.</div>
         </div>
-
-        <main>
-            <div class="featured-section">
-                <h3 class="rainbow-text">🌟 Website Features 🌟</h3>
-                <div class="feature-grid">
-                    <div class="feature-item games">
-                        <div class="feature-icon">🎡</div>
-                        <h4 class="glow-text">SPIN THE WHEEL!</h4>
-                        <p class="marquee-text">Pick your team with our magical spinning wheel!</p>
-                        <div class="sparkle">✨</div>
-                    </div>
-                    <div class="feature-item fanzone">
-                        <div class="feature-icon">🍺</div>
-                        <h4 class="glow-text">SEE IT, SIP IT!</h4>
-                        <p class="marquee-text">The ultimate Magic Round drinking game!</p>
-                        <div class="sparkle">✨</div>
-                    </div>
-                    <div class="feature-item entertainment">
-                        <div class="feature-icon">🎯</div>
-                        <h4 class="glow-text">FUN FACTS</h4>
-                        <p class="marquee-text">Amazing stats and trivia about Magic Round!</p>
-                        <div class="sparkle">✨</div>
-                    </div>
-                    <div class="feature-item food">
-                        <div class="feature-icon">👥</div>
-                        <h4 class="glow-text">TEAM LISTS</h4>
-                        <p class="marquee-text">Check out all the teams and players!</p>
-                        <div class="sparkle">✨</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="special-guest-section">
-                <h2>👑 Special Guest: The Magician Himself 👑</h2>
-                <div class="benji-container">
-                    <img src="./images/benji-marshall.jpg" alt="Young Benji Marshall in Wests Tigers jersey" class="benji-image">
-                    <div class="benji-caption">
-                        <h3>🐯 Benji Marshall 🐯</h3>
-                        <p class="drinking-rule">🍺 DRINKING RULE: Whenever you see Benji, you have to drink! 🍺</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="guestbook">
-                <h3 class="rainbow-text">📝 Sign Our Guestbook! 📝</h3>
-                <div class="guestbook-container">
-                    <form class="guestbook-form">
-                        <div class="form-group">
-                            <label for="name">Your Name:</label>
-                            <input type="text" id="name" placeholder="Enter your name here!" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="message">Your Message:</label>
-                            <textarea id="message" placeholder="Tell us what you think about Magic Round!" required></textarea>
-                        </div>
-                        <button type="submit" class="submit-button">💫 Sign Guestbook 💫</button>
-                    </form>
-                    <div class="guestbook-entries">
-                        <div class="entries-title">🌟 Recent Messages 🌟</div>
-                        <marquee direction="up" scrollamount="2" class="entries-marquee">
-                            <p>🌟 "Can't wait for Magic Round!" - John D.</p>
-                            <p>🏉 "Best weekend of the year!" - Sarah M.</p>
-                            <p>💪 "Broncos to win it all!" - Mike R.</p>
-                        </marquee>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <footer>
-            <p>💫 Best viewed in Internet Explorer 6.0 or Netscape Navigator 💫</p>
-            <p>© 2025 NRL Magic Round - Made with 💖 and lots of animations</p>
-            <div class="visitor-counter">
-                <span>Visitors: </span>
-                <span class="counter">000001</span>
-            </div>
-            <div class="construction-banner">🚧 UNDER CONSTRUCTION 🚧</div>
-        </footer>
+        <div class="cardBody">
+          <div class="bracket">
+            <div class="bracketGrid" id="bracketGrid"></div>
+          </div>
+          <div class="champ" id="champRow" style="display:none">
+            <div class="cup">🏆</div>
+            <div class="name" id="champName"></div>
+            <span class="pill">Champion</span>
+          </div>
+        </div>
+      </section>
     </div>
+  </div>
 
-    <style>
-        .special-guest-section {
-            background: linear-gradient(45deg, #000000, #FC4C02);
-            border: 3px solid #ff0;
-            padding: 20px;
-            margin: 20px auto;
-            border-radius: 15px;
-            text-align: center;
-            max-width: 800px;
-            box-shadow: 0 0 20px rgba(255, 255, 0, 0.3);
+  <script>
+    // ----- Data -----
+    const DEFAULT_PLAYERS = [
+      "Taylor Swift",
+      "Dwayne Johnson",
+      "Zendaya",
+      "Chris Hemsworth",
+      "Rihanna",
+      "Tom Holland",
+      "Margot Robbie",
+      "Ryan Reynolds",
+      "Beyoncé",
+      "Keanu Reeves",
+      "Adele",
+      "Pedro Pascal"
+    ];
+
+    // ----- State -----
+    const state = {
+      players: DEFAULT_PLAYERS.map(name => ({ name, selected: false, locked: false })),
+      teams: [], // { id, a, b }
+      lastTeam: null,
+      wheel: {
+        angle: 0,
+        spinning: false,
+        spinStart: 0,
+        spinDuration: 0,
+        spinFrom: 0,
+        spinTo: 0
+      },
+      bracket: null // built from teams
+    };
+
+    // ----- Helpers -----
+    const $ = (sel) => document.querySelector(sel);
+
+    function availablePool(){
+      return state.players.filter(p => p.selected && !p.locked).map(p => p.name);
+    }
+    function selectedCount(){
+      return state.players.filter(p => p.selected).length;
+    }
+
+    // Stable-ish hash to angle for given name
+    function hash01(str){
+      let h = 2166136261;
+      for (let i=0;i<str.length;i++){
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      // 0..1
+      return ((h >>> 0) % 100000) / 100000;
+    }
+
+    // ----- UI: People chips -----
+    function renderPeople(){
+      const wrap = $("#people");
+      wrap.innerHTML = "";
+      state.players.forEach((p, idx) => {
+        const chip = document.createElement("div");
+        chip.className = "chip" + (p.selected ? " selected" : "") + (p.locked ? " disabled" : "");
+        chip.innerHTML = `<span class="dot"></span><span>${p.name}</span>`;
+        chip.addEventListener("click", () => {
+          if (p.locked) return;
+          p.selected = !p.selected;
+          renderAll();
+        });
+        wrap.appendChild(chip);
+      });
+    }
+
+    // ----- UI: Pool tags -----
+    function renderPoolTags(){
+      const pool = availablePool();
+      const wrap = $("#poolTags");
+      wrap.innerHTML = "";
+      if (pool.length === 0){
+        wrap.innerHTML = `<span class="tag">–</span>`;
+        return;
+      }
+      pool.slice(0, 10).forEach(n => {
+        const t = document.createElement("span");
+        t.className = "tag";
+        t.textContent = n;
+        wrap.appendChild(t);
+      });
+      if (pool.length > 10){
+        const t = document.createElement("span");
+        t.className = "tag";
+        t.textContent = `+${pool.length - 10} more`;
+        wrap.appendChild(t);
+      }
+    }
+
+    // ----- UI: Teams -----
+    function renderTeams(){
+      const wrap = $("#teams");
+      wrap.innerHTML = "";
+      if (state.teams.length === 0){
+        wrap.innerHTML = `<div class="teamRow"><div class="names" style="color:rgba(255,255,255,.65)">No teams yet</div><div class="meta">–</div></div>`;
+        return;
+      }
+      state.teams.forEach((t, i) => {
+        const row = document.createElement("div");
+        row.className = "teamRow";
+        row.innerHTML = `<div class="names">${t.a} + ${t.b}</div><div class="meta">Team ${i+1}</div>`;
+        wrap.appendChild(row);
+      });
+    }
+
+    function renderCounts(){
+      $("#countsPill").textContent = `${selectedCount()} selected · ${state.teams.length} teams`;
+      $("#lastTeam").textContent = state.lastTeam ? `${state.lastTeam.a} + ${state.lastTeam.b}` : "–";
+    }
+
+    // ----- Wheel drawing -----
+    const wheelCanvas = $("#wheel");
+    const ctx = wheelCanvas.getContext("2d");
+
+    function drawWheel(){
+      const pool = availablePool();
+      const W = wheelCanvas.width;
+      const H = wheelCanvas.height;
+      const cx = W/2, cy = H/2;
+      const r = Math.min(cx, cy) - 10;
+
+      ctx.clearRect(0,0,W,H);
+
+      // Outer glow
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, r+2, 0, Math.PI*2);
+      ctx.closePath();
+      ctx.shadowColor = "rgba(90,200,250,.25)";
+      ctx.shadowBlur = 26;
+      ctx.fillStyle = "rgba(255,255,255,.02)";
+      ctx.fill();
+      ctx.restore();
+
+      // Background disc
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI*2);
+      ctx.closePath();
+      const grd = ctx.createRadialGradient(cx - r*0.25, cy - r*0.25, r*0.2, cx, cy, r);
+      grd.addColorStop(0, "rgba(255,255,255,.14)");
+      grd.addColorStop(1, "rgba(255,255,255,.05)");
+      ctx.fillStyle = grd;
+      ctx.fill();
+
+      // If empty, show text
+      if (pool.length === 0){
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(0);
+        ctx.fillStyle = "rgba(255,255,255,.72)";
+        ctx.font = "700 20px -apple-system, BlinkMacSystemFont, SF Pro Display, Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("Select players", 0, -12);
+        ctx.fillStyle = "rgba(255,255,255,.50)";
+        ctx.font = "600 14px -apple-system, BlinkMacSystemFont, SF Pro Text, Arial";
+        ctx.fillText("to add to the wheel", 0, 14);
+        ctx.restore();
+        return;
+      }
+
+      // Segments
+      const n = pool.length;
+      const seg = (Math.PI * 2) / n;
+      const base = state.wheel.angle;
+
+      for (let i=0;i<n;i++){
+        const name = pool[i];
+        const a0 = base + i*seg;
+        const a1 = a0 + seg;
+
+        // Color derived from name (no hardcoded palette needed)
+        const h = Math.floor(hash01(name) * 360);
+        const c0 = `hsla(${h}, 80%, 62%, 0.28)`;
+        const c1 = `hsla(${h}, 80%, 54%, 0.10)`;
+
+        const segGrd = ctx.createRadialGradient(
+          cx + Math.cos((a0+a1)/2)*r*0.1,
+          cy + Math.sin((a0+a1)/2)*r*0.1,
+          r*0.15,
+          cx, cy, r
+        );
+        segGrd.addColorStop(0, c0);
+        segGrd.addColorStop(1, c1);
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, a0, a1);
+        ctx.closePath();
+        ctx.fillStyle = segGrd;
+        ctx.fill();
+
+        ctx.strokeStyle = "rgba(255,255,255,.10)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Labels (shortened)
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(a0 + seg/2);
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "rgba(255,255,255,.82)";
+        ctx.font = "650 16px -apple-system, BlinkMacSystemFont, SF Pro Text, Arial";
+        const label = name.length > 18 ? name.slice(0, 17) + "…" : name;
+        ctx.fillText(label, r - 16, 0);
+        ctx.restore();
+      }
+
+      // Center cap
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, 54, 0, Math.PI*2);
+      ctx.closePath();
+      ctx.fillStyle = "rgba(0,0,0,.22)";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,.14)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(255,255,255,.86)";
+      ctx.font = "800 14px -apple-system, BlinkMacSystemFont, SF Pro Text, Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("SPIN", cx, cy);
+      ctx.restore();
+    }
+
+    // Pointer is at 12 o'clock. Determine index under pointer for current angle.
+    function pointerIndex(){
+      const pool = availablePool();
+      const n = pool.length;
+      if (!n) return -1;
+      const seg = (Math.PI * 2) / n;
+
+      // Angle at pointer (upwards) relative to wheel rotation.
+      // Pointer is -90deg. We want which segment covers that.
+      const pointerAngle = -Math.PI/2;
+
+      // Normalize: segment starts at state.wheel.angle
+      let a = pointerAngle - state.wheel.angle;
+      // Map to [0, 2pi)
+      a = ((a % (Math.PI*2)) + (Math.PI*2)) % (Math.PI*2);
+      const idx = Math.floor(a / seg) % n;
+      return idx;
+    }
+
+    // ----- Spin animation -----
+    function animate(now){
+      if (!state.wheel.spinning){
+        drawWheel();
+        return;
+      }
+      const t = (now - state.wheel.spinStart) / state.wheel.spinDuration;
+      const clamped = Math.max(0, Math.min(1, t));
+      // Ease out cubic
+      const ease = 1 - Math.pow(1 - clamped, 3);
+
+      state.wheel.angle = state.wheel.spinFrom + (state.wheel.spinTo - state.wheel.spinFrom) * ease;
+      drawWheel();
+
+      if (clamped < 1){
+        requestAnimationFrame(animate);
+      } else {
+        state.wheel.spinning = false;
+        // finalize
+        drawWheel();
+        onSpinComplete();
+      }
+    }
+
+    function startSpin(){
+      const pool = availablePool();
+      if (state.wheel.spinning) return;
+      if (pool.length < 2){
+        toast("Select at least 2 available players to spin.");
+        return;
+      }
+      // random target rotations + random offset
+      const extraRot = (Math.random() * 3 + 4) * Math.PI * 2; // 4–7 rotations
+      const jitter = (Math.random() - 0.5) * 0.35; // small jitter
+      state.wheel.spinFrom = state.wheel.angle;
+      state.wheel.spinTo = state.wheel.angle + extraRot + jitter;
+      state.wheel.spinStart = performance.now();
+      state.wheel.spinDuration = 1500 + Math.random() * 900; // 1.5–2.4s
+      state.wheel.spinning = true;
+
+      requestAnimationFrame(animate);
+    }
+
+    function onSpinComplete(){
+      // Pick two distinct players:
+      // first = where pointer landed. second = random from remaining.
+      const pool = availablePool();
+      if (pool.length < 2) return;
+
+      const idx = pointerIndex();
+      const a = pool[idx >= 0 ? idx : 0];
+
+      const remaining = pool.filter(n => n !== a);
+      const b = remaining[Math.floor(Math.random() * remaining.length)];
+
+      // Lock them in as a team
+      lockIntoTeam(a, b);
+    }
+
+    function lockIntoTeam(a, b){
+      // Mark players locked
+      const pa = state.players.find(p => p.name === a);
+      const pb = state.players.find(p => p.name === b);
+      if (!pa || !pb) return;
+      pa.locked = true;
+      pb.locked = true;
+
+      const id = cryptoRandomId();
+      const team = { id, a, b };
+      state.teams.push(team);
+      state.lastTeam = team;
+
+      rebuildBracket();
+      renderAll();
+
+      toast(`Team created: ${a} + ${b}`);
+    }
+
+    function cryptoRandomId(){
+      const bytes = new Uint8Array(8);
+      crypto.getRandomValues(bytes);
+      return Array.from(bytes).map(b => b.toString(16).padStart(2,"0")).join("");
+    }
+
+    // ----- Bracket model -----
+    // 8-slot bracket:
+    // QF: 4 matches, each has slot A/B
+    // SF: 2 matches
+    // F: 1 match
+    //
+    // Winners advance by tapping a team slot.
+    // BYE auto-advances.
+    function rebuildBracket(){
+      const slots = [];
+
+      // Fill in teams in creation order
+      state.teams.forEach(t => slots.push(teamLabel(t)));
+
+      // Pad to 8 with BYE
+      while (slots.length < 8) slots.push("BYE");
+      // If more than 8, still handle: take first 8 (simple)
+      const eight = slots.slice(0, 8);
+
+      state.bracket = {
+        rounds: [
+          { name: "Quarterfinals", matches: [
+            makeMatch(eight[0], eight[1]),
+            makeMatch(eight[2], eight[3]),
+            makeMatch(eight[4], eight[5]),
+            makeMatch(eight[6], eight[7]),
+          ]},
+          { name: "Semifinals", matches: [
+            makeMatch("", ""),
+            makeMatch("", ""),
+          ]},
+          { name: "Final", matches: [
+            makeMatch("", ""),
+          ]}
+        ],
+        champion: ""
+      };
+
+      // Auto-advance any BYEs from QFs into SFs
+      autoAdvanceByes(0);
+      // If that caused SF BYEs, auto-advance as well
+      autoAdvanceByes(1);
+      // If final has a BYE (rare), advance
+      autoAdvanceByes(2);
+
+      renderBracket();
+    }
+
+    function makeMatch(a, b){
+      return {
+        a, b,
+        winner: "" // equals a or b
+      };
+    }
+
+    function teamLabel(t){
+      return `${t.a} + ${t.b}`;
+    }
+
+    function autoAdvanceByes(roundIdx){
+      if (!state.bracket) return;
+      const round = state.bracket.rounds[roundIdx];
+      if (!round) return;
+
+      for (let m=0;m<round.matches.length;m++){
+        const match = round.matches[m];
+        if (match.winner) continue;
+
+        const aBye = match.a === "BYE";
+        const bBye = match.b === "BYE";
+
+        if (aBye && bBye){
+          match.winner = "BYE";
+        } else if (aBye && match.b){
+          match.winner = match.b;
+          pushWinnerForward(roundIdx, m, match.winner);
+        } else if (bBye && match.a){
+          match.winner = match.a;
+          pushWinnerForward(roundIdx, m, match.winner);
         }
+      }
+    }
 
-        .special-guest-section h2 {
-            color: #ff0;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            font-size: 2em;
-            margin-bottom: 20px;
+    function pushWinnerForward(roundIdx, matchIdx, winner){
+      const nextRoundIdx = roundIdx + 1;
+      if (!state.bracket.rounds[nextRoundIdx]) {
+        // final winner => champion
+        if (roundIdx === 2){
+          state.bracket.champion = winner && winner !== "BYE" ? winner : "";
         }
+        return;
+      }
+      const nextRound = state.bracket.rounds[nextRoundIdx];
 
-        .benji-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
+      // Map:
+      // QF match 0 -> SF match 0 slot a
+      // QF match 1 -> SF match 0 slot b
+      // QF match 2 -> SF match 1 slot a
+      // QF match 3 -> SF match 1 slot b
+      // SF match 0 -> Final slot a
+      // SF match 1 -> Final slot b
+      if (roundIdx === 0){
+        const sfMatchIdx = matchIdx < 2 ? 0 : 1;
+        const slot = (matchIdx % 2 === 0) ? "a" : "b";
+        nextRound.matches[sfMatchIdx][slot] = winner;
+      } else if (roundIdx === 1){
+        const slot = matchIdx === 0 ? "a" : "b";
+        nextRound.matches[0][slot] = winner;
+      } else if (roundIdx === 2){
+        state.bracket.champion = winner && winner !== "BYE" ? winner : "";
+      }
+    }
+
+    function pickWinner(roundIdx, matchIdx, which){
+      const match = state.bracket.rounds[roundIdx].matches[matchIdx];
+      const val = match[which];
+      if (!val || val === "BYE") return; // BYE already handled
+      match.winner = val;
+
+      // Rebuild forward rounds safely while preserving existing winner choices where possible
+      const snapQF = state.bracket.rounds[0].matches.map(m => ({ a: m.a, b: m.b, winner: m.winner }));
+      const snapSF = state.bracket.rounds[1].matches.map(m => ({ winner: m.winner }));
+      const snapF  = state.bracket.rounds[2].matches.map(m => ({ winner: m.winner }));
+
+      // Reset rounds 1+
+      state.bracket.rounds[1].matches = [ makeMatch("", ""), makeMatch("", "") ];
+      state.bracket.rounds[2].matches = [ makeMatch("", "") ];
+      state.bracket.rounds[1].matches.forEach(m => m.winner = "");
+      state.bracket.rounds[2].matches.forEach(m => m.winner = "");
+      state.bracket.champion = "";
+
+      // Re-apply QF winners and advance them
+      state.bracket.rounds[0].matches.forEach((m, i) => {
+        m.winner = snapQF[i].winner || "";
+        if (m.winner) pushWinnerForward(0, i, m.winner);
+      });
+      autoAdvanceByes(0);
+
+      // Re-apply SF winners if still valid in the now-filled SF slots
+      state.bracket.rounds[1].matches.forEach((m, i) => {
+        const desired = snapSF[i].winner || "";
+        if (desired && (m.a === desired || m.b === desired)){
+          m.winner = desired;
+          pushWinnerForward(1, i, desired);
         }
+      });
+      autoAdvanceByes(1);
 
-        .benji-image {
-            max-width: 400px;
-            border: 5px solid #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-            transform: rotate(-3deg);
-            transition: transform 0.3s ease;
-        }
+      // Re-apply Final winner if still valid
+      const final = state.bracket.rounds[2].matches[0];
+      const desiredF = snapF[0].winner || "";
+      if (desiredF && (final.a === desiredF || final.b === desiredF)){
+        final.winner = desiredF;
+        pushWinnerForward(2, 0, desiredF);
+      }
+      autoAdvanceByes(2);
 
-        .benji-image:hover {
-            transform: rotate(0deg) scale(1.05);
-        }
+      renderBracket();
+    }
 
-        .benji-caption {
-            background: rgba(0, 0, 0, 0.8);
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid #ff0;
-        }
+    // ----- Bracket rendering -----
+    function renderBracket(){
+      const grid = $("#bracketGrid");
+      grid.innerHTML = "";
+      if (!state.bracket){
+        grid.innerHTML = `<div style="color:rgba(255,255,255,.65);font-size:13px">Create at least one team to build the bracket.</div>`;
+        $("#champRow").style.display = "none";
+        return;
+      }
 
-        .benji-caption h3 {
-            color: #fff;
-            font-size: 1.5em;
-            margin-bottom: 10px;
-        }
+      state.bracket.rounds.forEach((round, rIdx) => {
+        const col = document.createElement("div");
+        const title = document.createElement("div");
+        title.className = "roundTitle";
+        title.textContent = round.name;
+        col.appendChild(title);
 
-        .drinking-rule {
-            color: #ff0;
-            font-size: 1.2em;
-            font-weight: bold;
-            animation: pulse 2s infinite;
-        }
+        round.matches.forEach((m, mIdx) => {
+          const match = document.createElement("div");
+          match.className = "match";
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
+          const slotA = makeSlot(m.a, m.winner === m.a, m.a === "BYE");
+          slotA.addEventListener("click", () => {
+            if (m.a && m.a !== "BYE") pickWinner(rIdx, mIdx, "a");
+          });
 
-        /* Digital Timer Styles */
-        .digital-timer {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            margin: 30px auto;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 15px;
-            max-width: 800px;
-        }
+          const slotB = makeSlot(m.b, m.winner === m.b, m.b === "BYE");
+          slotB.addEventListener("click", () => {
+            if (m.b && m.b !== "BYE") pickWinner(rIdx, mIdx, "b");
+          });
 
-        .time-unit {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .time-box {
-            background: linear-gradient(45deg, #000000, #333333);
-            border: 3px solid #FFA500;
-            border-radius: 10px;
-            padding: 20px 30px;
-            min-width: 120px;
-            text-align: center;
-            box-shadow: 
-                0 0 10px #FFA500,
-                0 0 20px #FFA500,
-                inset 0 0 10px rgba(255, 165, 0, 0.5);
-        }
-
-        .time-box span {
-            font-family: 'Digital', monospace;
-            font-size: 3.5em;
-            color: #FFA500;
-            text-shadow: 0 0 10px #FFA500;
-            font-weight: bold;
-        }
-
-        .time-separator {
-            font-size: 3.5em;
-            color: #FFA500;
-            text-shadow: 0 0 10px #FFA500;
-            margin: 0 10px;
-            animation: blink 1s infinite;
-        }
-
-        .label {
-            color: #FFA500;
-            font-size: 1.2em;
-            text-shadow: 0 0 5px #FFA500;
-            font-weight: bold;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .featured-section {
-            background: url('./images/stars.gif') repeat;
-            border: 5px solid #ff0;
-            padding: 20px;
-            margin: 20px auto;
-            border-radius: 15px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .rainbow-text {
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            animation: rainbow 3s linear infinite;
-            margin-bottom: 30px;
-        }
-
-        @keyframes rainbow {
-            0% { color: #ff0000; }
-            20% { color: #ff00ff; }
-            40% { color: #0000ff; }
-            60% { color: #00ffff; }
-            80% { color: #00ff00; }
-            100% { color: #ff0000; }
-        }
-
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            padding: 20px;
-        }
-
-        .feature-item {
-            background: linear-gradient(45deg, #000080, #4B0082);
-            border: 3px solid #ff00ff;
-            padding: 20px;
-            border-radius: 10px;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-
-        .feature-item:hover {
-            transform: scale(1.05);
-            border-color: #00ff00;
-        }
-
-        .feature-icon {
-            font-size: 3em;
-            margin-bottom: 15px;
-            animation: bounce 2s infinite;
-        }
-
-        .glow-text {
-            color: #00ff00;
-            font-size: 1.5em;
-            text-shadow: 0 0 10px #00ff00;
-            margin: 10px 0;
-            animation: glow 2s infinite;
-        }
-
-        .marquee-text {
-            color: #ffff00;
-            font-size: 1.2em;
-            text-shadow: 0 0 5px #ffff00;
-            margin: 10px 0;
-        }
-
-        .sparkle {
-            position: absolute;
-            font-size: 1.5em;
-            animation: sparkle 1.5s infinite;
-        }
-
-        .sparkle:nth-child(1) { top: 10px; left: 10px; }
-        .sparkle:nth-child(2) { top: 10px; right: 10px; }
-        .sparkle:nth-child(3) { bottom: 10px; left: 10px; }
-        .sparkle:nth-child(4) { bottom: 10px; right: 10px; }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @keyframes glow {
-            0%, 100% { text-shadow: 0 0 10px #00ff00; }
-            50% { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00; }
-        }
-
-        @keyframes sparkle {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
-        }
-
-        .guestbook {
-            background: url('./images/stars.gif') repeat;
-            border: 5px solid #ff0;
-            padding: 20px;
-            margin: 20px auto;
-            border-radius: 15px;
-            text-align: center;
-            max-width: 800px;
-            box-shadow: 0 0 20px rgba(255, 255, 0, 0.3);
-        }
-
-        .welcome-message {
-            text-align: center;
-            margin: 30px auto;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            border: 3px solid #ff0;
-            border-radius: 15px;
-            max-width: 800px;
-            box-shadow: 0 0 20px rgba(255, 255, 0, 0.3);
-        }
-
-        .welcome-text {
-            font-size: 1.2em;
-            color: #fff;
-            text-shadow: 1px 1px #000;
-            line-height: 1.6;
-            margin: 20px 0;
-        }
-
-        .countdown {
-            text-align: center;
-            margin: 30px auto;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            border: 3px solid #ff0;
-            border-radius: 15px;
-            max-width: 800px;
-            box-shadow: 0 0 20px rgba(255, 255, 0, 0.3);
-        }
-
-        .countdown h3 {
-            margin-bottom: 20px;
-        }
-
-        .bouncing-jersey {
-            position: fixed;
-            width: 100px;
-            height: 100px;
-            z-index: 1000;
-            pointer-events: none;
-            opacity: 0.8;
-            transition: opacity 0.3s ease;
-            transform-origin: center;
-            transition: transform 0.3s ease;
-        }
-
-        .bouncing-jersey:hover {
-            opacity: 1;
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-    </style>
-
-    <script>
-        // Set the target date to May 2nd, 2025 at 6:00 PM Sydney time
-        const targetDate = new Date('2025-05-02T18:00:00+10:00');
-
-        function updateCountdown() {
-            const now = new Date();
-            const difference = targetDate - now;
-
-            // Calculate days, hours, minutes, and seconds
-            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
-            // Update the display
-            document.getElementById('days').textContent = days.toString().padStart(3, '0');
-            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
-
-            // If countdown is finished
-            if (difference < 0) {
-                clearInterval(countdownInterval);
-                document.getElementById('timer').innerHTML = `
-                    <div class="time-unit">
-                        <div class="time-box"><span>000</span></div>
-                        <span class="label">DAYS</span>
-                    </div>
-                    <div class="time-separator">:</div>
-                    <div class="time-unit">
-                        <div class="time-box"><span>00</span></div>
-                        <span class="label">HOURS</span>
-                    </div>
-                    <div class="time-separator">:</div>
-                    <div class="time-unit">
-                        <div class="time-box"><span>00</span></div>
-                        <span class="label">MINUTES</span>
-                    </div>
-                    <div class="time-separator">:</div>
-                    <div class="time-unit">
-                        <div class="time-box"><span>00</span></div>
-                        <span class="label">SECONDS</span>
-                    </div>`;
-            }
-        }
-
-        // Update immediately and then every second
-        updateCountdown();
-        const countdownInterval = setInterval(updateCountdown, 1000);
-
-        // Visitor counter functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get the counter element
-            const counterElement = document.querySelector('.counter');
-            
-            // Load the current count from localStorage or start at 1
-            let visitorCount = parseInt(localStorage.getItem('visitorCount')) || 1;
-            
-            // Update the display with leading zeros
-            counterElement.textContent = visitorCount.toString().padStart(6, '0');
-            
-            // Increment the counter
-            visitorCount++;
-            
-            // Save the new count to localStorage
-            localStorage.setItem('visitorCount', visitorCount.toString());
+          match.appendChild(slotA);
+          match.appendChild(slotB);
+          col.appendChild(match);
         });
 
-        // Guestbook functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const guestbookForm = document.querySelector('.guestbook-form');
-            const entriesMarquee = document.querySelector('.entries-marquee');
-            
-            // Load existing entries from localStorage
-            let entries = JSON.parse(localStorage.getItem('guestbookEntries')) || [
-                { name: 'John D.', message: 'Can\'t wait for Magic Round!' },
-                { name: 'Sarah M.', message: 'Best weekend of the year!' },
-                { name: 'Mike R.', message: 'Broncos to win it all!' }
-            ];
-            
-            // Function to update the marquee with current entries
-            function updateMarquee() {
-                entriesMarquee.innerHTML = entries.map(entry => 
-                    `<p>🌟 "${entry.message}" - ${entry.name}</p>`
-                ).join('');
-            }
-            
-            // Initial marquee update
-            updateMarquee();
-            
-            // Handle form submission
-            guestbookForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const name = document.getElementById('name').value;
-                const message = document.getElementById('message').value;
-                
-                // Add new entry to the beginning of the array
-                entries.unshift({ name, message });
-                
-                // Keep only the last 10 entries
-                if (entries.length > 10) {
-                    entries = entries.slice(0, 10);
-                }
-                
-                // Save to localStorage
-                localStorage.setItem('guestbookEntries', JSON.stringify(entries));
-                
-                // Update the marquee
-                updateMarquee();
-                
-                // Clear the form
-                guestbookForm.reset();
-                
-                // Show success message
-                alert('🌟 Thanks for signing our guestbook! 🌟');
-            });
-        });
+        grid.appendChild(col);
+      });
 
-        // Bouncing jersey functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const jersey = document.createElement('img');
-            jersey.src = './BC/wests-tigers-2005-nrl-retro-jersey-804.webp';
-            jersey.className = 'bouncing-jersey';
-            document.body.appendChild(jersey);
+      if (state.bracket.champion){
+        $("#champName").textContent = state.bracket.champion;
+        $("#champRow").style.display = "flex";
+      } else {
+        $("#champRow").style.display = "none";
+      }
+    }
 
-            let x = Math.random() * (window.innerWidth - 100);
-            let y = Math.random() * (window.innerHeight - 100);
-            let dx = (Math.random() - 0.5) * 8;
-            let dy = (Math.random() - 0.5) * 8;
-            let rotation = 0;
+    function makeSlot(label, isWinner, isBye){
+      const el = document.createElement("div");
+      let cls = "slot";
+      if (!label) cls += " empty";
+      if (isWinner) cls += " winner";
+      if (isBye) cls += " bye";
+      el.className = cls;
 
-            function moveJersey() {
-                x += dx;
-                y += dy;
+      const safe = label || "–";
+      const status = isBye ? "BYE" : (isWinner ? "WIN" : "");
 
-                // Bounce off walls and spin
-                if (x <= 0 || x >= window.innerWidth - 100) {
-                    dx = -dx;
-                    jersey.style.animation = 'spin 0.5s linear';
-                    setTimeout(() => {
-                        jersey.style.animation = '';
-                    }, 500);
-                }
-                if (y <= 0 || y >= window.innerHeight - 100) {
-                    dy = -dy;
-                    jersey.style.animation = 'spin 0.5s linear';
-                    setTimeout(() => {
-                        jersey.style.animation = '';
-                    }, 500);
-                }
+      el.innerHTML = `
+        <div class="label" title="${escapeHtml(safe)}">${escapeHtml(safe)}</div>
+        <div class="status">${escapeHtml(status)}</div>
+      `;
+      return el;
+    }
 
-                jersey.style.left = x + 'px';
-                jersey.style.top = y + 'px';
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
 
-                requestAnimationFrame(moveJersey);
-            }
+    // ----- Toast (simple) -----
+    let toastTimer = null;
+    function toast(msg){
+      let el = document.getElementById("toast");
+      if (!el){
+        el = document.createElement("div");
+        el.id = "toast";
+        el.style.position = "fixed";
+        el.style.left = "50%";
+        el.style.bottom = "18px";
+        el.style.transform = "translateX(-50%)";
+        el.style.maxWidth = "92vw";
+        el.style.padding = "12px 14px";
+        el.style.borderRadius = "14px";
+        el.style.border = "1px solid rgba(255,255,255,.18)";
+        el.style.background = "rgba(0,0,0,.55)";
+        el.style.backdropFilter = "blur(14px)";
+        el.style.webkitBackdropFilter = "blur(14px)";
+        el.style.color = "rgba(255,255,255,.92)";
+        el.style.fontSize = "13px";
+        el.style.fontWeight = "650";
+        el.style.letterSpacing = ".1px";
+        el.style.boxShadow = "0 18px 45px rgba(0,0,0,.50)";
+        el.style.zIndex = "9999";
+        el.style.opacity = "0";
+        el.style.transition = "opacity .2s ease, transform .2s ease";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.opacity = "1";
+      el.style.transform = "translateX(-50%) translateY(-2px)";
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        el.style.opacity = "0";
+        el.style.transform = "translateX(-50%) translateY(0px)";
+      }, 1600);
+    }
 
-            moveJersey();
-        });
-    </script>
+    // ----- Buttons -----
+    $("#btnSpin").addEventListener("click", startSpin);
+
+    $("#btnReset").addEventListener("click", () => {
+      state.players.forEach(p => { p.selected = false; p.locked = false; });
+      state.teams = [];
+      state.lastTeam = null;
+      state.bracket = null;
+      state.wheel.angle = 0;
+      state.wheel.spinning = false;
+      renderAll();
+      toast("Reset complete.");
+    });
+
+    $("#btnDemoFill").addEventListener("click", () => {
+      const anyUnselected = state.players.some(p => !p.selected && !p.locked);
+      state.players.forEach(p => { if (!p.locked) p.selected = anyUnselected ? true : p.selected; });
+      renderAll();
+    });
+
+    // ----- Rendering -----
+    function renderAll(){
+      renderPeople();
+      renderPoolTags();
+      renderTeams();
+      renderCounts();
+      drawWheel();
+      if (state.bracket) renderBracket();
+      else {
+        const grid = $("#bracketGrid");
+        grid.innerHTML = `<div style="color:rgba(255,255,255,.65);font-size:13px">Create at least one team to build the bracket.</div>`;
+        $("#champRow").style.display = "none";
+      }
+    }
+
+    // initial
+    renderAll();
+    drawWheel();
+
+    // Keep wheel redrawing on resize
+    window.addEventListener("resize", () => drawWheel());
+  </script>
 </body>
-</html> 
+</html>
