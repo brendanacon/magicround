@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Secret Word Game - NRL Magic Round 2025</title>
+    <link rel="icon" type="image/webp" href="../BC/wests-tigers-2005-nrl-retro-jersey-804.webp">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .game-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 20px auto;
+        }
+
+        .game-card {
+            background: rgba(0, 0, 0, 0.85);
+            border: 3px solid #ff0;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.25);
+        }
+
+        .game-tabs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .tab-button {
+            background: linear-gradient(45deg, #ff0000, #ff00ff);
+            color: #fff;
+            border: 2px solid #fff;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .tab-button.active {
+            transform: scale(1.03);
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.8);
+            border-color: #ff0;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .player-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 0, 0.6);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .player-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .player-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            object-fit: cover;
+            background: #222;
+        }
+
+        .player-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .player-meta {
+            color: #ff0;
+            font-size: 0.95em;
+        }
+
+        .player-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .action-button {
+            background: linear-gradient(45deg, #000000, #FFA500);
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .action-button.secondary {
+            background: linear-gradient(45deg, #1e1e1e, #00bcd4);
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .toggle-row input {
+            transform: scale(1.3);
+        }
+
+        .play-area {
+            display: grid;
+            gap: 20px;
+        }
+
+        .current-player {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .current-player .player-avatar {
+            width: 90px;
+            height: 90px;
+        }
+
+        .slot-machine {
+            background: #111;
+            border: 3px solid #ff0;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slot-window {
+            background: #000;
+            border: 2px solid #fff;
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 2em;
+            color: #ff0;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 0 0 10px rgba(255, 255, 0, 0.6);
+        }
+
+        .slot-window.spinning {
+            animation: slotShake 0.2s infinite;
+        }
+
+        @keyframes slotShake {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(-2px); }
+            100% { transform: translateX(2px); }
+        }
+
+        .lever-button {
+            background: linear-gradient(45deg, #ff0000, #ff8800);
+            color: #fff;
+            border: none;
+            padding: 15px 25px;
+            font-size: 1.1em;
+            border-radius: 30px;
+            margin-top: 15px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .status-message {
+            margin-top: 10px;
+            color: #fff;
+            font-size: 0.95em;
+        }
+
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 0, 0.5);
+        }
+
+        .leaderboard-item span {
+            font-weight: bold;
+        }
+
+        .word-bank textarea {
+            width: 100%;
+            min-height: 220px;
+            border-radius: 12px;
+            border: 2px solid #ff0;
+            padding: 15px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        .word-bank .action-button {
+            margin-top: 12px;
+        }
+
+        .inline-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        @media (max-width: 600px) {
+            .player-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .player-actions {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .slot-window {
+                font-size: 1.6em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎰 Secret Word Game</h1>
+            <div class="flame-divider"></div>
+            <nav>
+                <div class="nav-button"><a href="../index.html">🏠 Home</a></div>
+                <div class="nav-button"><a href="weekend-details.html">📅 Weekend Details</a></div>
+                <div class="nav-button"><a href="team-list.html">📋 Team List</a></div>
+                <div class="nav-button"><a href="see-it-sip-it.html">🍺 See it, Sip it</a></div>
+                <div class="nav-button"><a href="spin-wheel.html">🎲 Spin the Wheel</a></div>
+                <div class="nav-button"><a href="word-game.html">🎰 Secret Word Game</a></div>
+                <div class="nav-button"><a href="fun-facts.html">✨ Fun Facts</a></div>
+            </nav>
+            <div class="flame-divider"></div>
+        </header>
+
+        <section class="game-shell">
+            <div class="game-card">
+                <h2 class="rainbow-text">Pick players, spin a word, keep score.</h2>
+                <p>Tap a celebrity to activate them, pull the lever for a secret word, and track points when they slip it into conversation.</p>
+            </div>
+
+            <div class="game-card game-tabs" role="tablist">
+                <button class="tab-button active" data-tab="players" role="tab" aria-selected="true">Players</button>
+                <button class="tab-button" data-tab="play" role="tab" aria-selected="false">Play</button>
+                <button class="tab-button" data-tab="leaderboard" role="tab" aria-selected="false">Leaderboard</button>
+                <button class="tab-button" data-tab="words" role="tab" aria-selected="false">Word Bank</button>
+            </div>
+
+            <div class="game-card tab-panel active" id="tab-players" role="tabpanel">
+                <h3>🎬 Celebrity Roster</h3>
+                <div class="player-grid" id="playerGrid"></div>
+            </div>
+
+            <div class="game-card tab-panel" id="tab-play" role="tabpanel">
+                <div class="play-area">
+                    <div class="current-player">
+                        <img class="player-avatar" id="activeAvatar" alt="Selected player avatar">
+                        <div>
+                            <div class="player-name" id="activeName">Select an active player</div>
+                            <div class="player-meta" id="activeWord">No word assigned yet.</div>
+                        </div>
+                        <div class="inline-actions">
+                            <button class="action-button" id="nextPlayer">Next Active Player</button>
+                            <button class="action-button secondary" id="clearWord">Clear Word</button>
+                        </div>
+                    </div>
+
+                    <div class="slot-machine">
+                        <div class="slot-window" id="slotWindow">🎯 Ready?</div>
+                        <button class="lever-button" id="spinLever">Pull the Lever</button>
+                        <div class="status-message" id="spinStatus"></div>
+                    </div>
+
+                    <div class="inline-actions">
+                        <button class="action-button" id="successPoint">✅ Word Landed (+1)</button>
+                        <button class="action-button secondary" id="caughtPoint">🚨 Called Out (-1)</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-card tab-panel" id="tab-leaderboard" role="tabpanel">
+                <h3>🏆 Leaderboard</h3>
+                <div class="leaderboard-list" id="leaderboardList"></div>
+                <button class="action-button" id="resetScores">Reset All Scores</button>
+            </div>
+
+            <div class="game-card tab-panel" id="tab-words" role="tabpanel">
+                <h3>📝 Word Bank</h3>
+                <p>Add one word per line. Save it to update the slot machine instantly.</p>
+                <div class="word-bank">
+                    <textarea id="wordBankInput" placeholder="blue\nred\ncoffee\ndessert"></textarea>
+                    <button class="action-button" id="saveWords">Save Words</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const defaultPlayers = [
+            { id: 'rdj', name: 'Robert Downey Jr.' },
+            { id: 'sj', name: 'Scarlett Johansson' },
+            { id: 'ch', name: 'Chris Hemsworth' },
+            { id: 'zd', name: 'Zendaya' },
+            { id: 'dj', name: 'Dwayne Johnson' },
+            { id: 'jl', name: 'Jennifer Lawrence' },
+            { id: 'th', name: 'Tom Holland' },
+            { id: 'gg', name: 'Gal Gadot' },
+            { id: 'rr', name: 'Ryan Reynolds' },
+            { id: 'es', name: 'Emma Stone' },
+            { id: 'kr', name: 'Keanu Reeves' },
+            { id: 'ts', name: 'Taylor Swift' },
+            { id: 'by', name: 'Beyoncé' },
+            { id: 'ce', name: 'Chris Evans' }
+        ];
+
+        const defaultWords = [
+            'blue', 'red', 'coffee', 'dessert', 'holiday', 'sunset', 'passport',
+            'lantern', 'ocean', 'movie', 'stadium', 'music', 'jacket', 'dessert'
+        ];
+
+        const colors = ['#ff6b6b', '#ffa502', '#1e90ff', '#2ed573', '#9b59b6', '#f368e0'];
+
+        const playerGrid = document.getElementById('playerGrid');
+        const leaderboardList = document.getElementById('leaderboardList');
+        const slotWindow = document.getElementById('slotWindow');
+        const spinStatus = document.getElementById('spinStatus');
+        const activeAvatar = document.getElementById('activeAvatar');
+        const activeName = document.getElementById('activeName');
+        const activeWord = document.getElementById('activeWord');
+        const wordBankInput = document.getElementById('wordBankInput');
+
+        let players = loadPlayers();
+        let words = loadWords();
+        let activePlayerId = localStorage.getItem('magicroundActivePlayerId') || '';
+        let spinTimer = null;
+
+        function loadPlayers() {
+            const stored = localStorage.getItem('magicroundPlayers');
+            if (stored) {
+                return JSON.parse(stored);
+            }
+            return defaultPlayers.map((player, index) => ({
+                ...player,
+                active: index < 6,
+                score: 0,
+                currentWord: ''
+            }));
+        }
+
+        function savePlayers() {
+            localStorage.setItem('magicroundPlayers', JSON.stringify(players));
+        }
+
+        function loadWords() {
+            const stored = localStorage.getItem('magicroundWords');
+            return stored ? JSON.parse(stored) : defaultWords;
+        }
+
+        function saveWords() {
+            localStorage.setItem('magicroundWords', JSON.stringify(words));
+        }
+
+        function initialsFromName(name) {
+            return name.split(' ').map(part => part[0]).slice(0, 2).join('').toUpperCase();
+        }
+
+        function createAvatar(name, index) {
+            const color = colors[index % colors.length];
+            const initials = initialsFromName(name);
+            const svg = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120">
+                    <defs>
+                        <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="${color}" />
+                            <stop offset="100%" stop-color="#111" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="120" height="120" rx="60" fill="url(#grad)" />
+                    <text x="50%" y="55%" text-anchor="middle" fill="#fff" font-family="Arial" font-size="44" font-weight="bold">${initials}</text>
+                </svg>
+            `;
+            return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+        }
+
+        function setActivePlayer(id) {
+            activePlayerId = id;
+            localStorage.setItem('magicroundActivePlayerId', id);
+            renderActivePlayer();
+        }
+
+        function getActivePlayers() {
+            return players.filter(player => player.active);
+        }
+
+        function nextActivePlayer() {
+            const activePlayers = getActivePlayers();
+            if (activePlayers.length === 0) {
+                setActivePlayer('');
+                return;
+            }
+            const currentIndex = activePlayers.findIndex(player => player.id === activePlayerId);
+            const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % activePlayers.length;
+            setActivePlayer(activePlayers[nextIndex].id);
+        }
+
+        function spinWord() {
+            const activePlayer = players.find(player => player.id === activePlayerId);
+            if (!activePlayer) {
+                spinStatus.textContent = 'Activate someone first in the Players tab.';
+                return;
+            }
+            if (words.length === 0) {
+                spinStatus.textContent = 'Add some words in the Word Bank first.';
+                return;
+            }
+            spinStatus.textContent = 'Spinning...';
+            slotWindow.classList.add('spinning');
+            let ticks = 0;
+            if (spinTimer) {
+                clearInterval(spinTimer);
+            }
+            spinTimer = setInterval(() => {
+                ticks += 1;
+                slotWindow.textContent = words[Math.floor(Math.random() * words.length)];
+                if (ticks > 15) {
+                    clearInterval(spinTimer);
+                    const chosen = words[Math.floor(Math.random() * words.length)];
+                    activePlayer.currentWord = chosen;
+                    slotWindow.textContent = chosen;
+                    slotWindow.classList.remove('spinning');
+                    spinStatus.textContent = `${activePlayer.name} must drop “${chosen}” into conversation.`;
+                    savePlayers();
+                    renderActivePlayer();
+                    renderPlayers();
+                }
+            }, 120);
+        }
+
+        function updateScore(id, delta) {
+            const player = players.find(item => item.id === id);
+            if (!player) {
+                return;
+            }
+            player.score += delta;
+            savePlayers();
+            renderPlayers();
+            renderLeaderboard();
+            renderActivePlayer();
+        }
+
+        function clearWord(id) {
+            const player = players.find(item => item.id === id);
+            if (!player) {
+                return;
+            }
+            player.currentWord = '';
+            savePlayers();
+            renderPlayers();
+            renderActivePlayer();
+            spinStatus.textContent = 'Word cleared. Ready for a new spin.';
+        }
+
+        function renderPlayers() {
+            playerGrid.innerHTML = '';
+            players.forEach((player, index) => {
+                const card = document.createElement('div');
+                card.className = 'player-card';
+
+                const header = document.createElement('div');
+                header.className = 'player-header';
+
+                const avatar = document.createElement('img');
+                avatar.className = 'player-avatar';
+                avatar.src = createAvatar(player.name, index);
+                avatar.alt = `${player.name} avatar`;
+
+                const info = document.createElement('div');
+                info.innerHTML = `
+                    <div class="player-name">${player.name}</div>
+                    <div class="player-meta">Score: ${player.score}</div>
+                    <div class="player-meta">Word: ${player.currentWord || 'None yet'}</div>
+                `;
+
+                header.appendChild(avatar);
+                header.appendChild(info);
+
+                const toggleRow = document.createElement('label');
+                toggleRow.className = 'toggle-row';
+                toggleRow.innerHTML = `
+                    <span>Active in game</span>
+                    <input type="checkbox" ${player.active ? 'checked' : ''}>
+                `;
+
+                const toggleInput = toggleRow.querySelector('input');
+                toggleInput.addEventListener('change', () => {
+                    player.active = toggleInput.checked;
+                    savePlayers();
+                    renderActivePlayer();
+                    renderLeaderboard();
+                });
+
+                const actions = document.createElement('div');
+                actions.className = 'player-actions';
+                actions.innerHTML = `
+                    <button class="action-button">+1 Point</button>
+                    <button class="action-button secondary">-1 Point</button>
+                `;
+                const [plusButton, minusButton] = actions.querySelectorAll('button');
+                plusButton.addEventListener('click', () => updateScore(player.id, 1));
+                minusButton.addEventListener('click', () => updateScore(player.id, -1));
+
+                card.appendChild(header);
+                card.appendChild(toggleRow);
+                card.appendChild(actions);
+                playerGrid.appendChild(card);
+            });
+        }
+
+        function renderActivePlayer() {
+            const activePlayer = players.find(player => player.id === activePlayerId && player.active);
+            if (!activePlayer) {
+                activeName.textContent = 'Select an active player';
+                activeWord.textContent = 'No word assigned yet.';
+                activeAvatar.src = createAvatar('?', 0);
+                return;
+            }
+            activeName.textContent = activePlayer.name;
+            activeWord.textContent = activePlayer.currentWord
+                ? `Current word: “${activePlayer.currentWord}”`
+                : 'No word assigned yet.';
+            const index = players.findIndex(player => player.id === activePlayer.id);
+            activeAvatar.src = createAvatar(activePlayer.name, index);
+        }
+
+        function renderLeaderboard() {
+            const sorted = [...players].sort((a, b) => b.score - a.score);
+            leaderboardList.innerHTML = '';
+            sorted.forEach((player, index) => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                item.innerHTML = `
+                    <span>#${index + 1} ${player.name}</span>
+                    <span>${player.score} pts</span>
+                `;
+                leaderboardList.appendChild(item);
+            });
+        }
+
+        function setupTabs() {
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    buttons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.setAttribute('aria-selected', 'false');
+                    });
+                    button.classList.add('active');
+                    button.setAttribute('aria-selected', 'true');
+                    const tabId = button.getAttribute('data-tab');
+                    document.querySelectorAll('.tab-panel').forEach(panel => {
+                        panel.classList.toggle('active', panel.id === `tab-${tabId}`);
+                    });
+                });
+            });
+        }
+
+        function setupControls() {
+            document.getElementById('nextPlayer').addEventListener('click', () => {
+                nextActivePlayer();
+            });
+
+            document.getElementById('spinLever').addEventListener('click', spinWord);
+
+            document.getElementById('successPoint').addEventListener('click', () => {
+                if (!activePlayerId) {
+                    spinStatus.textContent = 'Pick an active player first.';
+                    return;
+                }
+                updateScore(activePlayerId, 1);
+                clearWord(activePlayerId);
+            });
+
+            document.getElementById('caughtPoint').addEventListener('click', () => {
+                if (!activePlayerId) {
+                    spinStatus.textContent = 'Pick an active player first.';
+                    return;
+                }
+                updateScore(activePlayerId, -1);
+                clearWord(activePlayerId);
+            });
+
+            document.getElementById('clearWord').addEventListener('click', () => {
+                if (!activePlayerId) {
+                    spinStatus.textContent = 'Pick an active player first.';
+                    return;
+                }
+                clearWord(activePlayerId);
+            });
+
+            document.getElementById('resetScores').addEventListener('click', () => {
+                players = players.map(player => ({ ...player, score: 0 }));
+                savePlayers();
+                renderPlayers();
+                renderLeaderboard();
+                renderActivePlayer();
+            });
+
+            document.getElementById('saveWords').addEventListener('click', () => {
+                const input = wordBankInput.value
+                    .split('\n')
+                    .map(word => word.trim())
+                    .filter(Boolean);
+                words = input;
+                saveWords();
+                spinStatus.textContent = `Saved ${words.length} words.`;
+            });
+        }
+
+        function init() {
+            wordBankInput.value = words.join('\n');
+            renderPlayers();
+            renderLeaderboard();
+            renderActivePlayer();
+            setupTabs();
+            setupControls();
+            if (activePlayerId) {
+                renderActivePlayer();
+            } else {
+                nextActivePlayer();
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
