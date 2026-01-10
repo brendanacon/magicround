@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Outspoken Slot Game</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="app__header">
+        <div>
+          <p class="app__eyebrow">Outspoken</p>
+          <h1 class="app__title">Slot Game</h1>
+        </div>
+        <div class="app__status" id="activePlayerDisplay">
+          <span class="status__label">Next up</span>
+          <span class="status__value">Select players</span>
+        </div>
+      </header>
+
+      <main class="app__main">
+        <section class="panel panel--active" data-panel="players">
+          <div class="panel__header">
+            <div>
+              <h2>Players</h2>
+              <p>Select who is playing tonight.</p>
+            </div>
+            <button class="btn" id="activateAllBtn">Activate all</button>
+          </div>
+          <div class="player-grid" id="playerGrid"></div>
+        </section>
+
+        <section class="panel" data-panel="game">
+          <div class="panel__header">
+            <div>
+              <h2>Game Board</h2>
+              <p>Spin for a new word and keep score.</p>
+            </div>
+            <button class="btn btn--ghost" id="shufflePlayerBtn">Shuffle player</button>
+          </div>
+
+          <div class="game-card">
+            <div class="game-card__player" id="currentPlayerCard"></div>
+            <div class="slot-machine" id="slotMachine">
+              <div class="slot-machine__top">
+                <div class="slot-display">
+                  <div class="slot-reel" data-reel="0">
+                    <span class="reel-word">Ready</span>
+                  </div>
+                  <div class="slot-reel" data-reel="1">
+                    <span class="reel-word">Set</span>
+                  </div>
+                  <div class="slot-reel" data-reel="2">
+                    <span class="reel-word">Spin</span>
+                  </div>
+                </div>
+                <div class="slot-result" id="slotResult">Spin to get a word</div>
+              </div>
+              <div class="slot-machine__bottom">
+                <div class="slot-controls">
+                  <button class="btn btn--primary" id="spinBtn">
+                    <span>Pull the lever</span>
+                  </button>
+                  <div class="lever" id="lever">
+                    <div class="lever__stem"></div>
+                    <div class="lever__ball"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="score-actions">
+              <button class="btn btn--success" id="wordUsedBtn">Word landed (+1)</button>
+              <button class="btn btn--danger" id="wordGuessedBtn">Word guessed (-1)</button>
+              <button class="btn" id="newWordBtn">Draw new word</button>
+            </div>
+          </div>
+
+          <div class="scores" id="scoreBoard"></div>
+        </section>
+
+        <section class="panel" data-panel="words">
+          <div class="panel__header">
+            <div>
+              <h2>Word Bank</h2>
+              <p>Add new words, one per line.</p>
+            </div>
+            <div class="badge" id="wordCount">0 words</div>
+          </div>
+          <textarea
+            class="word-input"
+            id="wordInput"
+            placeholder="blue\nred\nchampagne\numbrella"
+          ></textarea>
+          <button class="btn btn--primary" id="saveWordsBtn">Save word bank</button>
+        </section>
+
+        <section class="panel" data-panel="leaderboard">
+          <div class="panel__header">
+            <div>
+              <h2>Leaderboard</h2>
+              <p>Overall points from active players.</p>
+            </div>
+            <button class="btn btn--ghost" id="resetScoresBtn">Reset scores</button>
+          </div>
+          <div class="leaderboard" id="leaderBoard"></div>
+        </section>
+      </main>
+
+      <nav class="tab-bar">
+        <button class="tab-bar__item tab-bar__item--active" data-tab="players">
+          <span>Players</span>
+        </button>
+        <button class="tab-bar__item" data-tab="game">
+          <span>Game</span>
+        </button>
+        <button class="tab-bar__item" data-tab="words">
+          <span>Words</span>
+        </button>
+        <button class="tab-bar__item" data-tab="leaderboard">
+          <span>Scores</span>
+        </button>
+      </nav>
+    </div>
+
+    <input type="file" accept="image/*" id="avatarUpload" class="hidden" />
+    <script src="app.js"></script>
+  </body>
+</html>
