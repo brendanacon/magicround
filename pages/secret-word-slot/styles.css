@@ -503,6 +503,14 @@ textarea {
   margin-top: 16px;
 }
 
+.add-word-feedback {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-height: 1.5em;
+  transition: color 0.2s ease;
+}
+
 .word-stats {
   margin-top: 12px;
   color: var(--muted);

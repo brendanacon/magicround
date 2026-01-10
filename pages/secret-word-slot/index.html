@@ -25,6 +25,7 @@
 
       <nav class="tabs" aria-label="Game tabs">
         <button class="tab-button active" data-tab="game">Game</button>
+        <button class="tab-button" data-tab="add-words">Add Words</button>
         <button class="tab-button" data-tab="words">Word Bank</button>
         <button class="tab-button" data-tab="leaderboard">Leaderboard</button>
         <button class="tab-button" data-tab="assigned">Assigned Words</button>
@@ -97,6 +98,25 @@
 
           <div class="card">
             <button class="reset-game-button" id="resetGameButton">Reset Game</button>
+          </div>
+        </section>
+
+        <section id="add-words" class="tab-panel">
+          <div class="card">
+            <div class="card-header">
+              <h2>Add Words</h2>
+              <p>Add new words or phrases to the word bank without seeing existing words.</p>
+            </div>
+            <label class="textarea-label" for="addWordInput">One word or phrase per line</label>
+            <textarea
+              id="addWordInput"
+              rows="12"
+              placeholder="Enter new words or phrases here...\n\nExample:\nblue\nred\ncall it out\nsubtle hint"
+            ></textarea>
+            <div class="word-actions">
+              <button class="primary" id="addWordsButton">Add to Word Bank</button>
+            </div>
+            <p class="add-word-feedback" id="addWordFeedback"></p>
           </div>
         </section>
 

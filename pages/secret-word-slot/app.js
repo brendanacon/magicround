@@ -110,6 +110,9 @@ let wordInput;
 let saveWordsButton;
 let resetWordsButton;
 let wordStats;
+let addWordInput;
+let addWordsButton;
+let addWordFeedback;
 let resetScoresButton;
 let passToMessage;
 let assignedWordsList;
@@ -680,6 +683,60 @@ function saveWordsFromInput() {
   updateWordStats();
 }
 
+function addWordsToBank() {
+  if (!addWordInput || !addWordFeedback) {
+    console.error("Add word elements not found");
+    return;
+  }
+
+  const newWords = addWordInput.value
+    .split("\n")
+    .map((word) => word.trim())
+    .filter(Boolean);
+
+  if (newWords.length === 0) {
+    addWordFeedback.textContent = "Please enter at least one word or phrase.";
+    addWordFeedback.style.color = "#ef4444";
+    return;
+  }
+
+  // Get existing words and add new ones (avoid duplicates)
+  const existingWords = state.words.map(w => w.toLowerCase());
+  const uniqueNewWords = newWords.filter(word => !existingWords.includes(word.toLowerCase()));
+  
+  if (uniqueNewWords.length === 0) {
+    addWordFeedback.textContent = "All words already exist in the word bank.";
+    addWordFeedback.style.color = "#ef4444";
+    return;
+  }
+
+  // Add unique new words to the word bank
+  state.words = [...state.words, ...uniqueNewWords];
+  saveWords();
+  
+  // Clear the input
+  addWordInput.value = "";
+  
+  // Show success message
+  const duplicateCount = newWords.length - uniqueNewWords.length;
+  if (duplicateCount > 0) {
+    addWordFeedback.textContent = `Added ${uniqueNewWords.length} new word(s). ${duplicateCount} duplicate(s) skipped.`;
+  } else {
+    addWordFeedback.textContent = `Successfully added ${uniqueNewWords.length} word(s) to the word bank!`;
+  }
+  addWordFeedback.style.color = "#10b981";
+  
+  // Update word stats if on the word bank tab
+  updateWordStats();
+  
+  // Clear feedback after 3 seconds
+  setTimeout(() => {
+    if (addWordFeedback) {
+      addWordFeedback.textContent = "";
+    }
+  }, 3000);
+}
+
 function resetWords() {
   state.words = [...defaultWords];
   saveWords();
@@ -905,6 +962,9 @@ function initializeApp() {
     saveWordsButton = document.getElementById("saveWords");
     resetWordsButton = document.getElementById("resetWords");
     wordStats = document.getElementById("wordStats");
+    addWordInput = document.getElementById("addWordInput");
+    addWordsButton = document.getElementById("addWordsButton");
+    addWordFeedback = document.getElementById("addWordFeedback");
     resetScoresButton = document.getElementById("resetScores");
     passToMessage = document.getElementById("passToMessage");
     assignedWordsList = document.getElementById("assignedWordsList");
@@ -955,6 +1015,9 @@ function initializeApp() {
     
     if (saveWordsButton) {
       saveWordsButton.addEventListener("click", saveWordsFromInput);
+    }
+    if (addWordsButton) {
+      addWordsButton.addEventListener("click", addWordsToBank);
     }
     if (resetWordsButton) {
       resetWordsButton.addEventListener("click", resetWords);
