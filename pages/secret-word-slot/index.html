@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Secret Word Slot Game</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <div>
+          <p class="app-eyebrow">Secret Word Slot</p>
+          <h1>Spin a word, drop it in conversation.</h1>
+          <p class="app-subtitle">
+            Activate your players, pull the lever, and keep score on who lands
+            the sneaky word without getting called out.
+          </p>
+        </div>
+        <div class="app-time" aria-hidden="true">
+          <span>Game Night</span>
+          <strong>Ready</strong>
+        </div>
+      </header>
+
+      <nav class="tabs" aria-label="Game tabs">
+        <button class="tab-button active" data-tab="game">Game</button>
+        <button class="tab-button" data-tab="assignments">Assignments</button>
+        <button class="tab-button" data-tab="words">Word Bank</button>
+        <button class="tab-button" data-tab="leaderboard">Leaderboard</button>
+      </nav>
+
+      <main>
+        <section id="game" class="tab-panel active">
+          <div class="card">
+            <div class="card-header">
+              <h2>Players</h2>
+              <p>Tap to activate who is playing tonight.</p>
+            </div>
+            <div class="player-grid" id="playerGrid"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2>Up Next</h2>
+              <p>Pick a player and spin for their secret word.</p>
+            </div>
+            <div class="current-player">
+              <img id="currentPlayerImage" alt="" />
+              <div class="current-player-info">
+                <span class="label">Current Player</span>
+                <strong id="currentPlayerName">Activate at least one player</strong>
+                <span id="currentPlayerStatus">Tap “Pick next” to start.</span>
+              </div>
+              <button class="primary" id="pickNext">Pick next</button>
+            </div>
+          </div>
+
+          <div class="card slot-card">
+            <div class="card-header">
+              <h2>Slot Machine</h2>
+              <p>Pull the lever for a new secret word.</p>
+            </div>
+            <div class="slot-machine">
+              <div class="slot-body">
+                <div class="slot-window">
+                  <div class="reel" id="reel"></div>
+                </div>
+                <div class="slot-result">
+                  <span class="label">Secret Word</span>
+                  <strong id="slotWord">Pull the lever</strong>
+                </div>
+              </div>
+              <button class="lever" id="lever" aria-label="Pull slot lever">
+                <span class="lever-handle"></span>
+                <span class="lever-knob"></span>
+              </button>
+            </div>
+            <div class="slot-actions">
+              <button class="primary" id="spinBtn">Pull lever</button>
+              <button class="ghost" id="hideWord">Hide word</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2>Scoreboard</h2>
+              <p>Adjust scores as words are guessed or missed.</p>
+            </div>
+            <div class="score-list" id="scoreList"></div>
+          </div>
+        </section>
+
+        <section id="assignments" class="tab-panel">
+          <div class="card">
+            <div class="card-header">
+              <h2>Word Assignments</h2>
+              <p>Tap a player to reveal their current word.</p>
+            </div>
+            <div class="assignment-list" id="assignmentList"></div>
+          </div>
+        </section>
+
+        <section id="words" class="tab-panel">
+          <div class="card">
+            <div class="card-header">
+              <h2>Word Bank</h2>
+              <p>Add or edit the words the slot machine can draw.</p>
+            </div>
+            <label class="textarea-label" for="wordInput">One word or phrase per line</label>
+            <textarea
+              id="wordInput"
+              rows="12"
+              placeholder="blue\nred\ncall it out\nsubtle hint"
+            ></textarea>
+            <div class="word-actions">
+              <button class="primary" id="saveWords">Save words</button>
+              <button class="ghost" id="resetWords">Reset to default</button>
+            </div>
+            <p class="word-stats" id="wordStats"></p>
+          </div>
+        </section>
+
+        <section id="leaderboard" class="tab-panel">
+          <div class="card">
+            <div class="card-header">
+              <h2>Leaderboard</h2>
+              <p>Track who is winning after each round.</p>
+            </div>
+            <div class="leaderboard" id="leaderboardList"></div>
+            <button class="ghost" id="resetScores">Reset scores</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
