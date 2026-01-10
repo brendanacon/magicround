@@ -383,36 +383,52 @@ function spinSlot() {
     return;
   }
 
-  let player = state.players.find((p) => p.id === state.currentPlayerId);
-  if (!player) {
-    slotWordDisplay.textContent = "Pick a player first";
-    return;
-  }
-
-  // If current player already has a word, automatically advance to next player
-  if (player.lastWord && player.lastWord.trim() !== "") {
-    const activePlayers = state.players.filter((p) => p.active);
-    const currentIndex = activePlayers.findIndex((p) => p.id === player.id);
-    const nextIndex = (currentIndex + 1) % activePlayers.length;
-    const nextPlayer = activePlayers[nextIndex];
-    
-    if (nextPlayer && nextPlayer.id !== player.id) {
-      console.log("Current player has a word, advancing to:", nextPlayer.name);
-      player = nextPlayer;
-      setCurrentPlayer(nextPlayer);
-      state.currentPlayerId = nextPlayer.id;
-      savePlayers();
-    } else {
-      // Only one active player, can't advance
-      if (slotWordDisplay) {
-        slotWordDisplay.textContent = `${player.name} already has a word. Use "Request New Word" to get another.`;
-        slotWordDisplay.classList.add("visible");
-      }
-      if (lever) {
-        lever.classList.remove("pulled");
-      }
-      state.spinning = false;
+  let player;
+  
+  // In additional mode, use the selected player
+  if (state.allocationMode === "additional") {
+    if (!state.selectedPlayerForAdditional) {
+      slotWordDisplay.textContent = "Select a player first";
       return;
+    }
+    player = state.players.find((p) => p.id === state.selectedPlayerForAdditional);
+    if (!player || !player.active) {
+      slotWordDisplay.textContent = "Selected player is not active";
+      return;
+    }
+  } else {
+    // Initial allocation mode - use current player
+    player = state.players.find((p) => p.id === state.currentPlayerId);
+    if (!player) {
+      slotWordDisplay.textContent = "Pick a player first";
+      return;
+    }
+
+    // If current player already has a word, automatically advance to next player
+    if (player.lastWord && player.lastWord.trim() !== "") {
+      const activePlayers = state.players.filter((p) => p.active);
+      const currentIndex = activePlayers.findIndex((p) => p.id === player.id);
+      const nextIndex = (currentIndex + 1) % activePlayers.length;
+      const nextPlayer = activePlayers[nextIndex];
+      
+      if (nextPlayer && nextPlayer.id !== player.id) {
+        console.log("Current player has a word, advancing to:", nextPlayer.name);
+        player = nextPlayer;
+        setCurrentPlayer(nextPlayer);
+        state.currentPlayerId = nextPlayer.id;
+        savePlayers();
+      } else {
+        // Only one active player, can't advance
+        if (slotWordDisplay) {
+          slotWordDisplay.textContent = `${player.name} already has a word. Switch to "Extra Word" mode to assign more.`;
+          slotWordDisplay.classList.add("visible");
+        }
+        if (lever) {
+          lever.classList.remove("pulled");
+        }
+        state.spinning = false;
+        return;
+      }
     }
   }
 
