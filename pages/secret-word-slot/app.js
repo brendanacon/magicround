@@ -845,9 +845,16 @@ function initTabs() {
 }
 
 function init() {
+  console.log("Initializing app state...");
   state.players = loadPlayers();
   state.words = loadWords();
   state.assignedWords = loadAssignedWords();
+  
+  console.log("Loaded:", {
+    players: state.players.length,
+    words: state.words.length,
+    assignedWords: state.assignedWords.length
+  });
 
   renderPlayers();
   renderScoreboard();
