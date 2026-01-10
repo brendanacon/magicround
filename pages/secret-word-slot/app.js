@@ -115,6 +115,7 @@ let resetScoresButton;
 let passToMessage;
 let assignedWordsList;
 let resetGameButton;
+let requestNewWordButton;
 
 const state = {
   players: [],
@@ -366,10 +367,37 @@ function spinSlot() {
     return;
   }
 
-  const player = state.players.find((p) => p.id === state.currentPlayerId);
+  let player = state.players.find((p) => p.id === state.currentPlayerId);
   if (!player) {
     slotWordDisplay.textContent = "Pick a player first";
     return;
+  }
+
+  // If current player already has a word, automatically advance to next player
+  if (player.lastWord && player.lastWord.trim() !== "") {
+    const activePlayers = state.players.filter((p) => p.active);
+    const currentIndex = activePlayers.findIndex((p) => p.id === player.id);
+    const nextIndex = (currentIndex + 1) % activePlayers.length;
+    const nextPlayer = activePlayers[nextIndex];
+    
+    if (nextPlayer && nextPlayer.id !== player.id) {
+      console.log("Current player has a word, advancing to:", nextPlayer.name);
+      player = nextPlayer;
+      setCurrentPlayer(nextPlayer);
+      state.currentPlayerId = nextPlayer.id;
+      savePlayers();
+    } else {
+      // Only one active player, can't advance
+      if (slotWordDisplay) {
+        slotWordDisplay.textContent = `${player.name} already has a word. Use "Request New Word" to get another.`;
+        slotWordDisplay.classList.add("visible");
+      }
+      if (lever) {
+        lever.classList.remove("pulled");
+      }
+      state.spinning = false;
+      return;
+    }
   }
 
   if (state.words.length === 0) {
@@ -517,6 +545,49 @@ function hideWord() {
     }
     state.nextPlayerId = null;
   }
+}
+
+function requestNewWord() {
+  const player = state.players.find((p) => p.id === state.currentPlayerId);
+  if (!player) {
+    return;
+  
+  // Remove the player's current word from assigned words
+  const wordToRemove = player.lastWord;
+  if (wordToRemove) {
+    state.assignedWords = state.assignedWords.filter(
+      (assignment) => !(assignment.playerId === player.id && assignment.word === wordToRemove)
+    );
+    saveAssignedWords();
+  }
+  
+  // Clear the player's lastWord
+  state.players = state.players.map((p) =>
+    p.id === player.id ? { ...p, lastWord: "" } : p
+  );
+  savePlayers();
+  
+  // Hide any visible word display
+  if (slotWordDisplay) {
+    slotWordDisplay.classList.remove("visible");
+    slotWordDisplay.textContent = "";
+    if (slotWordDisplay.parentElement) {
+      slotWordDisplay.parentElement.classList.remove("word-visible");
+    }
+  }
+  if (passToMessage) {
+    passToMessage.classList.remove("visible");
+  }
+  state.wordVisible = false;
+  state.nextPlayerId = null;
+  
+  // Update UI
+  setCurrentPlayer({ ...player, lastWord: "" });
+  renderScoreboard();
+  renderLeaderboard();
+  renderAssignedWords();
+  
+  console.log(`Cleared word for ${player.name}, ready for new word`);
 }
 
 function populateWordsText() {
@@ -758,6 +829,7 @@ function initializeApp() {
     passToMessage = document.getElementById("passToMessage");
     assignedWordsList = document.getElementById("assignedWordsList");
     resetGameButton = document.getElementById("resetGameButton");
+    requestNewWordButton = document.getElementById("requestNewWord");
 
     console.log("Elements found:", {
       playerGrid: !!playerGrid,
