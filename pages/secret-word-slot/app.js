@@ -196,7 +196,7 @@ function setCurrentPlayer(player) {
     currentPlayerName.textContent = "Activate at least one player";
     currentPlayerImage.removeAttribute("src");
     currentPlayerImage.alt = "";
-    currentPlayerStatus.textContent = "Tap "Pick next" to start.";
+    currentPlayerStatus.textContent = "Tap \"Pick next\" to start.";
   }
 }
 
