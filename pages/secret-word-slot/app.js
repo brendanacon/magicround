@@ -122,6 +122,7 @@ const state = {
   spinning: false,
   assignedWords: [],
   wordVisible: false,
+  nextPlayerId: null,
 };
 
 const itemHeight = 60;
@@ -444,15 +445,21 @@ function spinSlot() {
     );
     savePlayers();
     
-    // Show who to pass to next
+    // Show who to pass to next and store the next player
     const activePlayers = state.players.filter((p) => p.active);
     const currentIndex = activePlayers.findIndex((p) => p.id === player.id);
     const nextIndex = (currentIndex + 1) % activePlayers.length;
     const nextPlayer = activePlayers[nextIndex];
     
-    if (nextPlayer && nextPlayer.id !== player.id && passToMessage) {
-      passToMessage.textContent = `Pass to ${nextPlayer.name}`;
-      passToMessage.classList.add("visible");
+    // Store the next player ID so we can advance to them when word is hidden
+    if (nextPlayer && nextPlayer.id !== player.id) {
+      state.nextPlayerId = nextPlayer.id;
+      if (passToMessage) {
+        passToMessage.textContent = `Pass to ${nextPlayer.name}`;
+        passToMessage.classList.add("visible");
+      }
+    } else {
+      state.nextPlayerId = null;
     }
     
     renderScoreboard();
@@ -479,6 +486,18 @@ function hideWord() {
   }
   passToMessage.classList.remove("visible");
   state.wordVisible = false;
+  
+  // Automatically advance to the next player when word is hidden
+  if (state.nextPlayerId) {
+    const nextPlayer = state.players.find((p) => p.id === state.nextPlayerId && p.active);
+    if (nextPlayer) {
+      console.log("Advancing to next player:", nextPlayer.name);
+      setCurrentPlayer(nextPlayer);
+      state.currentPlayerId = nextPlayer.id;
+      savePlayers();
+    }
+    state.nextPlayerId = null;
+  }
 }
 
 function populateWordsText() {
