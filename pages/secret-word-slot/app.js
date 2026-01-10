@@ -364,17 +364,6 @@ function togglePlayer(id) {
   }
 }
 
-function pickNextPlayer() {
-  const activePlayers = state.players.filter((player) => player.active);
-  if (activePlayers.length === 0) {
-    setCurrentPlayer(null);
-    return;
-  }
-
-  const next =
-    activePlayers[Math.floor(Math.random() * activePlayers.length)];
-  setCurrentPlayer(next);
-}
 
 function updateScore(id, delta) {
   state.players = state.players.map((player) =>
