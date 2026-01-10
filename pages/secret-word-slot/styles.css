@@ -588,6 +588,77 @@ textarea {
   transform: translateY(0);
 }
 
+.allocation-toggle-switch {
+  width: 100%;
+  margin-top: 12px;
+  cursor: pointer;
+}
+
+.toggle-track {
+  position: relative;
+  width: 100%;
+  height: 56px;
+  background: var(--bg-alt);
+  border-radius: 16px;
+  border: 2px solid var(--border);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.allocation-toggle-switch.mode-additional .toggle-track {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+.toggle-slider {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: var(--accent);
+  border-radius: 12px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px -8px rgba(29, 78, 216, 0.4);
+}
+
+.allocation-toggle-switch.mode-additional .toggle-slider {
+  transform: translateX(100%);
+  background: #dc2626;
+  box-shadow: 0 4px 12px -8px rgba(220, 38, 38, 0.4);
+}
+
+.toggle-label {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 700;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.toggle-left {
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+}
+
+.allocation-toggle-switch.mode-additional .toggle-left {
+  color: var(--text);
+}
+
+.toggle-right {
+  right: 50%;
+  transform: translate(50%, -50%);
+  color: var(--text);
+}
+
+.allocation-toggle-switch.mode-additional .toggle-right {
+  color: #fff;
+}
+
 @media (max-width: 720px) {
   .app-header {
     flex-direction: column;
