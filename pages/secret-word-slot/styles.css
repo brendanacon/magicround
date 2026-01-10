@@ -83,7 +83,7 @@ body {
 
 .tabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   background: var(--bg-alt);
   padding: 6px;
@@ -282,6 +282,7 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .reel {
@@ -289,6 +290,7 @@ main {
   justify-items: center;
   gap: 0;
   transform: translateY(0);
+  transition: opacity 0.3s ease;
 }
 
 .reel-item {
@@ -302,15 +304,47 @@ main {
   width: 100%;
 }
 
-.slot-result {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  color: #fff;
+.slot-word-display {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #1d1f24;
+  text-align: center;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 8px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  min-width: 120px;
 }
 
-.slot-result strong {
-  font-size: 1.4rem;
+.slot-word-display.visible {
+  opacity: 1;
+}
+
+.slot-window.word-visible .reel {
+  opacity: 0.3;
+}
+
+.pass-to-message {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(29, 78, 216, 0.1);
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--accent);
+  display: none;
+}
+
+.pass-to-message.visible {
+  display: block;
 }
 
 .lever {
@@ -458,10 +492,78 @@ textarea {
   font-weight: 700;
 }
 
+.assigned-words-list {
+  display: grid;
+  gap: 12px;
+}
+
+.accordion-item {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.accordion-header {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  background: var(--card);
+  transition: background 0.2s ease;
+}
+
+.accordion-header:hover {
+  background: var(--bg-alt);
+}
+
+.accordion-header strong {
+  font-size: 1.1rem;
+}
+
+.accordion-toggle {
+  font-size: 1.2rem;
+  color: var(--muted);
+  transition: transform 0.3s ease;
+}
+
+.accordion-item.open .accordion-toggle {
+  transform: rotate(180deg);
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.accordion-item.open .accordion-content {
+  max-height: 500px;
+}
+
+.accordion-words {
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.word-item {
+  padding: 10px;
+  background: var(--card);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  font-weight: 500;
+}
+
 @media (max-width: 720px) {
   .app-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .tabs {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .slot-machine {

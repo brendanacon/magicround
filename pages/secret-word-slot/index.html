@@ -27,6 +27,7 @@
         <button class="tab-button active" data-tab="game">Game</button>
         <button class="tab-button" data-tab="words">Word Bank</button>
         <button class="tab-button" data-tab="leaderboard">Leaderboard</button>
+        <button class="tab-button" data-tab="assigned">Assigned Words</button>
       </nav>
 
       <main>
@@ -64,10 +65,7 @@
               <div class="slot-body">
                 <div class="slot-window">
                   <div class="reel" id="reel"></div>
-                </div>
-                <div class="slot-result">
-                  <span class="label">Secret Word</span>
-                  <strong id="slotWord">Pull the lever</strong>
+                  <div class="slot-word-display" id="slotWordDisplay"></div>
                 </div>
               </div>
               <button class="lever" id="lever" aria-label="Pull slot lever">
@@ -77,8 +75,9 @@
             </div>
             <div class="slot-actions">
               <button class="primary" id="spinBtn">Pull lever</button>
-              <button class="ghost" id="resetWord">Clear word</button>
+              <button class="ghost" id="resetWord">Hide word</button>
             </div>
+            <div class="pass-to-message" id="passToMessage"></div>
           </div>
 
           <div class="card">
@@ -118,6 +117,16 @@
             </div>
             <div class="leaderboard" id="leaderboardList"></div>
             <button class="ghost" id="resetScores">Reset scores</button>
+          </div>
+        </section>
+
+        <section id="assigned" class="tab-panel">
+          <div class="card">
+            <div class="card-header">
+              <h2>Assigned Words</h2>
+              <p>Review words assigned to each player throughout the night.</p>
+            </div>
+            <div class="assigned-words-list" id="assignedWordsList"></div>
           </div>
         </section>
       </main>

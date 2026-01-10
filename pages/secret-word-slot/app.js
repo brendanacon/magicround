@@ -1,6 +1,7 @@
 const STORAGE_KEYS = {
   players: "secret-word-slot-players",
   words: "secret-word-slot-words",
+  assignedWords: "secret-word-slot-assigned-words",
 };
 
 const defaultPlayers = [
@@ -114,7 +115,7 @@ const pickNextButton = document.getElementById("pickNext");
 const currentPlayerName = document.getElementById("currentPlayerName");
 const currentPlayerStatus = document.getElementById("currentPlayerStatus");
 const currentPlayerImage = document.getElementById("currentPlayerImage");
-const slotWord = document.getElementById("slotWord");
+const slotWordDisplay = document.getElementById("slotWordDisplay");
 const reel = document.getElementById("reel");
 const lever = document.getElementById("lever");
 const spinButton = document.getElementById("spinBtn");
@@ -124,12 +125,16 @@ const saveWordsButton = document.getElementById("saveWords");
 const resetWordsButton = document.getElementById("resetWords");
 const wordStats = document.getElementById("wordStats");
 const resetScoresButton = document.getElementById("resetScores");
+const passToMessage = document.getElementById("passToMessage");
+const assignedWordsList = document.getElementById("assignedWordsList");
 
 const state = {
   players: [],
   words: [],
   currentPlayerId: null,
   spinning: false,
+  assignedWords: [],
+  wordVisible: false,
 };
 
 const itemHeight = 60;
@@ -156,6 +161,18 @@ function loadWords() {
   return [...defaultWords];
 }
 
+function loadAssignedWords() {
+  const stored = localStorage.getItem(STORAGE_KEYS.assignedWords);
+  if (stored) {
+    return JSON.parse(stored);
+  }
+  return [];
+}
+
+function saveAssignedWords() {
+  localStorage.setItem(STORAGE_KEYS.assignedWords, JSON.stringify(state.assignedWords));
+}
+
 function savePlayers() {
   localStorage.setItem(STORAGE_KEYS.players, JSON.stringify(state.players));
 }
@@ -170,14 +187,12 @@ function setCurrentPlayer(player) {
     currentPlayerName.textContent = player.name;
     currentPlayerImage.src = player.image;
     currentPlayerImage.alt = player.name;
-    currentPlayerStatus.textContent = player.lastWord
-      ? `Last word: “${player.lastWord}”`
-      : "Ready to spin for a new word.";
+    currentPlayerStatus.textContent = "Ready to spin for a new word.";
   } else {
     currentPlayerName.textContent = "Activate at least one player";
     currentPlayerImage.removeAttribute("src");
     currentPlayerImage.alt = "";
-    currentPlayerStatus.textContent = "Tap “Pick next” to start.";
+    currentPlayerStatus.textContent = "Tap "Pick next" to start.";
   }
 }
 
@@ -227,9 +242,7 @@ function renderScoreboard() {
     row.className = "score-row";
 
     const name = document.createElement("div");
-    name.innerHTML = `<strong>${player.name}</strong><div class="player-status">${
-      player.lastWord ? `Current word: ${player.lastWord}` : "No word yet"
-    }</div>`;
+    name.innerHTML = `<strong>${player.name}</strong><div class="player-status">Active</div>`;
 
     const controls = document.createElement("div");
     controls.className = "score-controls";
@@ -274,9 +287,7 @@ function renderLeaderboard() {
     rank.textContent = index + 1;
 
     const name = document.createElement("div");
-    name.innerHTML = `<strong>${player.name}</strong><div class="player-status">${
-      player.lastWord ? `Last word: ${player.lastWord}` : "No word yet"
-    }</div>`;
+    name.innerHTML = `<strong>${player.name}</strong><div class="player-status">Active</div>`;
 
     const score = document.createElement("div");
     score.innerHTML = `<strong>${player.score}</strong>`;
@@ -329,14 +340,21 @@ function spinSlot() {
 
   const player = state.players.find((p) => p.id === state.currentPlayerId);
   if (!player) {
-    slotWord.textContent = "Pick a player first";
+    slotWordDisplay.textContent = "Pick a player first";
     return;
   }
 
   if (state.words.length === 0) {
-    slotWord.textContent = "Add words in the Word Bank";
+    slotWordDisplay.textContent = "Add words in the Word Bank";
     return;
   }
+
+  // Hide previous word if visible
+  slotWordDisplay.classList.remove("visible");
+  slotWordDisplay.textContent = "";
+  slotWordDisplay.parentElement.classList.remove("word-visible");
+  passToMessage.classList.remove("visible");
+  state.wordVisible = false;
 
   state.spinning = true;
   lever.classList.add("pulled");
@@ -365,13 +383,42 @@ function spinSlot() {
 
   const onFinish = () => {
     reel.removeEventListener("transitionend", onFinish);
-    slotWord.textContent = finalWord;
+    
+    // Display word in center of slot machine
+    slotWordDisplay.textContent = finalWord;
+    slotWordDisplay.classList.add("visible");
+    slotWordDisplay.parentElement.classList.add("word-visible");
+    state.wordVisible = true;
+    
+    // Save assigned word to history
+    state.assignedWords.push({
+      playerId: player.id,
+      playerName: player.name,
+      word: finalWord,
+      timestamp: new Date().toISOString(),
+    });
+    saveAssignedWords();
+    
+    // Update player's last word (for internal tracking)
     state.players = state.players.map((p) =>
       p.id === player.id ? { ...p, lastWord: finalWord } : p
     );
     savePlayers();
+    
+    // Show who to pass to next
+    const activePlayers = state.players.filter((p) => p.active);
+    const currentIndex = activePlayers.findIndex((p) => p.id === player.id);
+    const nextIndex = (currentIndex + 1) % activePlayers.length;
+    const nextPlayer = activePlayers[nextIndex];
+    
+    if (nextPlayer && nextPlayer.id !== player.id) {
+      passToMessage.textContent = `Pass to ${nextPlayer.name}`;
+      passToMessage.classList.add("visible");
+    }
+    
     renderScoreboard();
     renderLeaderboard();
+    renderAssignedWords();
     setCurrentPlayer({ ...player, lastWord: finalWord });
     lever.classList.remove("pulled");
     state.spinning = false;
@@ -380,19 +427,12 @@ function spinSlot() {
   reel.addEventListener("transitionend", onFinish);
 }
 
-function clearWord() {
-  slotWord.textContent = "Pull the lever";
-  if (!state.currentPlayerId) {
-    return;
-  }
-  state.players = state.players.map((player) =>
-    player.id === state.currentPlayerId ? { ...player, lastWord: "" } : player
-  );
-  savePlayers();
-  renderScoreboard();
-  renderLeaderboard();
-  const player = state.players.find((p) => p.id === state.currentPlayerId);
-  setCurrentPlayer(player);
+function hideWord() {
+  slotWordDisplay.classList.remove("visible");
+  slotWordDisplay.textContent = "";
+  slotWordDisplay.parentElement.classList.remove("word-visible");
+  passToMessage.classList.remove("visible");
+  state.wordVisible = false;
 }
 
 function populateWordsText() {
@@ -426,7 +466,70 @@ function resetScores() {
   savePlayers();
   renderScoreboard();
   renderLeaderboard();
-  slotWord.textContent = "Pull the lever";
+  slotWordDisplay.textContent = "";
+  slotWordDisplay.classList.remove("visible");
+  if (slotWordDisplay.parentElement) {
+    slotWordDisplay.parentElement.classList.remove("word-visible");
+  }
+  passToMessage.classList.remove("visible");
+  state.wordVisible = false;
+}
+
+function renderAssignedWords() {
+  assignedWordsList.innerHTML = "";
+  
+  if (state.assignedWords.length === 0) {
+    assignedWordsList.innerHTML = "<p class=\"word-stats\">No words assigned yet.</p>";
+    return;
+  }
+  
+  // Group words by player
+  const wordsByPlayer = {};
+  state.assignedWords.forEach((assignment) => {
+    if (!wordsByPlayer[assignment.playerId]) {
+      wordsByPlayer[assignment.playerId] = {
+        playerName: assignment.playerName,
+        words: [],
+      };
+    }
+    wordsByPlayer[assignment.playerId].words.push(assignment);
+  });
+  
+  // Create accordion for each player
+  Object.entries(wordsByPlayer).forEach(([playerId, data]) => {
+    const accordionItem = document.createElement("div");
+    accordionItem.className = "accordion-item";
+    
+    const header = document.createElement("div");
+    header.className = "accordion-header";
+    header.innerHTML = `
+      <strong>${data.playerName}</strong>
+      <span class="accordion-toggle">▼</span>
+    `;
+    
+    const content = document.createElement("div");
+    content.className = "accordion-content";
+    
+    const wordsContainer = document.createElement("div");
+    wordsContainer.className = "accordion-words";
+    
+    data.words.forEach((assignment) => {
+      const wordItem = document.createElement("div");
+      wordItem.className = "word-item";
+      wordItem.textContent = assignment.word;
+      wordsContainer.appendChild(wordItem);
+    });
+    
+    content.appendChild(wordsContainer);
+    accordionItem.appendChild(header);
+    accordionItem.appendChild(content);
+    
+    header.addEventListener("click", () => {
+      accordionItem.classList.toggle("open");
+    });
+    
+    assignedWordsList.appendChild(accordionItem);
+  });
 }
 
 function initTabs() {
@@ -449,10 +552,12 @@ function initTabs() {
 function init() {
   state.players = loadPlayers();
   state.words = loadWords();
+  state.assignedWords = loadAssignedWords();
 
   renderPlayers();
   renderScoreboard();
   renderLeaderboard();
+  renderAssignedWords();
   setCurrentPlayer(
     state.players.find((player) => player.active) || null
   );
@@ -463,7 +568,7 @@ function init() {
 pickNextButton.addEventListener("click", pickNextPlayer);
 spinButton.addEventListener("click", spinSlot);
 lever.addEventListener("click", spinSlot);
-resetWordButton.addEventListener("click", clearWord);
+resetWordButton.addEventListener("click", hideWord);
 saveWordsButton.addEventListener("click", saveWordsFromInput);
 resetWordsButton.addEventListener("click", resetWords);
 resetScoresButton.addEventListener("click", resetScores);
