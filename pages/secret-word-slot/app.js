@@ -129,7 +129,25 @@ const itemHeight = 60;
 function loadPlayers() {
   const stored = localStorage.getItem(STORAGE_KEYS.players);
   if (stored) {
-    return JSON.parse(stored);
+    const parsed = JSON.parse(stored);
+    // Check if stored players match the new default list
+    // If the first player is not in our new defaults, reset to new defaults
+    const firstStoredId = parsed[0]?.id;
+    const hasNewPlayer = defaultPlayers.some(p => p.id === firstStoredId);
+    
+    if (!hasNewPlayer) {
+      // Old data detected - reset to new defaults
+      console.log("Detected old player data, resetting to new player list");
+      const newPlayers = defaultPlayers.map((player) => ({
+        ...player,
+        active: false,
+        score: 0,
+        lastWord: "",
+      }));
+      savePlayers();
+      return newPlayers;
+    }
+    return parsed;
   }
 
   return defaultPlayers.map((player) => ({
