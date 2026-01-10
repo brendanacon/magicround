@@ -888,7 +888,9 @@ function initTabs() {
     console.log("Initializing tabs:", buttons.length, "buttons,", panels.length, "panels");
 
     buttons.forEach((button) => {
-      button.addEventListener("click", () => {
+      const handleTabSwitch = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         const tab = button.dataset.tab;
         console.log("Tab clicked:", tab);
         buttons.forEach((btn) => btn.classList.remove("active"));
@@ -899,7 +901,11 @@ function initTabs() {
           panel.classList.toggle("active", isActive);
           console.log("Panel", panel.id, "active:", isActive);
         });
-      });
+      };
+      
+      // Add both click and touchstart for better mobile support
+      button.addEventListener("click", handleTabSwitch);
+      button.addEventListener("touchend", handleTabSwitch);
     });
   } catch (error) {
     console.error("Error initializing tabs:", error);

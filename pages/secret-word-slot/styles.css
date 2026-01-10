@@ -83,7 +83,7 @@ body {
 
 .tabs {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 8px;
   background: var(--bg-alt);
   padding: 6px;
@@ -98,6 +98,9 @@ body {
   font-weight: 600;
   color: var(--muted);
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .tab-button.active {
@@ -715,6 +718,12 @@ textarea {
 
   .tabs {
     grid-template-columns: repeat(2, 1fr);
+    font-size: 0.85rem;
+  }
+  
+  .tab-button {
+    padding: 10px 8px;
+    font-size: 0.85rem;
   }
 
   .slot-machine {
