@@ -504,6 +504,12 @@ function spinSlot() {
       slotWordDisplay.classList.add("visible");
       if (slotWordDisplay.parentElement) {
         slotWordDisplay.parentElement.classList.add("word-visible");
+        // Adjust slot window height based on content
+        const wordLength = finalWord.length;
+        if (wordLength > 30) {
+          slotWordDisplay.parentElement.style.minHeight = "auto";
+          slotWordDisplay.parentElement.style.padding = "16px";
+        }
       }
     }
     state.wordVisible = true;
