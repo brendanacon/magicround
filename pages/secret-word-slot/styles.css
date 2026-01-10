@@ -257,6 +257,9 @@ main {
   font-size: 0.95rem;
   border: none;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .primary {

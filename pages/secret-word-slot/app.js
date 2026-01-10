@@ -1028,7 +1028,13 @@ function initializeApp() {
       saveWordsButton.addEventListener("click", saveWordsFromInput);
     }
     if (addWordsButton) {
-      addWordsButton.addEventListener("click", addWordsToBank);
+      const handleAddWords = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        addWordsToBank();
+      };
+      addWordsButton.addEventListener("click", handleAddWords);
+      addWordsButton.addEventListener("touchend", handleAddWords);
     }
     if (resetWordsButton) {
       resetWordsButton.addEventListener("click", resetWords);
