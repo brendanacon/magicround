@@ -115,8 +115,7 @@ let resetScoresButton;
 let passToMessage;
 let assignedWordsList;
 let resetGameButton;
-let initialAllocationButton;
-let additionalWordsButton;
+let allocationToggle;
 let modeDescription;
 let playersDescription;
 
@@ -601,10 +600,9 @@ function setAllocationMode(mode) {
   state.allocationMode = mode;
   state.selectedPlayerForAdditional = null;
   
-  // Update toggle buttons
-  if (initialAllocationButton && additionalWordsButton) {
-    initialAllocationButton.classList.toggle("active", mode === "initial");
-    additionalWordsButton.classList.toggle("active", mode === "additional");
+  // Update toggle switch
+  if (allocationToggle) {
+    allocationToggle.classList.toggle("mode-additional", mode === "additional");
   }
   
   // Update descriptions
@@ -873,8 +871,7 @@ function initializeApp() {
     passToMessage = document.getElementById("passToMessage");
     assignedWordsList = document.getElementById("assignedWordsList");
     resetGameButton = document.getElementById("resetGameButton");
-    initialAllocationButton = document.getElementById("initialAllocation");
-    additionalWordsButton = document.getElementById("additionalWords");
+    allocationToggle = document.getElementById("allocationToggle");
     modeDescription = document.getElementById("modeDescription");
     playersDescription = document.getElementById("playersDescription");
 
@@ -910,11 +907,11 @@ function initializeApp() {
     resetWordButton.addEventListener("click", hideWord);
     
     // Set up allocation mode toggle
-    if (initialAllocationButton) {
-      initialAllocationButton.addEventListener("click", () => setAllocationMode("initial"));
-    }
-    if (additionalWordsButton) {
-      additionalWordsButton.addEventListener("click", () => setAllocationMode("additional"));
+    if (allocationToggle) {
+      allocationToggle.addEventListener("click", () => {
+        const newMode = state.allocationMode === "initial" ? "additional" : "initial";
+        setAllocationMode(newMode);
+      });
     }
     
     // Initialize allocation mode

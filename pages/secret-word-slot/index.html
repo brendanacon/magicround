@@ -37,13 +37,12 @@
               <h2>Allocation Mode</h2>
               <p>Choose how words are assigned to players.</p>
             </div>
-            <div class="allocation-toggle">
-              <button class="toggle-option active" id="initialAllocation" data-mode="initial">
-                Initial Allocation
-              </button>
-              <button class="toggle-option" id="additionalWords" data-mode="additional">
-                Additional Words
-              </button>
+            <div class="allocation-toggle-switch" id="allocationToggle">
+              <div class="toggle-track">
+                <div class="toggle-slider"></div>
+                <span class="toggle-label toggle-left">Assigning Group Words</span>
+                <span class="toggle-label toggle-right">Extra Word</span>
+              </div>
             </div>
             <p class="mode-description" id="modeDescription">
               Words will cycle through players one by one. Pull the lever to assign to the current player.
