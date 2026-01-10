@@ -551,6 +551,7 @@ function requestNewWord() {
   const player = state.players.find((p) => p.id === state.currentPlayerId);
   if (!player) {
     return;
+  }
   
   // Remove the player's current word from assigned words
   const wordToRemove = player.lastWord;
