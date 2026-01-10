@@ -900,10 +900,10 @@ function initializeApp() {
 
     console.log("Elements found:", {
       playerGrid: !!playerGrid,
-      pickNextButton: !!pickNextButton,
       spinButton: !!spinButton,
       lever: !!lever,
-      resetWordButton: !!resetWordButton
+      resetWordButton: !!resetWordButton,
+      allocationToggle: !!allocationToggle
     });
 
     // Verify all required elements exist

@@ -614,6 +614,8 @@ textarea {
   width: 100%;
   margin-top: 12px;
   cursor: pointer;
+  position: relative;
+  z-index: 1;
 }
 
 .toggle-track {
