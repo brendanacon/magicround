@@ -231,8 +231,16 @@ function renderPlayers() {
     console.error("playerGrid not found in renderPlayers");
     return;
   }
-  console.log("Rendering players:", state.players.length);
+  console.log("Rendering players:", state.players.length, "players in state");
+  console.log("Player grid element:", playerGrid);
   playerGrid.innerHTML = "";
+  
+  if (state.players.length === 0) {
+    console.warn("No players in state! Loading players...");
+    state.players = loadPlayers();
+    console.log("Loaded players:", state.players.length);
+  }
+  
   state.players.forEach((player) => {
     const card = document.createElement("div");
     const isSelected = state.allocationMode === "additional" && state.selectedPlayerForAdditional === player.id;
