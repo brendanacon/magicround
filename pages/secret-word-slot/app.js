@@ -883,7 +883,7 @@ function startApp() {
 startApp();
 
 // Test if script loaded
-console.log("Secret Word Slot script loaded");
+console.log("Secret Word Slot script loaded v2");
 
 function initializeApp() {
   try {
