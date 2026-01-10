@@ -207,7 +207,11 @@ function updateWordStats() {
 }
 
 function renderPlayers() {
-  if (!playerGrid) return;
+  if (!playerGrid) {
+    console.error("playerGrid not found in renderPlayers");
+    return;
+  }
+  console.log("Rendering players:", state.players.length);
   playerGrid.innerHTML = "";
   state.players.forEach((player) => {
     const card = document.createElement("div");
@@ -566,20 +570,29 @@ function renderAssignedWords() {
 }
 
 function initTabs() {
-  const buttons = document.querySelectorAll(".tab-button");
-  const panels = document.querySelectorAll(".tab-panel");
+  try {
+    const buttons = document.querySelectorAll(".tab-button");
+    const panels = document.querySelectorAll(".tab-panel");
 
-  buttons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const tab = button.dataset.tab;
-      buttons.forEach((btn) => btn.classList.remove("active"));
-      button.classList.add("active");
+    console.log("Initializing tabs:", buttons.length, "buttons,", panels.length, "panels");
 
-      panels.forEach((panel) => {
-        panel.classList.toggle("active", panel.id === tab);
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const tab = button.dataset.tab;
+        console.log("Tab clicked:", tab);
+        buttons.forEach((btn) => btn.classList.remove("active"));
+        button.classList.add("active");
+
+        panels.forEach((panel) => {
+          const isActive = panel.id === tab;
+          panel.classList.toggle("active", isActive);
+          console.log("Panel", panel.id, "active:", isActive);
+        });
       });
     });
-  });
+  } catch (error) {
+    console.error("Error initializing tabs:", error);
+  }
 }
 
 function init() {
@@ -598,63 +611,89 @@ function init() {
   initTabs();
 }
 
-// Wait for DOM to be ready
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initializeApp);
-} else {
-  initializeApp();
+// Wait for DOM to be ready - use multiple methods to ensure it works
+function startApp() {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeApp);
+  } else if (document.readyState === "interactive" || document.readyState === "complete") {
+    // DOM is already ready
+    setTimeout(initializeApp, 0);
+  } else {
+    initializeApp();
+  }
 }
 
-function initializeApp() {
-  // Get all DOM elements
-  playerGrid = document.getElementById("playerGrid");
-  scoreList = document.getElementById("scoreList");
-  leaderboardList = document.getElementById("leaderboardList");
-  pickNextButton = document.getElementById("pickNext");
-  currentPlayerName = document.getElementById("currentPlayerName");
-  currentPlayerStatus = document.getElementById("currentPlayerStatus");
-  currentPlayerImage = document.getElementById("currentPlayerImage");
-  slotWordDisplay = document.getElementById("slotWordDisplay");
-  reel = document.getElementById("reel");
-  lever = document.getElementById("lever");
-  spinButton = document.getElementById("spinBtn");
-  resetWordButton = document.getElementById("resetWord");
-  wordInput = document.getElementById("wordInput");
-  saveWordsButton = document.getElementById("saveWords");
-  resetWordsButton = document.getElementById("resetWords");
-  wordStats = document.getElementById("wordStats");
-  resetScoresButton = document.getElementById("resetScores");
-  passToMessage = document.getElementById("passToMessage");
-  assignedWordsList = document.getElementById("assignedWordsList");
+// Start the app
+startApp();
 
-  // Verify all required elements exist
-  if (!playerGrid || !pickNextButton || !spinButton || !lever || !resetWordButton) {
-    console.error("Required DOM elements not found", {
+function initializeApp() {
+  try {
+    console.log("Initializing app...");
+    
+    // Get all DOM elements
+    playerGrid = document.getElementById("playerGrid");
+    scoreList = document.getElementById("scoreList");
+    leaderboardList = document.getElementById("leaderboardList");
+    pickNextButton = document.getElementById("pickNext");
+    currentPlayerName = document.getElementById("currentPlayerName");
+    currentPlayerStatus = document.getElementById("currentPlayerStatus");
+    currentPlayerImage = document.getElementById("currentPlayerImage");
+    slotWordDisplay = document.getElementById("slotWordDisplay");
+    reel = document.getElementById("reel");
+    lever = document.getElementById("lever");
+    spinButton = document.getElementById("spinBtn");
+    resetWordButton = document.getElementById("resetWord");
+    wordInput = document.getElementById("wordInput");
+    saveWordsButton = document.getElementById("saveWords");
+    resetWordsButton = document.getElementById("resetWords");
+    wordStats = document.getElementById("wordStats");
+    resetScoresButton = document.getElementById("resetScores");
+    passToMessage = document.getElementById("passToMessage");
+    assignedWordsList = document.getElementById("assignedWordsList");
+
+    console.log("Elements found:", {
       playerGrid: !!playerGrid,
       pickNextButton: !!pickNextButton,
       spinButton: !!spinButton,
       lever: !!lever,
       resetWordButton: !!resetWordButton
     });
-    return;
-  }
 
-  // Initialize the app
-  init();
+    // Verify all required elements exist
+    if (!playerGrid || !pickNextButton || !spinButton || !lever || !resetWordButton) {
+      console.error("Required DOM elements not found", {
+        playerGrid: !!playerGrid,
+        pickNextButton: !!pickNextButton,
+        spinButton: !!spinButton,
+        lever: !!lever,
+        resetWordButton: !!resetWordButton
+      });
+      return;
+    }
 
-  // Set up event listeners
-  pickNextButton.addEventListener("click", pickNextPlayer);
-  spinButton.addEventListener("click", spinSlot);
-  lever.addEventListener("click", spinSlot);
-  resetWordButton.addEventListener("click", hideWord);
-  
-  if (saveWordsButton) {
-    saveWordsButton.addEventListener("click", saveWordsFromInput);
-  }
-  if (resetWordsButton) {
-    resetWordsButton.addEventListener("click", resetWords);
-  }
-  if (resetScoresButton) {
-    resetScoresButton.addEventListener("click", resetScores);
+    // Initialize the app
+    console.log("Calling init()...");
+    init();
+
+    // Set up event listeners
+    console.log("Setting up event listeners...");
+    pickNextButton.addEventListener("click", pickNextPlayer);
+    spinButton.addEventListener("click", spinSlot);
+    lever.addEventListener("click", spinSlot);
+    resetWordButton.addEventListener("click", hideWord);
+    
+    if (saveWordsButton) {
+      saveWordsButton.addEventListener("click", saveWordsFromInput);
+    }
+    if (resetWordsButton) {
+      resetWordsButton.addEventListener("click", resetWords);
+    }
+    if (resetScoresButton) {
+      resetScoresButton.addEventListener("click", resetScores);
+    }
+    
+    console.log("App initialized successfully!");
+  } catch (error) {
+    console.error("Error initializing app:", error);
   }
 }
