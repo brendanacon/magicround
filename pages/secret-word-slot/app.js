@@ -6,88 +6,74 @@ const STORAGE_KEYS = {
 
 const defaultPlayers = [
   {
-    id: "rdj",
-    name: "Robert Downey Jr.",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/5/5f/Robert_Downey_Jr_2014_Comic_Con_%28cropped%29.jpg",
+    id: "andreas",
+    name: "Andreas",
+    image: "",
   },
   {
-    id: "zendaya",
-    name: "Zendaya",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/f/f5/Zendaya_2019_by_Glenn_Francis.jpg",
+    id: "axel",
+    name: "Axel",
+    image: "",
   },
   {
-    id: "gosling",
-    name: "Ryan Gosling",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/5/55/Ryan_Gosling_in_2018.jpg",
+    id: "benjamin",
+    name: "Benjamin",
+    image: "",
   },
   {
-    id: "blanchett",
-    name: "Cate Blanchett",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/3/3d/Cate_Blanchett_Cannes_2018.jpg",
+    id: "brendan",
+    name: "Brendan Connaughton",
+    image: "",
   },
   {
-    id: "idris",
-    name: "Idris Elba",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/7/7e/Idris_Elba-4580.jpg",
+    id: "erika",
+    name: "Erika Dias",
+    image: "",
   },
   {
-    id: "stone",
-    name: "Emma Stone",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/0/0d/Emma_Stone_at_Maniac_UK_premiere_%28cropped%29.jpg",
+    id: "george",
+    name: "George Hatz",
+    image: "",
   },
   {
-    id: "gaga",
-    name: "Lady Gaga",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/0/0b/Lady_Gaga_at_Joe_Biden%27s_inauguration_%28cropped%29.jpg",
+    id: "joanna",
+    name: "Joanna Lily",
+    image: "",
   },
   {
-    id: "jackman",
-    name: "Hugh Jackman",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/5/59/Hugh_Jackman_by_Gage_Skidmore_2.jpg",
+    id: "kaitlyn",
+    name: "Kaitlyn Rooke",
+    image: "",
   },
   {
-    id: "viola",
-    name: "Viola Davis",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/5/58/Viola_Davis_by_Gage_Skidmore.jpg",
+    id: "lara",
+    name: "Lara Murray",
+    image: "",
   },
   {
-    id: "chalamet",
-    name: "Timothée Chalamet",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/2/2b/Timoth%C3%A9e_Chalamet-4485.jpg",
+    id: "lilli",
+    name: "Lilli Klil",
+    image: "",
   },
   {
-    id: "salma",
-    name: "Salma Hayek",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/8/88/Salma_Hayek_by_Gage_Skidmore_2.jpg",
+    id: "matt",
+    name: "Matt Ellis",
+    image: "",
   },
   {
-    id: "pascale",
-    name: "Pedro Pascal",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/9/99/Pedro_Pascal_by_Gage_Skidmore.jpg",
+    id: "michael",
+    name: "Michael Evans",
+    image: "",
   },
   {
-    id: "wong",
-    name: "Awkwafina",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/4/4d/Awkwafina_2019_by_Glenn_Francis.jpg",
+    id: "phil",
+    name: "Phil Maxwell",
+    image: "",
   },
   {
-    id: "nyongo",
-    name: "Lupita Nyong'o",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/f/f6/Lupita_Nyong%27o_by_Gage_Skidmore.jpg",
+    id: "rachel",
+    name: "Rachel Towers",
+    image: "",
   },
 ];
 
@@ -189,8 +175,11 @@ function setCurrentPlayer(player) {
   }
   if (player) {
     currentPlayerName.textContent = player.name;
-    currentPlayerImage.src = player.image;
-    currentPlayerImage.alt = player.name;
+    if (currentPlayerImage) {
+      currentPlayerImage.src = player.image || "";
+      currentPlayerImage.alt = player.name;
+      currentPlayerImage.style.display = "none";
+    }
     currentPlayerStatus.textContent = "Ready to spin for a new word.";
   } else {
     currentPlayerName.textContent = "Activate at least one player";
@@ -223,8 +212,9 @@ function renderPlayers() {
 
     const img = document.createElement("img");
     img.className = "player-avatar";
-    img.src = player.image;
+    img.src = player.image || "";
     img.alt = player.name;
+    img.style.display = "none";
 
     const name = document.createElement("div");
     name.className = "player-name";
@@ -419,7 +409,8 @@ function spinSlot() {
     }
     state.wordVisible = true;
     
-    // Save assigned word to history
+    // Save assigned word to history - ensure we're using the correct current player
+    console.log("Assigning word to player:", player.name, "ID:", player.id);
     state.assignedWords.push({
       playerId: player.id,
       playerName: player.name,
