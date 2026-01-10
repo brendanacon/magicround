@@ -655,26 +655,27 @@ textarea {
   top: 50%;
   transform: translateY(-50%);
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.9rem;
   transition: color 0.3s ease;
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
+  white-space: nowrap;
+  width: 50%;
+  text-align: center;
 }
 
 .toggle-left {
-  left: 50%;
-  transform: translate(-50%, -50%);
+  left: 0;
   color: #fff;
 }
 
 .allocation-toggle-switch.mode-additional .toggle-left {
-  color: var(--text);
+  color: var(--muted);
 }
 
 .toggle-right {
-  right: 50%;
-  transform: translate(50%, -50%);
-  color: var(--text);
+  right: 0;
+  color: var(--muted);
 }
 
 .allocation-toggle-switch.mode-additional .toggle-right {
