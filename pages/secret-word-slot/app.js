@@ -108,25 +108,26 @@ const defaultWords = [
   "wildcard",
 ];
 
-const playerGrid = document.getElementById("playerGrid");
-const scoreList = document.getElementById("scoreList");
-const leaderboardList = document.getElementById("leaderboardList");
-const pickNextButton = document.getElementById("pickNext");
-const currentPlayerName = document.getElementById("currentPlayerName");
-const currentPlayerStatus = document.getElementById("currentPlayerStatus");
-const currentPlayerImage = document.getElementById("currentPlayerImage");
-const slotWordDisplay = document.getElementById("slotWordDisplay");
-const reel = document.getElementById("reel");
-const lever = document.getElementById("lever");
-const spinButton = document.getElementById("spinBtn");
-const resetWordButton = document.getElementById("resetWord");
-const wordInput = document.getElementById("wordInput");
-const saveWordsButton = document.getElementById("saveWords");
-const resetWordsButton = document.getElementById("resetWords");
-const wordStats = document.getElementById("wordStats");
-const resetScoresButton = document.getElementById("resetScores");
-const passToMessage = document.getElementById("passToMessage");
-const assignedWordsList = document.getElementById("assignedWordsList");
+// DOM element references - will be set during initialization
+let playerGrid;
+let scoreList;
+let leaderboardList;
+let pickNextButton;
+let currentPlayerName;
+let currentPlayerStatus;
+let currentPlayerImage;
+let slotWordDisplay;
+let reel;
+let lever;
+let spinButton;
+let resetWordButton;
+let wordInput;
+let saveWordsButton;
+let resetWordsButton;
+let wordStats;
+let resetScoresButton;
+let passToMessage;
+let assignedWordsList;
 
 const state = {
   players: [],
@@ -183,6 +184,9 @@ function saveWords() {
 
 function setCurrentPlayer(player) {
   state.currentPlayerId = player ? player.id : null;
+  if (!currentPlayerName || !currentPlayerImage || !currentPlayerStatus) {
+    return;
+  }
   if (player) {
     currentPlayerName.textContent = player.name;
     currentPlayerImage.src = player.image;
@@ -197,10 +201,13 @@ function setCurrentPlayer(player) {
 }
 
 function updateWordStats() {
-  wordStats.textContent = `${state.words.length} words loaded.`;
+  if (wordStats) {
+    wordStats.textContent = `${state.words.length} words loaded.`;
+  }
 }
 
 function renderPlayers() {
+  if (!playerGrid) return;
   playerGrid.innerHTML = "";
   state.players.forEach((player) => {
     const card = document.createElement("div");
@@ -230,6 +237,7 @@ function renderPlayers() {
 }
 
 function renderScoreboard() {
+  if (!scoreList) return;
   scoreList.innerHTML = "";
   const activePlayers = state.players.filter((player) => player.active);
   if (activePlayers.length === 0) {
@@ -268,6 +276,7 @@ function renderScoreboard() {
 }
 
 function renderLeaderboard() {
+  if (!leaderboardList) return;
   leaderboardList.innerHTML = "";
   const ranked = [...state.players]
     .filter((player) => player.active)
@@ -338,6 +347,10 @@ function spinSlot() {
     return;
   }
 
+  if (!slotWordDisplay || !reel) {
+    return;
+  }
+
   const player = state.players.find((p) => p.id === state.currentPlayerId);
   if (!player) {
     slotWordDisplay.textContent = "Pick a player first";
@@ -352,12 +365,18 @@ function spinSlot() {
   // Hide previous word if visible
   slotWordDisplay.classList.remove("visible");
   slotWordDisplay.textContent = "";
-  slotWordDisplay.parentElement.classList.remove("word-visible");
-  passToMessage.classList.remove("visible");
+  if (slotWordDisplay.parentElement) {
+    slotWordDisplay.parentElement.classList.remove("word-visible");
+  }
+  if (passToMessage) {
+    passToMessage.classList.remove("visible");
+  }
   state.wordVisible = false;
 
   state.spinning = true;
-  lever.classList.add("pulled");
+  if (lever) {
+    lever.classList.add("pulled");
+  }
 
   const cycles = 14;
   const picks = Array.from({ length: cycles }, () =>
@@ -382,12 +401,18 @@ function spinSlot() {
   });
 
   const onFinish = () => {
-    reel.removeEventListener("transitionend", onFinish);
+    if (reel) {
+      reel.removeEventListener("transitionend", onFinish);
+    }
     
     // Display word in center of slot machine
-    slotWordDisplay.textContent = finalWord;
-    slotWordDisplay.classList.add("visible");
-    slotWordDisplay.parentElement.classList.add("word-visible");
+    if (slotWordDisplay) {
+      slotWordDisplay.textContent = finalWord;
+      slotWordDisplay.classList.add("visible");
+      if (slotWordDisplay.parentElement) {
+        slotWordDisplay.parentElement.classList.add("word-visible");
+      }
+    }
     state.wordVisible = true;
     
     // Save assigned word to history
@@ -411,7 +436,7 @@ function spinSlot() {
     const nextIndex = (currentIndex + 1) % activePlayers.length;
     const nextPlayer = activePlayers[nextIndex];
     
-    if (nextPlayer && nextPlayer.id !== player.id) {
+    if (nextPlayer && nextPlayer.id !== player.id && passToMessage) {
       passToMessage.textContent = `Pass to ${nextPlayer.name}`;
       passToMessage.classList.add("visible");
     }
@@ -420,7 +445,9 @@ function spinSlot() {
     renderLeaderboard();
     renderAssignedWords();
     setCurrentPlayer({ ...player, lastWord: finalWord });
-    lever.classList.remove("pulled");
+    if (lever) {
+      lever.classList.remove("pulled");
+    }
     state.spinning = false;
   };
 
@@ -428,9 +455,14 @@ function spinSlot() {
 }
 
 function hideWord() {
+  if (!slotWordDisplay || !passToMessage) {
+    return;
+  }
   slotWordDisplay.classList.remove("visible");
   slotWordDisplay.textContent = "";
-  slotWordDisplay.parentElement.classList.remove("word-visible");
+  if (slotWordDisplay.parentElement) {
+    slotWordDisplay.parentElement.classList.remove("word-visible");
+  }
   passToMessage.classList.remove("visible");
   state.wordVisible = false;
 }
@@ -476,6 +508,7 @@ function resetScores() {
 }
 
 function renderAssignedWords() {
+  if (!assignedWordsList) return;
   assignedWordsList.innerHTML = "";
   
   if (state.assignedWords.length === 0) {
@@ -565,12 +598,63 @@ function init() {
   initTabs();
 }
 
-pickNextButton.addEventListener("click", pickNextPlayer);
-spinButton.addEventListener("click", spinSlot);
-lever.addEventListener("click", spinSlot);
-resetWordButton.addEventListener("click", hideWord);
-saveWordsButton.addEventListener("click", saveWordsFromInput);
-resetWordsButton.addEventListener("click", resetWords);
-resetScoresButton.addEventListener("click", resetScores);
+// Wait for DOM to be ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeApp);
+} else {
+  initializeApp();
+}
 
-init();
+function initializeApp() {
+  // Get all DOM elements
+  playerGrid = document.getElementById("playerGrid");
+  scoreList = document.getElementById("scoreList");
+  leaderboardList = document.getElementById("leaderboardList");
+  pickNextButton = document.getElementById("pickNext");
+  currentPlayerName = document.getElementById("currentPlayerName");
+  currentPlayerStatus = document.getElementById("currentPlayerStatus");
+  currentPlayerImage = document.getElementById("currentPlayerImage");
+  slotWordDisplay = document.getElementById("slotWordDisplay");
+  reel = document.getElementById("reel");
+  lever = document.getElementById("lever");
+  spinButton = document.getElementById("spinBtn");
+  resetWordButton = document.getElementById("resetWord");
+  wordInput = document.getElementById("wordInput");
+  saveWordsButton = document.getElementById("saveWords");
+  resetWordsButton = document.getElementById("resetWords");
+  wordStats = document.getElementById("wordStats");
+  resetScoresButton = document.getElementById("resetScores");
+  passToMessage = document.getElementById("passToMessage");
+  assignedWordsList = document.getElementById("assignedWordsList");
+
+  // Verify all required elements exist
+  if (!playerGrid || !pickNextButton || !spinButton || !lever || !resetWordButton) {
+    console.error("Required DOM elements not found", {
+      playerGrid: !!playerGrid,
+      pickNextButton: !!pickNextButton,
+      spinButton: !!spinButton,
+      lever: !!lever,
+      resetWordButton: !!resetWordButton
+    });
+    return;
+  }
+
+  // Initialize the app
+  init();
+
+  // Set up event listeners
+  pickNextButton.addEventListener("click", pickNextPlayer);
+  spinButton.addEventListener("click", spinSlot);
+  lever.addEventListener("click", spinSlot);
+  resetWordButton.addEventListener("click", hideWord);
+  
+  if (saveWordsButton) {
+    saveWordsButton.addEventListener("click", saveWordsFromInput);
+  }
+  if (resetWordsButton) {
+    resetWordsButton.addEventListener("click", resetWords);
+  }
+  if (resetScoresButton) {
+    resetScoresButton.addEventListener("click", resetScores);
+  }
+}
