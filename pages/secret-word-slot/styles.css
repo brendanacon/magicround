@@ -345,6 +345,12 @@ main {
   opacity: 0.3;
 }
 
+.slot-window.word-visible {
+  min-height: auto;
+  height: auto;
+  padding: 16px;
+}
+
 .pass-to-message {
   margin-top: 16px;
   padding: 12px;
