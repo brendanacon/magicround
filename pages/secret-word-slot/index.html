@@ -34,8 +34,26 @@
         <section id="game" class="tab-panel active">
           <div class="card">
             <div class="card-header">
+              <h2>Allocation Mode</h2>
+              <p>Choose how words are assigned to players.</p>
+            </div>
+            <div class="allocation-toggle">
+              <button class="toggle-option active" id="initialAllocation" data-mode="initial">
+                Initial Allocation
+              </button>
+              <button class="toggle-option" id="additionalWords" data-mode="additional">
+                Additional Words
+              </button>
+            </div>
+            <p class="mode-description" id="modeDescription">
+              Words will cycle through players one by one. Pull the lever to assign to the current player.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
               <h2>Players</h2>
-              <p>Tap to activate who is playing tonight.</p>
+              <p id="playersDescription">Tap to activate who is playing tonight.</p>
             </div>
             <div class="player-grid" id="playerGrid"></div>
           </div>
@@ -76,7 +94,6 @@
             <div class="slot-actions">
               <button class="primary" id="spinBtn">Pull lever</button>
               <button class="ghost" id="resetWord">Hide word</button>
-              <button class="ghost" id="requestNewWord" style="display: none;">Request New Word</button>
             </div>
             <div class="pass-to-message" id="passToMessage"></div>
           </div>

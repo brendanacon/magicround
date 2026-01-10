@@ -168,6 +168,12 @@ main {
   background: rgba(29, 78, 216, 0.08);
 }
 
+.player-card.selected {
+  border-color: rgba(220, 38, 38, 0.7);
+  background: rgba(220, 38, 38, 0.12);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.3);
+}
+
 .player-card button {
   border: none;
   background: transparent;

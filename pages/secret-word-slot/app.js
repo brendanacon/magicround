@@ -115,7 +115,10 @@ let resetScoresButton;
 let passToMessage;
 let assignedWordsList;
 let resetGameButton;
-let requestNewWordButton;
+let initialAllocationButton;
+let additionalWordsButton;
+let modeDescription;
+let playersDescription;
 
 const state = {
   players: [],
@@ -226,11 +229,19 @@ function renderPlayers() {
   playerGrid.innerHTML = "";
   state.players.forEach((player) => {
     const card = document.createElement("div");
-    card.className = `player-card${player.active ? " active" : ""}`;
+    const isSelected = state.allocationMode === "additional" && state.selectedPlayerForAdditional === player.id;
+    card.className = `player-card${player.active ? " active" : ""}${isSelected ? " selected" : ""}`;
 
     const button = document.createElement("button");
     button.type = "button";
-    button.addEventListener("click", () => togglePlayer(player.id));
+    
+    // In additional mode, clicking selects the player for word assignment
+    // In initial mode, clicking toggles active status
+    if (state.allocationMode === "additional") {
+      button.addEventListener("click", () => selectPlayerForAdditional(player.id));
+    } else {
+      button.addEventListener("click", () => togglePlayer(player.id));
+    }
 
     const img = document.createElement("img");
     img.className = "player-avatar";
@@ -492,20 +503,28 @@ function spinSlot() {
     );
     savePlayers();
     
-    // Show who to pass to next and store the next player
-    const activePlayers = state.players.filter((p) => p.active);
-    const currentIndex = activePlayers.findIndex((p) => p.id === player.id);
-    const nextIndex = (currentIndex + 1) % activePlayers.length;
-    const nextPlayer = activePlayers[nextIndex];
-    
-    // Store the next player ID so we can advance to them when word is hidden
-    if (nextPlayer && nextPlayer.id !== player.id) {
-      state.nextPlayerId = nextPlayer.id;
-      if (passToMessage) {
-        passToMessage.textContent = `Pass to ${nextPlayer.name}`;
-        passToMessage.classList.add("visible");
+    // Show who to pass to next and store the next player (only in initial mode)
+    if (state.allocationMode === "initial") {
+      const activePlayers = state.players.filter((p) => p.active);
+      const currentIndex = activePlayers.findIndex((p) => p.id === player.id);
+      const nextIndex = (currentIndex + 1) % activePlayers.length;
+      const nextPlayer = activePlayers[nextIndex];
+      
+      // Store the next player ID so we can advance to them when word is hidden
+      if (nextPlayer && nextPlayer.id !== player.id) {
+        state.nextPlayerId = nextPlayer.id;
+        if (passToMessage) {
+          passToMessage.textContent = `Pass to ${nextPlayer.name}`;
+          passToMessage.classList.add("visible");
+        }
+      } else {
+        state.nextPlayerId = null;
       }
     } else {
+      // In additional mode, clear the pass message
+      if (passToMessage) {
+        passToMessage.classList.remove("visible");
+      }
       state.nextPlayerId = null;
     }
     
@@ -547,48 +566,58 @@ function hideWord() {
   }
 }
 
-function requestNewWord() {
-  const player = state.players.find((p) => p.id === state.currentPlayerId);
-  if (!player) {
+function selectPlayerForAdditional(playerId) {
+  // Only allow selection in additional mode
+  if (state.allocationMode !== "additional") {
     return;
   }
   
-  // Remove the player's current word from assigned words
-  const wordToRemove = player.lastWord;
-  if (wordToRemove) {
-    state.assignedWords = state.assignedWords.filter(
-      (assignment) => !(assignment.playerId === player.id && assignment.word === wordToRemove)
-    );
-    saveAssignedWords();
+  const player = state.players.find((p) => p.id === playerId);
+  if (!player || !player.active) {
+    return;
   }
   
-  // Clear the player's lastWord
-  state.players = state.players.map((p) =>
-    p.id === player.id ? { ...p, lastWord: "" } : p
-  );
-  savePlayers();
+  state.selectedPlayerForAdditional = playerId;
+  setCurrentPlayer(player);
+  renderPlayers();
+  console.log("Selected player for additional word:", player.name);
+}
+
+function setAllocationMode(mode) {
+  state.allocationMode = mode;
+  state.selectedPlayerForAdditional = null;
   
-  // Hide any visible word display
-  if (slotWordDisplay) {
-    slotWordDisplay.classList.remove("visible");
-    slotWordDisplay.textContent = "";
-    if (slotWordDisplay.parentElement) {
-      slotWordDisplay.parentElement.classList.remove("word-visible");
+  // Update toggle buttons
+  if (initialAllocationButton && additionalWordsButton) {
+    initialAllocationButton.classList.toggle("active", mode === "initial");
+    additionalWordsButton.classList.toggle("active", mode === "additional");
+  }
+  
+  // Update descriptions
+  if (modeDescription) {
+    if (mode === "initial") {
+      modeDescription.textContent = "Words will cycle through players one by one. Pull the lever to assign to the current player.";
+    } else {
+      modeDescription.textContent = "Select a player from the grid, then pull the lever to assign a word to them.";
     }
   }
-  if (passToMessage) {
-    passToMessage.classList.remove("visible");
+  
+  if (playersDescription) {
+    if (mode === "initial") {
+      playersDescription.textContent = "Tap to activate who is playing tonight.";
+    } else {
+      playersDescription.textContent = "Tap a player to select them for word assignment.";
+    }
   }
-  state.wordVisible = false;
-  state.nextPlayerId = null;
   
-  // Update UI
-  setCurrentPlayer({ ...player, lastWord: "" });
-  renderScoreboard();
-  renderLeaderboard();
-  renderAssignedWords();
+  // Re-render players to show selection state
+  renderPlayers();
   
-  console.log(`Cleared word for ${player.name}, ready for new word`);
+  // Clear current player selection if switching to initial mode
+  if (mode === "initial") {
+    const activePlayer = state.players.find((p) => p.active);
+    setCurrentPlayer(activePlayer || null);
+  }
 }
 
 function populateWordsText() {
@@ -830,7 +859,10 @@ function initializeApp() {
     passToMessage = document.getElementById("passToMessage");
     assignedWordsList = document.getElementById("assignedWordsList");
     resetGameButton = document.getElementById("resetGameButton");
-    requestNewWordButton = document.getElementById("requestNewWord");
+    initialAllocationButton = document.getElementById("initialAllocation");
+    additionalWordsButton = document.getElementById("additionalWords");
+    modeDescription = document.getElementById("modeDescription");
+    playersDescription = document.getElementById("playersDescription");
 
     console.log("Elements found:", {
       playerGrid: !!playerGrid,
@@ -881,3 +913,4 @@ function initializeApp() {
     console.error("Error initializing app:", error);
   }
 }
+
