@@ -126,6 +126,8 @@ const state = {
   assignedWords: [],
   wordVisible: false,
   nextPlayerId: null,
+  allocationMode: "initial",
+  selectedPlayerForAdditional: null,
 };
 
 const itemHeight = 60;
