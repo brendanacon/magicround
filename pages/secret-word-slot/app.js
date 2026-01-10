@@ -144,7 +144,8 @@ function loadPlayers() {
         score: 0,
         lastWord: "",
       }));
-      savePlayers();
+      // Save directly to localStorage since state.players isn't set yet
+      localStorage.setItem(STORAGE_KEYS.players, JSON.stringify(newPlayers));
       return newPlayers;
     }
     return parsed;
