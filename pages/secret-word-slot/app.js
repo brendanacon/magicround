@@ -559,8 +559,8 @@ function hideWord() {
   passToMessage.classList.remove("visible");
   state.wordVisible = false;
   
-  // Automatically advance to the next player when word is hidden
-  if (state.nextPlayerId) {
+  // Automatically advance to the next player when word is hidden (only in initial mode)
+  if (state.allocationMode === "initial" && state.nextPlayerId) {
     const nextPlayer = state.players.find((p) => p.id === state.nextPlayerId && p.active);
     if (nextPlayer) {
       console.log("Advancing to next player:", nextPlayer.name);
@@ -569,6 +569,14 @@ function hideWord() {
       savePlayers();
     }
     state.nextPlayerId = null;
+  } else if (state.allocationMode === "additional") {
+    // In additional mode, keep the selected player selected
+    if (state.selectedPlayerForAdditional) {
+      const selectedPlayer = state.players.find((p) => p.id === state.selectedPlayerForAdditional);
+      if (selectedPlayer) {
+        setCurrentPlayer(selectedPlayer);
+      }
+    }
   }
 }
 
