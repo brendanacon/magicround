@@ -901,6 +901,17 @@ function initializeApp() {
     lever.addEventListener("click", spinSlot);
     resetWordButton.addEventListener("click", hideWord);
     
+    // Set up allocation mode toggle
+    if (initialAllocationButton) {
+      initialAllocationButton.addEventListener("click", () => setAllocationMode("initial"));
+    }
+    if (additionalWordsButton) {
+      additionalWordsButton.addEventListener("click", () => setAllocationMode("additional"));
+    }
+    
+    // Initialize allocation mode
+    setAllocationMode("initial");
+    
     if (saveWordsButton) {
       saveWordsButton.addEventListener("click", saveWordsFromInput);
     }
