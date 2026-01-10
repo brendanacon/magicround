@@ -204,14 +204,20 @@ main {
   color: var(--muted);
 }
 
-.current-player {
+.current-player-header {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.current-player-display {
   display: flex;
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
 }
 
-.current-player img {
+.current-player-display img {
   display: none;
   width: 68px;
   height: 68px;
@@ -225,6 +231,11 @@ main {
   flex: 1;
   display: grid;
   gap: 6px;
+}
+
+.current-player-info strong {
+  font-size: 1.3rem;
+  color: var(--text);
 }
 
 .label {

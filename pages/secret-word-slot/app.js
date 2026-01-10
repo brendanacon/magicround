@@ -98,7 +98,6 @@ const defaultWords = [
 let playerGrid;
 let scoreList;
 let leaderboardList;
-let pickNextButton;
 let currentPlayerName;
 let currentPlayerStatus;
 let currentPlayerImage;
@@ -215,7 +214,7 @@ function setCurrentPlayer(player) {
     currentPlayerName.textContent = "Activate at least one player";
     currentPlayerImage.removeAttribute("src");
     currentPlayerImage.alt = "";
-    currentPlayerStatus.textContent = "Tap \"Pick next\" to start.";
+    currentPlayerStatus.textContent = "Activate players to start.";
   }
 }
 
@@ -876,7 +875,6 @@ function initializeApp() {
     playerGrid = document.getElementById("playerGrid");
     scoreList = document.getElementById("scoreList");
     leaderboardList = document.getElementById("leaderboardList");
-    pickNextButton = document.getElementById("pickNext");
     currentPlayerName = document.getElementById("currentPlayerName");
     currentPlayerStatus = document.getElementById("currentPlayerStatus");
     currentPlayerImage = document.getElementById("currentPlayerImage");
@@ -906,10 +904,9 @@ function initializeApp() {
     });
 
     // Verify all required elements exist
-    if (!playerGrid || !pickNextButton || !spinButton || !lever || !resetWordButton) {
+    if (!playerGrid || !spinButton || !lever || !resetWordButton) {
       console.error("Required DOM elements not found", {
         playerGrid: !!playerGrid,
-        pickNextButton: !!pickNextButton,
         spinButton: !!spinButton,
         lever: !!lever,
         resetWordButton: !!resetWordButton
@@ -923,7 +920,6 @@ function initializeApp() {
 
     // Set up event listeners
     console.log("Setting up event listeners...");
-    pickNextButton.addEventListener("click", pickNextPlayer);
     spinButton.addEventListener("click", spinSlot);
     lever.addEventListener("click", spinSlot);
     resetWordButton.addEventListener("click", hideWord);
