@@ -698,7 +698,14 @@ textarea {
   }
 
   .slot-window {
-    height: 54px;
+    min-height: 54px;
+    padding: 10px;
+  }
+  
+  .slot-word-display {
+    font-size: clamp(0.85rem, 3vw, 1.1rem);
+    padding: 10px 16px;
+    max-width: calc(100% - 20px);
   }
 
   .reel-item {
