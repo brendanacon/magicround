@@ -714,6 +714,11 @@ function addWordsToBank() {
   state.words = [...state.words, ...uniqueNewWords];
   saveWords();
   
+  // Update the word bank textarea to show the newly added words
+  if (wordInput) {
+    populateWordsText();
+  }
+  
   // Clear the input
   addWordInput.value = "";
   
@@ -726,7 +731,7 @@ function addWordsToBank() {
   }
   addWordFeedback.style.color = "#10b981";
   
-  // Update word stats if on the word bank tab
+  // Update word stats
   updateWordStats();
   
   // Clear feedback after 3 seconds
