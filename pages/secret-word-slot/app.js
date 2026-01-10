@@ -626,6 +626,9 @@ function startApp() {
 // Start the app
 startApp();
 
+// Test if script loaded
+console.log("Secret Word Slot script loaded");
+
 function initializeApp() {
   try {
     console.log("Initializing app...");
