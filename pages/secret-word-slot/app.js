@@ -347,8 +347,20 @@ function togglePlayer(id) {
   renderLeaderboard();
 
   const activePlayers = state.players.filter((player) => player.active);
-  if (!activePlayers.find((player) => player.id === state.currentPlayerId)) {
-    setCurrentPlayer(activePlayers[0] || null);
+  
+  // Auto-set current player if none is set or current player is no longer active
+  if (!state.currentPlayerId || !activePlayers.find((player) => player.id === state.currentPlayerId)) {
+    // In initial mode, set to first active player
+    // In additional mode, don't auto-set (user must select)
+    if (state.allocationMode === "initial") {
+      setCurrentPlayer(activePlayers[0] || null);
+      if (activePlayers[0]) {
+        state.currentPlayerId = activePlayers[0].id;
+      }
+    } else {
+      setCurrentPlayer(null);
+      state.currentPlayerId = null;
+    }
   }
 }
 
