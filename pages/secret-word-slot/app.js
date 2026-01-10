@@ -799,6 +799,9 @@ function initializeApp() {
     if (resetScoresButton) {
       resetScoresButton.addEventListener("click", resetScores);
     }
+    if (resetGameButton) {
+      resetGameButton.addEventListener("click", resetGame);
+    }
     
     console.log("App initialized successfully!");
   } catch (error) {
