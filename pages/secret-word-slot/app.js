@@ -481,7 +481,7 @@ function spinSlot() {
     return;
   }
 
-  const cycles = 14;
+  const cycles = 20;
   const picks = Array.from({ length: cycles }, () =>
     availableWords[Math.floor(Math.random() * availableWords.length)]
   );
