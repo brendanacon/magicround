@@ -514,7 +514,9 @@ textarea {
   font-size: 0.9rem;
   font-weight: 500;
   min-height: 1.5em;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, opacity 0.3s ease;
+  display: block;
+  opacity: 1;
 }
 
 .word-stats {

@@ -683,36 +683,59 @@ function saveWordsFromInput() {
   updateWordStats();
 }
 
-function addWordsToBank() {
+function addWordsToBank(e) {
+  // Prevent form submission if called from form
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  
+  console.log("addWordsToBank called");
+  
   if (!addWordInput || !addWordFeedback) {
-    console.error("Add word elements not found");
-    return;
+    console.error("Add word elements not found", {
+      addWordInput: !!addWordInput,
+      addWordFeedback: !!addWordFeedback
+    });
+    return false;
   }
 
-  const newWords = addWordInput.value
+  const inputValue = addWordInput.value;
+  console.log("Input value:", inputValue);
+  
+  const newWords = inputValue
     .split("\n")
     .map((word) => word.trim())
     .filter(Boolean);
 
+  console.log("Parsed words:", newWords);
+
   if (newWords.length === 0) {
     addWordFeedback.textContent = "Please enter at least one word or phrase.";
     addWordFeedback.style.color = "#ef4444";
-    return;
+    addWordFeedback.style.display = "block";
+    return false;
   }
 
   // Get existing words and add new ones (avoid duplicates)
   const existingWords = state.words.map(w => w.toLowerCase());
   const uniqueNewWords = newWords.filter(word => !existingWords.includes(word.toLowerCase()));
   
+  console.log("Unique new words:", uniqueNewWords);
+  
   if (uniqueNewWords.length === 0) {
     addWordFeedback.textContent = "All words already exist in the word bank.";
     addWordFeedback.style.color = "#ef4444";
-    return;
+    addWordFeedback.style.display = "block";
+    return false;
   }
 
   // Add unique new words to the word bank
+  const previousWordCount = state.words.length;
   state.words = [...state.words, ...uniqueNewWords];
   saveWords();
+  
+  console.log("Words saved. Previous count:", previousWordCount, "New count:", state.words.length);
   
   // Update the word bank textarea to show the newly added words
   if (wordInput) {
@@ -722,7 +745,7 @@ function addWordsToBank() {
   // Clear the input
   addWordInput.value = "";
   
-  // Show success message
+  // Show success message immediately
   const duplicateCount = newWords.length - uniqueNewWords.length;
   if (duplicateCount > 0) {
     addWordFeedback.textContent = `Added ${uniqueNewWords.length} new word(s). ${duplicateCount} duplicate(s) skipped.`;
@@ -730,16 +753,31 @@ function addWordsToBank() {
     addWordFeedback.textContent = `Successfully added ${uniqueNewWords.length} word(s) to the word bank!`;
   }
   addWordFeedback.style.color = "#10b981";
+  addWordFeedback.style.display = "block";
+  addWordFeedback.style.opacity = "1";
+  
+  // Force a reflow to ensure the message is visible
+  addWordFeedback.offsetHeight;
   
   // Update word stats
   updateWordStats();
   
-  // Clear feedback after 3 seconds
+  console.log("Success message displayed");
+  
+  // Clear feedback after 5 seconds
   setTimeout(() => {
     if (addWordFeedback) {
-      addWordFeedback.textContent = "";
+      addWordFeedback.style.opacity = "0";
+      setTimeout(() => {
+        if (addWordFeedback) {
+          addWordFeedback.textContent = "";
+          addWordFeedback.style.display = "none";
+        }
+      }, 300);
     }
-  }, 3000);
+  }, 5000);
+  
+  return false;
 }
 
 function resetWords() {
@@ -1027,14 +1065,21 @@ function initializeApp() {
     if (saveWordsButton) {
       saveWordsButton.addEventListener("click", saveWordsFromInput);
     }
+    // Set up form submission for Add Words (more reliable on mobile)
+    const addWordsForm = document.getElementById("addWordsForm");
+    if (addWordsForm) {
+      addWordsForm.addEventListener("submit", addWordsToBank);
+      console.log("Add Words form event listener attached");
+    }
+    
+    // Also attach to button as fallback
     if (addWordsButton) {
-      const handleAddWords = (e) => {
+      addWordsButton.addEventListener("click", addWordsToBank);
+      addWordsButton.addEventListener("touchend", (e) => {
         e.preventDefault();
-        e.stopPropagation();
-        addWordsToBank();
-      };
-      addWordsButton.addEventListener("click", handleAddWords);
-      addWordsButton.addEventListener("touchend", handleAddWords);
+        addWordsToBank(e);
+      });
+      console.log("Add Words button event listeners attached");
     }
     if (resetWordsButton) {
       resetWordsButton.addEventListener("click", resetWords);

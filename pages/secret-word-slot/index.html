@@ -107,16 +107,18 @@
               <h2>Add Words</h2>
               <p>Add new words or phrases to the word bank without seeing existing words.</p>
             </div>
-            <label class="textarea-label" for="addWordInput">One word or phrase per line</label>
-            <textarea
-              id="addWordInput"
-              rows="12"
-              placeholder="Enter new words or phrases here...\n\nExample:\nblue\nred\ncall it out\nsubtle hint"
-            ></textarea>
-            <div class="word-actions">
-              <button class="primary" id="addWordsButton">Add to Word Bank</button>
-            </div>
-            <p class="add-word-feedback" id="addWordFeedback"></p>
+            <form id="addWordsForm" onsubmit="return false;">
+              <label class="textarea-label" for="addWordInput">One word or phrase per line</label>
+              <textarea
+                id="addWordInput"
+                rows="12"
+                placeholder="Enter new words or phrases here...\n\nExample:\nblue\nred\ncall it out\nsubtle hint"
+              ></textarea>
+              <div class="word-actions">
+                <button type="submit" class="primary" id="addWordsButton">Add to Word Bank</button>
+              </div>
+              <p class="add-word-feedback" id="addWordFeedback"></p>
+            </form>
           </div>
         </section>
 
