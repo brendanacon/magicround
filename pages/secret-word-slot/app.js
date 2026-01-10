@@ -205,7 +205,13 @@ function setCurrentPlayer(player) {
       currentPlayerImage.alt = player.name;
       currentPlayerImage.style.display = "none";
     }
-    currentPlayerStatus.textContent = "Ready to spin for a new word.";
+    if (state.allocationMode === "additional" && state.selectedPlayerForAdditional === player.id) {
+      currentPlayerStatus.textContent = "Selected for word assignment. Pull the lever.";
+    } else if (player.lastWord && player.lastWord.trim() !== "") {
+      currentPlayerStatus.textContent = `Current word: "${player.lastWord}"`;
+    } else {
+      currentPlayerStatus.textContent = "Ready to spin for a new word.";
+    }
   } else {
     currentPlayerName.textContent = "Activate at least one player";
     currentPlayerImage.removeAttribute("src");
