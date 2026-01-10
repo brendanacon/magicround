@@ -114,6 +114,7 @@ let wordStats;
 let resetScoresButton;
 let passToMessage;
 let assignedWordsList;
+let resetGameButton;
 
 const state = {
   players: [],
@@ -392,11 +393,29 @@ function spinSlot() {
     lever.classList.add("pulled");
   }
 
+  // Get words that haven't been assigned yet
+  const assignedWordList = state.assignedWords.map(a => a.word.toLowerCase());
+  const availableWords = state.words.filter(word => 
+    !assignedWordList.includes(word.toLowerCase())
+  );
+  
+  if (availableWords.length === 0) {
+    if (slotWordDisplay) {
+      slotWordDisplay.textContent = "All words assigned!";
+      slotWordDisplay.classList.add("visible");
+    }
+    if (lever) {
+      lever.classList.remove("pulled");
+    }
+    state.spinning = false;
+    return;
+  }
+
   const cycles = 14;
   const picks = Array.from({ length: cycles }, () =>
-    state.words[Math.floor(Math.random() * state.words.length)]
+    availableWords[Math.floor(Math.random() * availableWords.length)]
   );
-  const finalWord = state.words[Math.floor(Math.random() * state.words.length)];
+  const finalWord = availableWords[Math.floor(Math.random() * availableWords.length)];
   picks.push(finalWord);
 
   reel.innerHTML = picks
@@ -538,6 +557,62 @@ function resetScores() {
   }
   passToMessage.classList.remove("visible");
   state.wordVisible = false;
+}
+
+function resetGame() {
+  // Show confirmation dialog
+  const confirmed = confirm(
+    "Are you sure you want to reset the game?\n\n" +
+    "This will clear:\n" +
+    "• All assigned words\n" +
+    "• Current word assignments\n" +
+    "• Slot machine display\n\n" +
+    "Word Bank will NOT be reset."
+  );
+  
+  if (!confirmed) {
+    return;
+  }
+  
+  // Clear assigned words
+  state.assignedWords = [];
+  saveAssignedWords();
+  
+  // Clear player lastWord assignments
+  state.players = state.players.map((player) => ({
+    ...player,
+    lastWord: "",
+  }));
+  savePlayers();
+  
+  // Clear slot machine display
+  if (slotWordDisplay) {
+    slotWordDisplay.textContent = "";
+    slotWordDisplay.classList.remove("visible");
+    if (slotWordDisplay.parentElement) {
+      slotWordDisplay.parentElement.classList.remove("word-visible");
+    }
+  }
+  
+  // Clear pass to message
+  if (passToMessage) {
+    passToMessage.classList.remove("visible");
+    passToMessage.textContent = "";
+  }
+  
+  // Reset state
+  state.wordVisible = false;
+  state.nextPlayerId = null;
+  
+  // Re-render everything
+  renderScoreboard();
+  renderLeaderboard();
+  renderAssignedWords();
+  setCurrentPlayer(
+    state.players.find((player) => player.active) || null
+  );
+  
+  console.log("Game reset complete");
 }
 
 function renderAssignedWords() {
@@ -682,6 +757,7 @@ function initializeApp() {
     resetScoresButton = document.getElementById("resetScores");
     passToMessage = document.getElementById("passToMessage");
     assignedWordsList = document.getElementById("assignedWordsList");
+    resetGameButton = document.getElementById("resetGameButton");
 
     console.log("Elements found:", {
       playerGrid: !!playerGrid,
