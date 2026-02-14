@@ -164,7 +164,8 @@
             font-weight: 500;
         }
 
-        .setup-panel input[type="url"] {
+        .setup-panel input[type="url"],
+        .setup-panel input[type="password"] {
             width: 100%;
             background: #fafafa;
             border: 1px solid #ddd;
@@ -178,7 +179,8 @@
             transition: border-color 0.15s;
         }
 
-        .setup-panel input[type="url"]:focus {
+        .setup-panel input[type="url"]:focus,
+        .setup-panel input[type="password"]:focus {
             border-color: #4F46E5;
         }
 
@@ -485,6 +487,21 @@
             <button class="feed-btn primary" onclick="saveFeedUrl()">Save & Fetch</button>
 
             <hr>
+            <h3>OpenAI API Key</h3>
+            <label for="apiKeyInput">API Key</label>
+            <input type="password" id="apiKeyInput" placeholder="sk-..." />
+            <p class="hint">Your OpenAI API key for AI-powered responses. Stored locally in your browser only. Never sent anywhere except OpenAI.</p>
+            <button class="feed-btn primary" onclick="saveApiKey()">Save Key</button>
+
+            <hr>
+            <h3>Article Archive</h3>
+            <p class="hint" id="archiveStats">Loading archive stats...</p>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+                <button class="feed-btn" onclick="exportArchive()">Export Archive</button>
+                <button class="feed-btn" onclick="clearArchive()">Clear Archive</button>
+            </div>
+
+            <hr>
             <h3>Manual Paste</h3>
             <label for="pasteXml">Paste RSS XML here</label>
             <textarea id="pasteXml" rows="6" placeholder="Open the RSS URL in your browser, Select All, Copy, then paste here..."></textarea>
@@ -539,10 +556,12 @@
         'use strict';
 
         // --- Constants ---
-        const CACHE_KEY = 'ben-chat-feed-cache';
         const URL_KEY = 'ben-chat-feed-url';
+        const API_KEY_KEY = 'ben-chat-openai-key';
         const LAST_FETCH_KEY = 'ben-chat-last-fetch';
-        const CACHE_TTL = 6 * 60 * 60 * 1000;       // 6 hours
+        const DB_NAME = 'ben-chat-archive';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'articles';
         const REFRESH_COOLDOWN = 5 * 60 * 1000;        // 5 minutes
         const DEFAULT_FEED_URL = 'https://stratechery.passport.online/feed/rss/CKPS49J7qPJbN4eYcQDpR';
         const CORS_PROXIES = [
@@ -575,6 +594,7 @@
         ]);
 
         let articles = [];
+        let db = null;
 
         // --- DOM refs ---
         const chatWindow = document.getElementById('chatWindow');
@@ -586,54 +606,135 @@
         const feedUrlInput = document.getElementById('feedUrl');
         const refreshBtn = document.getElementById('refreshBtn');
         const topicChips = document.getElementById('topicChips');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const archiveStats = document.getElementById('archiveStats');
 
-        // --- Init ---
-        function init() {
+        // =====================================================
+        // IndexedDB Article Archive
+        // =====================================================
+        function openDB() {
+            return new Promise(function(resolve, reject) {
+                const req = indexedDB.open(DB_NAME, DB_VERSION);
+                req.onupgradeneeded = function(e) {
+                    const database = e.target.result;
+                    if (!database.objectStoreNames.contains(STORE_NAME)) {
+                        const store = database.createObjectStore(STORE_NAME, { keyPath: 'link' });
+                        store.createIndex('date', 'date', { unique: false });
+                        store.createIndex('title', 'title', { unique: false });
+                    }
+                };
+                req.onsuccess = function(e) { resolve(e.target.result); };
+                req.onerror = function(e) { reject(e.target.error); };
+            });
+        }
+
+        function loadAllArticles() {
+            return new Promise(function(resolve, reject) {
+                const tx = db.transaction(STORE_NAME, 'readonly');
+                const store = tx.objectStore(STORE_NAME);
+                const req = store.getAll();
+                req.onsuccess = function() { resolve(req.result || []); };
+                req.onerror = function() { reject(req.error); };
+            });
+        }
+
+        function mergeArticles(newArticles) {
+            return new Promise(function(resolve, reject) {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                let added = 0;
+
+                newArticles.forEach(function(article) {
+                    if (!article.link) return;
+                    const getReq = store.get(article.link);
+                    getReq.onsuccess = function() {
+                        if (!getReq.result) {
+                            store.put(article);
+                            added++;
+                        }
+                    };
+                });
+
+                tx.oncomplete = function() { resolve(added); };
+                tx.onerror = function() { reject(tx.error); };
+            });
+        }
+
+        function clearAllArticles() {
+            return new Promise(function(resolve, reject) {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                const req = store.clear();
+                req.onsuccess = function() { resolve(); };
+                req.onerror = function() { reject(req.error); };
+            });
+        }
+
+        function updateArchiveStats() {
+            if (!db) return;
+            loadAllArticles().then(function(all) {
+                archiveStats.textContent = all.length + ' articles in archive';
+            });
+        }
+
+        // =====================================================
+        // Init
+        // =====================================================
+        async function init() {
+            // Open IndexedDB
+            try {
+                db = await openDB();
+            } catch(e) {
+                console.error('IndexedDB failed:', e);
+            }
+
             // Set default URL if none saved
             if (!localStorage.getItem(URL_KEY)) {
                 localStorage.setItem(URL_KEY, DEFAULT_FEED_URL);
             }
 
-            const savedUrl = localStorage.getItem(URL_KEY);
-            feedUrlInput.value = savedUrl;
+            feedUrlInput.value = localStorage.getItem(URL_KEY);
 
-            // Try loading cached feed
-            const cached = loadCache();
-            if (cached && cached.length > 0) {
-                articles = cached;
-                updateStatus('loaded', articles.length + ' articles cached', articles.length);
+            // Load saved API key
+            const savedKey = localStorage.getItem(API_KEY_KEY);
+            if (savedKey) {
+                apiKeyInput.value = savedKey;
+            }
+
+            // Migrate old localStorage cache to IndexedDB
+            try {
+                const oldCache = localStorage.getItem('ben-chat-feed-cache');
+                if (oldCache && db) {
+                    const data = JSON.parse(oldCache);
+                    if (data.articles && data.articles.length > 0) {
+                        await mergeArticles(data.articles);
+                        localStorage.removeItem('ben-chat-feed-cache');
+                    }
+                }
+            } catch(e) {}
+
+            // Load articles from IndexedDB
+            if (db) {
+                articles = await loadAllArticles();
+            }
+
+            if (articles.length > 0) {
+                updateStatus('loaded', articles.length + ' articles in archive', articles.length);
                 buildTopicChips();
             } else {
                 updateStatus('empty', 'Click Refresh to load the feed');
             }
 
             updateRefreshButton();
+            updateArchiveStats();
         }
 
-        // --- Cache ---
-        function loadCache() {
-            try {
-                const raw = localStorage.getItem(CACHE_KEY);
-                if (!raw) return null;
-                const data = JSON.parse(raw);
-                return data.articles || null;
-            } catch(e) {
-                return null;
-            }
-        }
-
-        function saveCache(arts) {
-            localStorage.setItem(CACHE_KEY, JSON.stringify({ articles: arts }));
-            localStorage.setItem(LAST_FETCH_KEY, Date.now().toString());
-        }
-
+        // =====================================================
+        // Refresh cooldown
+        // =====================================================
         function getCacheAge() {
             const last = parseInt(localStorage.getItem(LAST_FETCH_KEY) || '0');
             return Date.now() - last;
-        }
-
-        function isCacheValid() {
-            return getCacheAge() < CACHE_TTL;
         }
 
         function canRefresh() {
@@ -664,9 +765,12 @@
             }
         }
 
-        // --- Setup ---
+        // =====================================================
+        // Settings
+        // =====================================================
         window.toggleSetup = function() {
             setupPanel.classList.toggle('visible');
+            updateArchiveStats();
         };
 
         window.saveFeedUrl = function() {
@@ -677,7 +781,36 @@
             refreshFeed();
         };
 
-        // --- Fetch RSS ---
+        window.saveApiKey = function() {
+            const key = apiKeyInput.value.trim();
+            if (!key) return;
+            localStorage.setItem(API_KEY_KEY, key);
+            addBenMessage('API key saved. Your responses will now be powered by AI.');
+        };
+
+        window.exportArchive = async function() {
+            const all = await loadAllArticles();
+            const blob = new Blob([JSON.stringify(all, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'stratechery-archive-' + new Date().toISOString().slice(0, 10) + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        window.clearArchive = async function() {
+            if (!confirm('This will delete all archived articles. Are you sure?')) return;
+            await clearAllArticles();
+            articles = [];
+            updateStatus('empty', 'Archive cleared');
+            updateArchiveStats();
+            addBenMessage('Archive cleared.');
+        };
+
+        // =====================================================
+        // Fetch RSS
+        // =====================================================
         window.refreshFeed = async function() {
             const feedUrl = localStorage.getItem(URL_KEY);
             if (!feedUrl) {
@@ -696,6 +829,7 @@
             refreshBtn.textContent = 'Fetching...';
 
             const errors = [];
+            let fetchedArticles = [];
 
             // Try each CORS proxy
             for (let i = 0; i < CORS_PROXIES.length; i++) {
@@ -715,25 +849,16 @@
                         continue;
                     }
 
-                    // rss2json returns JSON with parsed items
                     if (proxy.rss2json) {
                         const json = await resp.json();
                         if (json.status === 'ok' && json.items && json.items.length > 0) {
-                            articles = parseRSS2JSON(json);
-                            if (articles.length > 0) {
-                                saveCache(articles);
-                                updateStatus('loaded', 'Feed loaded via ' + proxy.name, articles.length);
-                                updateRefreshButton();
-                                buildTopicChips();
-                                addBenMessage('Feed loaded with ' + articles.length + ' articles! Ask me anything about what Ben has been writing about.');
-                                return;
-                            }
+                            fetchedArticles = parseRSS2JSON(json);
+                            if (fetchedArticles.length > 0) break;
                         }
                         errors.push(proxy.name + ': ' + (json.message || 'no items'));
                         continue;
                     }
 
-                    // allorigins JSON wraps content in {contents: "..."}
                     let xml;
                     if (proxy.json) {
                         const json = await resp.json();
@@ -743,15 +868,8 @@
                     }
 
                     if (xml && xml.length > 100) {
-                        articles = parseRSS(xml);
-                        if (articles.length > 0) {
-                            saveCache(articles);
-                            updateStatus('loaded', 'Feed loaded via ' + proxy.name, articles.length);
-                            updateRefreshButton();
-                            buildTopicChips();
-                            addBenMessage('Feed loaded with ' + articles.length + ' articles! Ask me anything about what Ben has been writing about.');
-                            return;
-                        }
+                        fetchedArticles = parseRSS(xml);
+                        if (fetchedArticles.length > 0) break;
                         errors.push(proxy.name + ': XML fetched but 0 articles parsed');
                     } else {
                         errors.push(proxy.name + ': empty/short response');
@@ -761,27 +879,43 @@
                 }
             }
 
-            // Fallback: try direct fetch (works if CORS headers are present)
-            try {
-                updateStatus('loading', 'Trying direct fetch...');
-                const resp = await fetch(feedUrl);
-                if (resp.ok) {
-                    const xml = await resp.text();
-                    if (xml && xml.length > 100) {
-                        articles = parseRSS(xml);
-                        if (articles.length > 0) {
-                            saveCache(articles);
-                            updateStatus('loaded', 'Feed loaded directly', articles.length);
-                            updateRefreshButton();
-                            buildTopicChips();
-                            addBenMessage('Feed loaded with ' + articles.length + ' articles! Ask me anything.');
-                            return;
+            // Fallback: direct fetch
+            if (fetchedArticles.length === 0) {
+                try {
+                    updateStatus('loading', 'Trying direct fetch...');
+                    const resp = await fetch(feedUrl);
+                    if (resp.ok) {
+                        const xml = await resp.text();
+                        if (xml && xml.length > 100) {
+                            fetchedArticles = parseRSS(xml);
                         }
                     }
+                    if (fetchedArticles.length === 0) errors.push('direct: failed or empty');
+                } catch(e) {
+                    errors.push('direct: ' + (e.message || 'blocked'));
                 }
-                errors.push('direct: failed or empty');
-            } catch(e) {
-                errors.push('direct: ' + (e.message || 'blocked'));
+            }
+
+            // Process results
+            if (fetchedArticles.length > 0) {
+                localStorage.setItem(LAST_FETCH_KEY, Date.now().toString());
+
+                // Merge into IndexedDB archive
+                if (db) {
+                    const added = await mergeArticles(fetchedArticles);
+                    articles = await loadAllArticles();
+                    updateStatus('loaded', 'Added ' + added + ' new articles', articles.length);
+                    addBenMessage('Feed refreshed! Added <strong>' + added + ' new articles</strong> to the archive. Total: <strong>' + articles.length + ' articles</strong>. Ask me anything.');
+                } else {
+                    articles = fetchedArticles;
+                    updateStatus('loaded', 'Feed loaded', articles.length);
+                    addBenMessage('Feed loaded with ' + articles.length + ' articles.');
+                }
+
+                updateRefreshButton();
+                buildTopicChips();
+                updateArchiveStats();
+                return;
             }
 
             // All methods failed
@@ -790,15 +924,17 @@
             refreshBtn.disabled = false;
 
             let errorDetail = '<strong>Could not fetch the RSS feed.</strong> Tried ' + errors.length + ' methods, all failed:<br><br>';
-            errorDetail += '<div style="font-size:0.85em;color:#ff8888;font-family:monospace;background:rgba(255,0,0,0.08);padding:10px;border-radius:6px;margin-bottom:10px;">';
+            errorDetail += '<div style="font-size:0.85em;color:#b91c1c;font-family:monospace;background:rgba(239,68,68,0.08);padding:10px;border-radius:6px;margin-bottom:10px;">';
             errors.forEach(function(e, i) { errorDetail += (i + 1) + '. ' + escapeHTML(e) + '<br>'; });
             errorDetail += '</div>';
-            errorDetail += '<div style="font-size:0.85em;color:#aaa;">Feed URL: ' + escapeHTML(feedUrl) + '</div><br>';
+            errorDetail += '<div style="font-size:0.85em;color:#888;">Feed URL: ' + escapeHTML(feedUrl) + '</div><br>';
             errorDetail += '<strong>Workaround:</strong> Open Settings, scroll down to "Manual Paste", open the RSS URL directly in your browser, copy the page source (Ctrl+U then Ctrl+A, Ctrl+C), and paste it in.';
             addBenMessage(errorDetail);
         };
 
-        // --- Parse RSS2JSON format ---
+        // =====================================================
+        // RSS Parsing
+        // =====================================================
         function parseRSS2JSON(json) {
             const parsed = [];
             (json.items || []).forEach(function(item) {
@@ -819,8 +955,7 @@
             return parsed;
         }
 
-        // --- Load pasted XML ---
-        window.loadPastedFeed = function() {
+        window.loadPastedFeed = async function() {
             const pasteArea = document.getElementById('pasteXml');
             const xml = pasteArea.value.trim();
             if (!xml) {
@@ -828,22 +963,30 @@
                 return;
             }
 
-            articles = parseRSS(xml);
-            if (articles.length === 0) {
+            const parsed = parseRSS(xml);
+            if (parsed.length === 0) {
                 addBenMessage('Could not parse any articles from the pasted content. Make sure you copied the full XML source of the RSS feed (try Ctrl+U in the browser to view source, then copy all).');
                 return;
             }
 
-            saveCache(articles);
-            updateStatus('loaded', 'Feed loaded from paste', articles.length);
+            if (db) {
+                const added = await mergeArticles(parsed);
+                articles = await loadAllArticles();
+                addBenMessage('Added <strong>' + added + ' new articles</strong> from paste. Total archive: <strong>' + articles.length + '</strong>.');
+            } else {
+                articles = parsed;
+                addBenMessage('Feed loaded with ' + articles.length + ' articles from pasted content.');
+            }
+
+            localStorage.setItem(LAST_FETCH_KEY, Date.now().toString());
+            updateStatus('loaded', articles.length + ' articles in archive', articles.length);
             updateRefreshButton();
             buildTopicChips();
+            updateArchiveStats();
             setupPanel.classList.remove('visible');
             pasteArea.value = '';
-            addBenMessage('Feed loaded with ' + articles.length + ' articles from pasted content! Ask me anything.');
         };
 
-        // --- Parse RSS XML ---
         function parseRSS(xml) {
             try {
                 const parser = new DOMParser();
@@ -862,7 +1005,6 @@
                         categories.push(cat.textContent.trim());
                     });
 
-                    // Get best available content, strip HTML
                     const rawContent = contentEncoded || description || '';
                     const textContent = stripHTML(rawContent);
                     const descText = stripHTML(description || '');
@@ -875,7 +1017,6 @@
                             date: pubDate ? formatDate(pubDate) : '',
                             link: link || '',
                             categories: categories,
-                            // Pre-compute paragraphs for search
                             paragraphs: splitIntoParagraphs(textContent)
                         });
                     }
@@ -888,7 +1029,6 @@
         }
 
         function getTagText(parent, tagName) {
-            // Handle namespaced tags
             const el = parent.querySelector(tagName) || parent.getElementsByTagName(tagName)[0];
             if (!el) return '';
             return el.textContent || el.innerHTML || '';
@@ -915,7 +1055,9 @@
                 .filter(function(p) { return p.length > 40; });
         }
 
-        // --- Search Engine ---
+        // =====================================================
+        // Search Engine
+        // =====================================================
         function extractKeywords(query) {
             return query.toLowerCase()
                 .replace(/[^\w\s]/g, '')
@@ -937,15 +1079,8 @@
                 }
             });
 
-            // Bonus for matching more distinct keywords
-            if (matched > 1) {
-                score *= (1 + matched * 0.3);
-            }
-
-            // Slight penalty for very long paragraphs (prefer focused content)
-            if (paragraph.length > 1000) {
-                score *= 0.9;
-            }
+            if (matched > 1) score *= (1 + matched * 0.3);
+            if (paragraph.length > 1000) score *= 0.9;
 
             return { score: score, matched: matched };
         }
@@ -954,23 +1089,19 @@
             return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
 
-        function search(query) {
+        function search(query, maxResults) {
             if (articles.length === 0) return [];
-
             const keywords = extractKeywords(query);
             if (keywords.length === 0) return [];
 
             const results = [];
 
             articles.forEach(function(article) {
-                // Score the title
                 const titleScore = scoreParagraph(article.title, keywords);
-
-                // Score each paragraph
                 let bestPara = null;
                 let bestParaScore = 0;
 
-                article.paragraphs.forEach(function(para) {
+                (article.paragraphs || []).forEach(function(para) {
                     const ps = scoreParagraph(para, keywords);
                     if (ps.score > bestParaScore) {
                         bestParaScore = ps.score;
@@ -978,37 +1109,21 @@
                     }
                 });
 
-                // Also check description
-                const descScore = scoreParagraph(article.description, keywords);
-
+                const descScore = scoreParagraph(article.description || '', keywords);
                 const totalScore = (titleScore.score * 3) + bestParaScore + descScore.score;
 
                 if (totalScore > 0) {
                     results.push({
                         article: article,
                         score: totalScore,
-                        bestParagraph: bestPara || article.description,
+                        bestParagraph: bestPara || article.description || '',
                         titleMatch: titleScore.score > 0
                     });
                 }
             });
 
-            // Sort by score descending
             results.sort(function(a, b) { return b.score - a.score; });
-
-            return results.slice(0, 5);
-        }
-
-        function highlightKeywords(text, query) {
-            const keywords = extractKeywords(query);
-            let result = escapeHTML(text);
-
-            keywords.forEach(function(kw) {
-                const regex = new RegExp('(' + escapeRegex(kw) + '\\w*)', 'gi');
-                result = result.replace(regex, '<mark>$1</mark>');
-            });
-
-            return result;
+            return results.slice(0, maxResults || 5);
         }
 
         function escapeHTML(s) {
@@ -1017,7 +1132,9 @@
             return div.innerHTML;
         }
 
-        // --- Chat Messages ---
+        // =====================================================
+        // Chat Messages
+        // =====================================================
         function addUserMessage(text) {
             const div = document.createElement('div');
             div.className = 'chat-message user';
@@ -1029,51 +1146,161 @@
         function addBenMessage(html) {
             const div = document.createElement('div');
             div.className = 'chat-message ben';
-            div.innerHTML = '<div class="msg-sender">Stratechery Bot</div><div class="msg-bubble">' + html + '</div>';
+            div.innerHTML = '<div class="msg-sender">Stratechery</div><div class="msg-bubble">' + html + '</div>';
             chatWindow.appendChild(div);
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
-        function formatSearchResult(result, query) {
-            let excerpt = result.bestParagraph;
-            // Trim to reasonable length
-            if (excerpt.length > 500) {
-                // Try to find the most relevant window
-                const keywords = extractKeywords(query);
-                let bestStart = 0;
-                let bestCount = 0;
-                const windowSize = 400;
+        // Creates a streaming message element, returns an object to append text
+        function addStreamingMessage() {
+            const div = document.createElement('div');
+            div.className = 'chat-message ben';
+            const sender = document.createElement('div');
+            sender.className = 'msg-sender';
+            sender.textContent = 'Stratechery';
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble';
+            bubble.innerHTML = '<span class="streaming-cursor" style="display:inline-block;width:6px;height:14px;background:#4F46E5;border-radius:1px;animation:pulse 0.8s infinite;vertical-align:text-bottom;"></span>';
+            div.appendChild(sender);
+            div.appendChild(bubble);
+            chatWindow.appendChild(div);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
 
-                for (let i = 0; i < excerpt.length - windowSize; i += 50) {
-                    const window = excerpt.substring(i, i + windowSize).toLowerCase();
-                    let count = 0;
-                    keywords.forEach(function(kw) {
-                        const regex = new RegExp(escapeRegex(kw), 'gi');
-                        const matches = window.match(regex);
-                        if (matches) count += matches.length;
-                    });
-                    if (count > bestCount) {
-                        bestCount = count;
-                        bestStart = i;
+            let fullText = '';
+            return {
+                append: function(chunk) {
+                    fullText += chunk;
+                    // Simple markdown-ish rendering: convert newlines to <br>
+                    bubble.innerHTML = formatAIResponse(fullText) +
+                        '<span class="streaming-cursor" style="display:inline-block;width:6px;height:14px;background:#4F46E5;border-radius:1px;animation:pulse 0.8s infinite;vertical-align:text-bottom;margin-left:2px;"></span>';
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                },
+                finish: function(sources) {
+                    let html = formatAIResponse(fullText);
+                    if (sources && sources.length > 0) {
+                        html += '<div class="article-ref" style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.08);">';
+                        html += '<strong style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Sources</strong><br>';
+                        sources.forEach(function(s) {
+                            html += '<span class="article-title">' + escapeHTML(s.title) + '</span>';
+                            if (s.date) html += ' <span class="article-date">(' + escapeHTML(s.date) + ')</span>';
+                            html += '<br>';
+                        });
+                        html += '</div>';
+                    }
+                    bubble.innerHTML = html;
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                },
+                getText: function() { return fullText; }
+            };
+        }
+
+        function formatAIResponse(text) {
+            // Convert **bold** to <strong>
+            let html = escapeHTML(text);
+            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            // Convert newlines to <br>
+            html = html.replace(/\n/g, '<br>');
+            return html;
+        }
+
+        // =====================================================
+        // OpenAI Integration
+        // =====================================================
+        async function chatWithAI(query, searchResults) {
+            const apiKey = localStorage.getItem(API_KEY_KEY);
+            if (!apiKey) return null;
+
+            // Build context from top search results
+            let context = '';
+            const sources = [];
+            searchResults.forEach(function(r, i) {
+                const article = r.article;
+                sources.push({ title: article.title, date: article.date });
+                // Use best paragraph + surrounding content, capped per article
+                let excerpt = r.bestParagraph || article.description || '';
+                if (excerpt.length > 1500) excerpt = excerpt.substring(0, 1500) + '...';
+                context += '\n\n---\nArticle ' + (i + 1) + ': "' + article.title + '" (' + article.date + ')\n' + excerpt;
+            });
+
+            const systemPrompt = 'You are an AI assistant that helps users understand Ben Thompson\'s analysis from Stratechery. ' +
+                'Answer the user\'s question based on the article excerpts provided below. ' +
+                'Synthesize insights from across the excerpts into a coherent, conversational answer. ' +
+                'Present the analysis naturally as if explaining Ben\'s views. ' +
+                'If the excerpts don\'t fully address the question, say so honestly. ' +
+                'Be concise but thorough. Use Ben\'s frameworks and terminology where appropriate (e.g., Aggregation Theory, commoditization, integration). ' +
+                'Do not make up information that isn\'t in the excerpts.\n\n' +
+                'ARTICLE EXCERPTS:' + context;
+
+            const stream = addStreamingMessage();
+
+            try {
+                const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + apiKey
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-4o-mini',
+                        messages: [
+                            { role: 'system', content: systemPrompt },
+                            { role: 'user', content: query }
+                        ],
+                        stream: true,
+                        max_tokens: 1000
+                    })
+                });
+
+                if (!resp.ok) {
+                    const errText = await resp.text();
+                    stream.finish();
+                    if (resp.status === 401) {
+                        addBenMessage('OpenAI API key is invalid. Please update it in Settings.');
+                    } else {
+                        addBenMessage('OpenAI API error: HTTP ' + resp.status + '. ' + escapeHTML(errText.substring(0, 200)));
+                    }
+                    return;
+                }
+
+                const reader = resp.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
+
+                    for (const line of lines) {
+                        const trimmed = line.trim();
+                        if (!trimmed || !trimmed.startsWith('data: ')) continue;
+                        const data = trimmed.slice(6);
+                        if (data === '[DONE]') break;
+
+                        try {
+                            const parsed = JSON.parse(data);
+                            const content = parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content;
+                            if (content) {
+                                stream.append(content);
+                            }
+                        } catch(e) {}
                     }
                 }
 
-                const start = Math.max(0, bestStart);
-                const end = Math.min(excerpt.length, start + windowSize);
-                excerpt = (start > 0 ? '...' : '') + excerpt.substring(start, end) + (end < excerpt.length ? '...' : '');
+                stream.finish(sources);
+            } catch(e) {
+                stream.finish();
+                addBenMessage('Failed to connect to OpenAI: ' + escapeHTML(e.message));
             }
-
-            const highlighted = highlightKeywords(excerpt, query);
-
-            return '<div class="excerpt">' + highlighted + '</div>' +
-                   '<div class="article-ref">' +
-                   '<span class="article-title">' + escapeHTML(result.article.title) + '</span>' +
-                   (result.article.date ? ' <span class="article-date">(' + escapeHTML(result.article.date) + ')</span>' : '') +
-                   '</div>';
         }
 
-        // --- Send Message ---
-        window.sendMessage = function() {
+        // =====================================================
+        // Send Message
+        // =====================================================
+        window.sendMessage = async function() {
             const text = chatInput.value.trim();
             if (!text) return;
 
@@ -1085,27 +1312,33 @@
                 return;
             }
 
-            const results = search(text);
+            const results = search(text, 5);
 
             if (results.length === 0) {
-                addBenMessage('I couldn\'t find any articles matching that topic in the current feed. Try different keywords or browse the topics below.');
+                addBenMessage('I couldn\'t find any articles matching that topic in the archive. Try different keywords or browse the topics below.');
                 return;
             }
 
-            // Build response
-            let response = '';
-
-            if (results.length === 1) {
-                response = 'Here\'s what I found on that topic:<br><br>';
-                response += formatSearchResult(results[0], text);
-            } else {
-                response = 'I found <strong>' + results.length + ' relevant articles</strong>. Here are the most relevant passages:<br><br>';
-                results.forEach(function(r, i) {
-                    if (i > 0) response += '<br><br>';
-                    response += formatSearchResult(r, text);
-                });
+            // If we have an API key, use AI response
+            const apiKey = localStorage.getItem(API_KEY_KEY);
+            if (apiKey) {
+                await chatWithAI(text, results);
+                return;
             }
 
+            // Fallback: show raw search results (no API key)
+            let response = 'I found <strong>' + results.length + ' relevant articles</strong>:<br><br>';
+            results.forEach(function(r, i) {
+                let excerpt = r.bestParagraph || '';
+                if (excerpt.length > 400) excerpt = excerpt.substring(0, 400) + '...';
+                if (i > 0) response += '<br><br>';
+                response += '<div class="excerpt">' + escapeHTML(excerpt) + '</div>';
+                response += '<div class="article-ref">';
+                response += '<span class="article-title">' + escapeHTML(r.article.title) + '</span>';
+                if (r.article.date) response += ' <span class="article-date">(' + escapeHTML(r.article.date) + ')</span>';
+                response += '</div>';
+            });
+            response += '<br><div style="font-size:12px;color:#999;">Add your OpenAI API key in Settings for AI-powered conversational answers.</div>';
             addBenMessage(response);
         };
 
@@ -1114,12 +1347,13 @@
             sendMessage();
         };
 
-        // --- Build dynamic topic chips based on article content ---
+        // =====================================================
+        // Topic Chips
+        // =====================================================
         function buildTopicChips() {
-            // Count category/keyword frequency across articles
             const topicFreq = {};
             articles.forEach(function(a) {
-                a.categories.forEach(function(cat) {
+                (a.categories || []).forEach(function(cat) {
                     const key = cat.toLowerCase().trim();
                     if (key.length > 2 && key.length < 30) {
                         topicFreq[key] = (topicFreq[key] || 0) + 1;
@@ -1127,7 +1361,6 @@
                 });
             });
 
-            // Sort by frequency
             const sorted = Object.keys(topicFreq).sort(function(a, b) { return topicFreq[b] - topicFreq[a]; });
             const topTopics = sorted.slice(0, 6);
 
@@ -1141,7 +1374,6 @@
                     topicChips.appendChild(btn);
                 });
             }
-            // If no categories found, keep the default chips
         }
 
         // --- Boot ---
