@@ -496,6 +496,46 @@
             font-weight: 600;
         }
 
+        #archiveStats .expand-arrow {
+            display: inline-block;
+            transition: transform 0.2s;
+            margin-left: 4px;
+            font-size: 10px;
+        }
+        #archiveStats .expand-arrow.open {
+            transform: rotate(90deg);
+        }
+        .archive-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+            gap: 12px;
+        }
+        .archive-item:last-child {
+            border-bottom: none;
+        }
+        .archive-item a {
+            color: #1a1a1a;
+            text-decoration: none;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .archive-item a:hover {
+            color: #4F46E5;
+        }
+        .archive-item .archive-date {
+            color: #999;
+            font-size: 11px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
         /* --- Responsive --- */
         @media (max-width: 640px) {
             .profile-header {
@@ -552,7 +592,8 @@
 
             <hr>
             <h3>Article Archive</h3>
-            <p class="hint" id="archiveStats">Loading archive stats...</p>
+            <p class="hint" id="archiveStats" style="cursor:pointer;user-select:none;" onclick="toggleArticleList()">Loading archive stats...</p>
+            <div id="articleList" style="display:none;max-height:320px;overflow-y:auto;margin-bottom:10px;border:1px solid #eee;border-radius:8px;background:#fff;"></div>
             <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
                 <button class="feed-btn" onclick="document.getElementById('importJsonInput').click()">Import JSON</button>
                 <button class="feed-btn" onclick="exportArchive()">Export Archive</button>
@@ -732,9 +773,39 @@
         function updateArchiveStats() {
             if (!db) return;
             loadAllArticles().then(function(all) {
-                archiveStats.textContent = all.length + ' articles in archive';
+                const arrow = archiveStats.querySelector('.expand-arrow');
+                const isOpen = arrow && arrow.classList.contains('open');
+                archiveStats.innerHTML = all.length + ' articles in archive' +
+                    (all.length > 0 ? ' <span class="expand-arrow' + (isOpen ? ' open' : '') + '">&#9654;</span>' : '');
+
+                // Build article list
+                const listEl = document.getElementById('articleList');
+                if (all.length === 0) {
+                    listEl.style.display = 'none';
+                    listEl.innerHTML = '';
+                    return;
+                }
+                // Sort by date descending
+                all.sort(function(a, b) {
+                    return (b.date || '').localeCompare(a.date || '');
+                });
+                listEl.innerHTML = all.map(function(a) {
+                    var title = escapeHTML(a.title || 'Untitled');
+                    var date = a.date ? '<span class="archive-date">' + escapeHTML(a.date) + '</span>' : '';
+                    var link = a.link ? '<a href="' + escapeHTML(a.link) + '" target="_blank" rel="noopener" title="' + title + '">' + title + '</a>' : '<span>' + title + '</span>';
+                    return '<div class="archive-item">' + link + date + '</div>';
+                }).join('');
             });
         }
+
+        window.toggleArticleList = function() {
+            const listEl = document.getElementById('articleList');
+            const arrow = archiveStats.querySelector('.expand-arrow');
+            if (!arrow) return;
+            const isOpen = listEl.style.display !== 'none';
+            listEl.style.display = isOpen ? 'none' : 'block';
+            arrow.classList.toggle('open', !isOpen);
+        };
 
         // =====================================================
         // Init
