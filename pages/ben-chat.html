@@ -685,7 +685,9 @@
                     });
 
                     if (!resp.ok) {
-                        errors.push(proxy.name + ': HTTP ' + resp.status);
+                        let body = '';
+                        try { body = (await resp.text()).substring(0, 120); } catch(ignored) {}
+                        errors.push(proxy.name + ': HTTP ' + resp.status + ' ' + resp.statusText + (body ? ' — ' + body : ''));
                         continue;
                     }
 
@@ -763,10 +765,11 @@
             refreshBtn.textContent = 'Retry';
             refreshBtn.disabled = false;
 
-            let errorDetail = '<strong>Could not fetch the RSS feed.</strong> All proxy methods failed:<br><br>';
-            errorDetail += '<div style="font-size:0.85em;color:#ff8888;">';
-            errors.forEach(function(e) { errorDetail += '&bull; ' + escapeHTML(e) + '<br>'; });
-            errorDetail += '</div><br>';
+            let errorDetail = '<strong>Could not fetch the RSS feed.</strong> Tried ' + errors.length + ' methods, all failed:<br><br>';
+            errorDetail += '<div style="font-size:0.85em;color:#ff8888;font-family:monospace;background:rgba(255,0,0,0.08);padding:10px;border-radius:6px;margin-bottom:10px;">';
+            errors.forEach(function(e, i) { errorDetail += (i + 1) + '. ' + escapeHTML(e) + '<br>'; });
+            errorDetail += '</div>';
+            errorDetail += '<div style="font-size:0.85em;color:#aaa;">Feed URL: ' + escapeHTML(feedUrl) + '</div><br>';
             errorDetail += '<strong>Workaround:</strong> Open Settings, scroll down to "Manual Paste", open the RSS URL directly in your browser, copy the page source (Ctrl+U then Ctrl+A, Ctrl+C), and paste it in.';
             addBenMessage(errorDetail);
         };
