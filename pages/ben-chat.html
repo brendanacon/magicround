@@ -572,6 +572,41 @@
             cursor: not-allowed;
         }
 
+        /* --- Response Format Chips --- */
+        .format-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 6px 12px 8px;
+        }
+        .format-chip {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            color: #888;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
+            transition: all 0.15s;
+            user-select: none;
+        }
+        .format-chip:hover {
+            border-color: #ccc;
+            color: #555;
+        }
+        .format-chip.active {
+            background: #FAA634;
+            border-color: #FAA634;
+            color: #fff;
+        }
+        .format-chip-divider {
+            width: 1px;
+            background: #e0e0e0;
+            margin: 2px 4px;
+        }
+
         /* --- Responsive --- */
         @media (max-width: 640px) {
             .profile-header {
@@ -690,6 +725,14 @@
                     <textarea class="chat-input" id="chatInput" rows="1" placeholder="Ask Ben anything..."
                              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
                     <button class="send-btn" onclick="sendMessage()">Ask</button>
+                </div>
+                <div class="format-chips">
+                    <button class="format-chip" data-group="words" data-value="50" onclick="toggleFormatChip(this)">50 words</button>
+                    <button class="format-chip active" data-group="words" data-value="100" onclick="toggleFormatChip(this)">100 words</button>
+                    <button class="format-chip" data-group="words" data-value="200" onclick="toggleFormatChip(this)">200 words</button>
+                    <button class="format-chip" data-group="words" data-value="500" onclick="toggleFormatChip(this)">500 words</button>
+                    <div class="format-chip-divider"></div>
+                    <button class="format-chip" data-group="format" data-value="bullets" onclick="toggleFormatChip(this)">Bullet points</button>
                 </div>
             </div>
 
@@ -1737,12 +1780,19 @@
                 context += '\n\n---\nArticle ' + (i + 1) + ': "' + article.title + '" (' + article.date + ')\n' + excerpt;
             });
 
+            const prefs = getFormatPreferences();
+            var formatInstructions = 'Keep your response to approximately ' + prefs.wordCount + ' words. ';
+            if (prefs.bullets) {
+                formatInstructions += 'Format your response as bullet points. ';
+            }
+
             const systemPrompt = 'You are an AI assistant that helps users understand Ben Thompson\'s analysis from Stratechery. ' +
                 'Answer the user\'s question based on the article excerpts provided below. ' +
                 'Synthesize insights from across the excerpts into a coherent, conversational answer. ' +
                 'Present the analysis naturally as if explaining Ben\'s views. ' +
                 'If the excerpts don\'t fully address the question, say so honestly. ' +
-                'Be concise but thorough. Use Ben\'s frameworks and terminology where appropriate (e.g., Aggregation Theory, commoditization, integration). ' +
+                formatInstructions +
+                'Use Ben\'s frameworks and terminology where appropriate (e.g., Aggregation Theory, commoditization, integration). ' +
                 'Do not make up information that isn\'t in the excerpts.\n\n' +
                 'ARTICLE EXCERPTS:' + context;
 
@@ -1898,6 +1948,28 @@
                     topicChips.appendChild(btn);
                 });
             }
+        }
+
+        // --- Format chips ---
+        window.toggleFormatChip = function(chip) {
+            const group = chip.dataset.group;
+            if (group === 'words') {
+                // Radio behavior: one active at a time, must have one selected
+                document.querySelectorAll('.format-chip[data-group="words"]').forEach(function(c) {
+                    c.classList.remove('active');
+                });
+                chip.classList.add('active');
+            } else {
+                // Toggle behavior for format chips
+                chip.classList.toggle('active');
+            }
+        };
+
+        function getFormatPreferences() {
+            var wordChip = document.querySelector('.format-chip[data-group="words"].active');
+            var wordCount = wordChip ? wordChip.dataset.value : '100';
+            var bullets = document.querySelector('.format-chip[data-group="format"][data-value="bullets"].active') !== null;
+            return { wordCount: wordCount, bullets: bullets };
         }
 
         // --- Auto-resize textarea ---
