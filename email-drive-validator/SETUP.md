@@ -1,84 +1,142 @@
-# Email-Drive File Validator Agent
+# Email-Drive File Validator - Setup Guide
 
-Automatically checks Google Drive folders linked in your emails to verify that the correct number of character files exist and none are corrupted.
+This tool reads your emails, finds the Google Drive links, and checks that the right number of files are in the character profiles and character objectives folders (and that none are corrupted).
 
-## What it does
+---
 
-1. Searches your Gmail for recent game-related emails
-2. Extracts the number of guests/characters from the email text
-3. Finds Google Drive folder links in the email
-4. Opens each Drive folder and looks for subfolders: **character profiles** and **character objectives**
-5. Counts files in each subfolder and compares against the expected guest count
-6. Validates each file for corruption (checks file size, image headers, thumbnail availability)
-7. Prints a clear report showing what passed and what needs attention
+## Step 1: Install Python (if you don't have it)
 
-## Setup
+Open Terminal and check:
 
-### 1. Create a Google Cloud Project
+```
+python3 --version
+```
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project (or use an existing one)
-3. Enable the **Gmail API** and **Google Drive API**:
-   - Go to APIs & Services > Library
-   - Search for "Gmail API" and click Enable
-   - Search for "Google Drive API" and click Enable
+If you get a version number (3.8 or higher), you're good. If not, download Python from https://www.python.org/downloads/
 
-### 2. Create OAuth2 Credentials
+---
 
-1. Go to APIs & Services > Credentials
-2. Click "Create Credentials" > "OAuth client ID"
-3. If prompted, configure the OAuth consent screen first:
-   - Choose "External" user type
-   - Fill in the app name (e.g., "File Validator")
-   - Add your email as a test user
-4. For Application type, select **Desktop app**
-5. Download the JSON file and save it as `credentials.json` in this directory
+## Step 2: Set up Google Cloud (one-time, ~5 minutes)
 
-### 3. Install Dependencies
+This gives the tool permission to read your Gmail and Google Drive.
 
-```bash
+1. Open https://console.cloud.google.com/
+2. Sign in with the same Google account that receives the game emails
+3. At the top of the page, click the project dropdown and click **New Project**
+4. Name it anything (e.g. "File Validator") and click **Create**
+5. Wait a few seconds, then make sure your new project is selected in the top dropdown
+
+---
+
+## Step 3: Turn on Gmail and Drive APIs
+
+1. In the left sidebar, click **APIs & Services** then **Library**
+2. In the search bar, type **Gmail API**
+3. Click on it, then click the blue **Enable** button
+4. Go back to the Library (click the back arrow or left sidebar)
+5. Search for **Google Drive API**
+6. Click on it, then click the blue **Enable** button
+
+---
+
+## Step 4: Create your credentials file
+
+1. In the left sidebar, click **APIs & Services** then **Credentials**
+2. Click the blue **+ CREATE CREDENTIALS** button at the top
+3. Select **OAuth client ID**
+4. You'll likely be asked to **Configure Consent Screen** first:
+   - Click the button to configure it
+   - Choose **External** and click Create
+   - Fill in **App name** (e.g. "File Validator")
+   - Fill in **User support email** (your email)
+   - Scroll down, fill in **Developer contact email** (your email again)
+   - Click **Save and Continue** through the remaining steps (Scopes, Test Users, Summary)
+   - On the **Test Users** step, click **+ Add Users** and add your own email address
+   - Click **Save and Continue**, then **Back to Dashboard**
+5. Now go back to **Credentials** in the left sidebar
+6. Click **+ CREATE CREDENTIALS** > **OAuth client ID** again
+7. For **Application type**, choose **Desktop app**
+8. Name it anything and click **Create**
+9. Click **DOWNLOAD JSON** on the popup that appears
+10. Rename the downloaded file to **`credentials.json`**
+11. Move it into the `email-drive-validator` folder (same folder as `agent.py`)
+
+---
+
+## Step 5: Install the Python packages
+
+Open Terminal, navigate to this folder, and run:
+
+```
 cd email-drive-validator
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
-### 4. Configure (Optional)
+---
 
-Edit `config.py` to customize:
-- `GMAIL_SEARCH_QUERY` - the Gmail search query to find your game emails
-- `MAX_EMAILS_TO_CHECK` - how many recent emails to scan
-- `EXPECTED_SUBFOLDERS` - the subfolder names to look for
-- `MIN_FILE_SIZE_BYTES` - threshold below which files are flagged as suspicious
+## Step 6: Tell the tool what emails to search for
 
-### 5. Run
+Open `config.py` in any text editor and change this line to match your game emails:
 
-```bash
-# Check all recent matching emails
-python agent.py
-
-# Check a specific Drive folder directly
-python agent.py --folder-id YOUR_FOLDER_ID
-
-# Override the expected file count
-python agent.py --count 8
-
-# Use a custom email search query
-python agent.py --query "from:sender@example.com"
+```python
+GMAIL_SEARCH_QUERY = 'subject:"murder mystery" OR subject:"character" OR subject:"game"'
 ```
 
-On first run, a browser window will open asking you to authorize access to your Gmail and Drive. The authorization token is saved to `token.json` for future runs.
+For example, if all your game emails come from a specific address:
+```python
+GMAIL_SEARCH_QUERY = 'from:orders@yourgamecompany.com'
+```
 
-## File Validation Checks
+Or if they all have a specific subject:
+```python
+GMAIL_SEARCH_QUERY = 'subject:"your party game name"'
+```
 
-The agent performs these corruption checks on each file:
+Also update the subfolder names if yours are different:
+```python
+EXPECTED_SUBFOLDERS = ["character profiles", "character objectives"]
+```
 
-| Check | What it detects |
-|-------|----------------|
-| **File size** | Empty files (0 bytes) or suspiciously small files (<1KB) |
-| **Image headers** | Invalid magic bytes (wrong file format or corrupted data) |
-| **Thumbnail availability** | Missing Drive thumbnails (images that won't render) |
-| **Document size** | Documents too small to contain real content |
+---
 
-## Example Output
+## Step 7: Run it
+
+```
+python3 agent.py
+```
+
+**First time only:** A browser window will pop up asking you to sign in to Google and allow access. Click through and approve it. This only happens once - after that it remembers your login.
+
+The tool will then:
+1. Search your Gmail for matching emails
+2. Pull out the guest count and Drive folder link from each email
+3. Open each Drive folder
+4. Check the character profiles and character objectives subfolders
+5. Count the files and flag any that look corrupted
+
+---
+
+## Other ways to run it
+
+**Check a specific Drive folder directly** (skip the email step):
+```
+python3 agent.py --folder-id PASTE_FOLDER_ID_HERE
+```
+(The folder ID is the long string of letters/numbers at the end of the Drive folder URL)
+
+**Tell it exactly how many files to expect:**
+```
+python3 agent.py --count 8
+```
+
+**Combine both:**
+```
+python3 agent.py --folder-id PASTE_FOLDER_ID_HERE --count 10
+```
+
+---
+
+## What the output looks like
 
 ```
 ======================================================================
@@ -97,14 +155,29 @@ DRIVE FOLDER: 1ABC123...
       OK  butler.pdf (198.7 KB)
       BAD chef.pdf
           -> File is suspiciously small (512 bytes)
-      ...
 
   FOLDER: Character Objectives
     Files: 7 (expected 8) [MISMATCH]
-      ...
 
   SUMMARY:
     COUNT MISMATCH in 'Character Objectives': found 7, expected 8
     FILE ISSUE in 'Character Profiles/chef.pdf': File is suspiciously small
 ======================================================================
 ```
+
+- **OK** = file looks good
+- **BAD** = something is wrong (empty, corrupted, or can't load)
+- **MISMATCH** = wrong number of files vs. what the email said
+- **MISSING subfolder** = the expected folder wasn't found in Drive
+
+---
+
+## Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| "Missing credentials.json" | Make sure you completed Step 4 and the file is in this folder |
+| "Access denied" to a Drive folder | The Drive folder needs to be shared with (or owned by) the Google account you signed in with |
+| No emails found | Adjust the `GMAIL_SEARCH_QUERY` in `config.py` to match your emails (Step 6) |
+| "pip3 not found" | Try `pip` instead of `pip3`, or install Python first (Step 1) |
+| Browser doesn't open on first run | Copy the URL from the terminal and paste it into your browser manually |
