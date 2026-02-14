@@ -466,6 +466,13 @@
                 <input type="url" id="feedUrl" placeholder="https://stratechery.passport.online/feed/rss/..." />
                 <p class="hint">Your personal subscriber RSS URL from Stratechery. Stored locally in your browser only.</p>
                 <button class="feed-btn" onclick="saveFeedUrl()">Save & Fetch</button>
+
+                <hr style="border-color:#ff00ff; margin:20px 0;">
+                <h3>Manual Paste (if fetch fails)</h3>
+                <label for="pasteXml">Paste RSS XML here:</label>
+                <textarea id="pasteXml" rows="6" style="width:100%;box-sizing:border-box;background:#0a0a2e;border:2px solid #ff00ff;border-radius:5px;padding:10px;color:#ffdd00;font-family:inherit;font-size:0.85em;resize:vertical;" placeholder="Open the RSS URL in your browser, Select All, Copy, then paste here..."></textarea>
+                <p class="hint">Open your RSS feed URL directly in your browser, copy the page content (Ctrl+A, Ctrl+C), and paste it above.</p>
+                <button class="feed-btn" onclick="loadPastedFeed()">Load Pasted Feed</button>
             </div>
 
             <!-- Chat window -->
@@ -515,8 +522,10 @@
         const REFRESH_COOLDOWN = 60 * 60 * 1000;     // 1 hour
         const DEFAULT_FEED_URL = 'https://stratechery.passport.online/feed/rss/CKPS49J7qPJbN4eYcQDpR';
         const CORS_PROXIES = [
-            url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
-            url => 'https://corsproxy.io/?' + encodeURIComponent(url),
+            { name: 'allorigins-json', url: url => 'https://api.allorigins.win/get?url=' + encodeURIComponent(url), json: true },
+            { name: 'allorigins-raw', url: url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url), json: false },
+            { name: 'corsproxy', url: url => 'https://corsproxy.io/?' + encodeURIComponent(url), json: false },
+            { name: 'rss2json', url: url => 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(url), rss2json: true },
         ];
 
         // Stop words for search
@@ -661,56 +670,149 @@
             refreshBtn.disabled = true;
             refreshBtn.textContent = 'Fetching...';
 
-            let xml = null;
+            const errors = [];
+
+            // Try each CORS proxy
             for (let i = 0; i < CORS_PROXIES.length; i++) {
+                const proxy = CORS_PROXIES[i];
                 try {
-                    const proxyUrl = CORS_PROXIES[i](feedUrl);
+                    const proxyUrl = proxy.url(feedUrl);
+                    updateStatus('loading', 'Trying ' + proxy.name + '...');
+
                     const resp = await fetch(proxyUrl, {
-                        headers: { 'Accept': 'application/rss+xml, application/xml, text/xml, */*' }
+                        headers: { 'Accept': 'application/rss+xml, application/xml, text/xml, application/json, */*' }
                     });
-                    if (resp.ok) {
+
+                    if (!resp.ok) {
+                        errors.push(proxy.name + ': HTTP ' + resp.status);
+                        continue;
+                    }
+
+                    // rss2json returns JSON with parsed items
+                    if (proxy.rss2json) {
+                        const json = await resp.json();
+                        if (json.status === 'ok' && json.items && json.items.length > 0) {
+                            articles = parseRSS2JSON(json);
+                            if (articles.length > 0) {
+                                saveCache(articles);
+                                updateStatus('loaded', 'Feed loaded via ' + proxy.name, articles.length);
+                                updateRefreshButton();
+                                buildTopicChips();
+                                addBenMessage('Feed loaded with ' + articles.length + ' articles! Ask me anything about what Ben has been writing about.');
+                                return;
+                            }
+                        }
+                        errors.push(proxy.name + ': ' + (json.message || 'no items'));
+                        continue;
+                    }
+
+                    // allorigins JSON wraps content in {contents: "..."}
+                    let xml;
+                    if (proxy.json) {
+                        const json = await resp.json();
+                        xml = json.contents;
+                    } else {
                         xml = await resp.text();
-                        break;
+                    }
+
+                    if (xml && xml.length > 100) {
+                        articles = parseRSS(xml);
+                        if (articles.length > 0) {
+                            saveCache(articles);
+                            updateStatus('loaded', 'Feed loaded via ' + proxy.name, articles.length);
+                            updateRefreshButton();
+                            buildTopicChips();
+                            addBenMessage('Feed loaded with ' + articles.length + ' articles! Ask me anything about what Ben has been writing about.');
+                            return;
+                        }
+                        errors.push(proxy.name + ': XML fetched but 0 articles parsed');
+                    } else {
+                        errors.push(proxy.name + ': empty/short response');
                     }
                 } catch(e) {
-                    // Try next proxy
+                    errors.push(proxy.name + ': ' + (e.message || 'network error'));
                 }
             }
 
             // Fallback: try direct fetch (works if CORS headers are present)
-            if (!xml) {
-                try {
-                    const resp = await fetch(feedUrl);
-                    if (resp.ok) {
-                        xml = await resp.text();
+            try {
+                updateStatus('loading', 'Trying direct fetch...');
+                const resp = await fetch(feedUrl);
+                if (resp.ok) {
+                    const xml = await resp.text();
+                    if (xml && xml.length > 100) {
+                        articles = parseRSS(xml);
+                        if (articles.length > 0) {
+                            saveCache(articles);
+                            updateStatus('loaded', 'Feed loaded directly', articles.length);
+                            updateRefreshButton();
+                            buildTopicChips();
+                            addBenMessage('Feed loaded with ' + articles.length + ' articles! Ask me anything.');
+                            return;
+                        }
                     }
-                } catch(e) {
-                    // Direct fetch also failed
                 }
+                errors.push('direct: failed or empty');
+            } catch(e) {
+                errors.push('direct: ' + (e.message || 'blocked'));
             }
 
+            // All methods failed
+            updateStatus('empty', 'All fetch methods failed');
+            refreshBtn.textContent = 'Retry';
+            refreshBtn.disabled = false;
+
+            let errorDetail = '<strong>Could not fetch the RSS feed.</strong> All proxy methods failed:<br><br>';
+            errorDetail += '<div style="font-size:0.85em;color:#ff8888;">';
+            errors.forEach(function(e) { errorDetail += '&bull; ' + escapeHTML(e) + '<br>'; });
+            errorDetail += '</div><br>';
+            errorDetail += '<strong>Workaround:</strong> Open Settings, scroll down to "Manual Paste", open the RSS URL directly in your browser, copy the page source (Ctrl+U then Ctrl+A, Ctrl+C), and paste it in.';
+            addBenMessage(errorDetail);
+        };
+
+        // --- Parse RSS2JSON format ---
+        function parseRSS2JSON(json) {
+            const parsed = [];
+            (json.items || []).forEach(function(item) {
+                const textContent = stripHTML(item.content || item.description || '');
+                const descText = stripHTML(item.description || '');
+                if (item.title || textContent) {
+                    parsed.push({
+                        title: item.title || 'Untitled',
+                        description: descText.substring(0, 300),
+                        content: textContent,
+                        date: item.pubDate ? formatDate(item.pubDate) : '',
+                        link: item.link || '',
+                        categories: item.categories || [],
+                        paragraphs: splitIntoParagraphs(textContent)
+                    });
+                }
+            });
+            return parsed;
+        }
+
+        // --- Load pasted XML ---
+        window.loadPastedFeed = function() {
+            const pasteArea = document.getElementById('pasteXml');
+            const xml = pasteArea.value.trim();
             if (!xml) {
-                updateStatus('empty', 'Failed to fetch feed. Check URL or try later.');
-                refreshBtn.textContent = 'Retry';
-                refreshBtn.disabled = false;
-                addBenMessage('Could not fetch the RSS feed. This could be a CORS issue or the URL may be incorrect. Check Settings and try again.');
+                addBenMessage('Please paste the RSS feed XML content first.');
                 return;
             }
 
             articles = parseRSS(xml);
             if (articles.length === 0) {
-                updateStatus('empty', 'Feed loaded but no articles found');
-                refreshBtn.disabled = false;
-                refreshBtn.textContent = 'Refresh Feed';
-                addBenMessage('The feed was fetched but contained no recognizable articles. The URL might not be a valid RSS feed.');
+                addBenMessage('Could not parse any articles from the pasted content. Make sure you copied the full XML source of the RSS feed (try Ctrl+U in the browser to view source, then copy all).');
                 return;
             }
 
             saveCache(articles);
-            updateStatus('loaded', 'Feed loaded', articles.length);
+            updateStatus('loaded', 'Feed loaded from paste', articles.length);
             updateRefreshButton();
             buildTopicChips();
-            addBenMessage('Feed loaded with ' + articles.length + ' articles. Ask me anything about what I\'ve been writing about!');
+            setupPanel.classList.remove('visible');
+            pasteArea.value = '';
+            addBenMessage('Feed loaded with ' + articles.length + ' articles from pasted content! Ask me anything.');
         };
 
         // --- Parse RSS XML ---
