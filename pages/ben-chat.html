@@ -343,7 +343,7 @@
 
         .chat-input-area {
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             gap: 8px;
         }
 
@@ -356,6 +356,11 @@
             font-family: inherit;
             font-size: 15px;
             outline: none;
+            resize: none;
+            min-height: 22px;
+            max-height: 120px;
+            overflow-y: auto;
+            line-height: 1.4;
         }
 
         .chat-input::placeholder {
@@ -535,8 +540,8 @@
             <!-- Input area -->
             <div class="chat-input-wrapper">
                 <div class="chat-input-area">
-                    <input type="text" class="chat-input" id="chatInput" placeholder="Ask Ben anything..."
-                           onkeydown="if(event.key==='Enter')sendMessage()">
+                    <textarea class="chat-input" id="chatInput" rows="1" placeholder="Ask Ben anything..."
+                             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
                     <button class="send-btn" onclick="sendMessage()">Ask</button>
                 </div>
             </div>
@@ -1305,6 +1310,7 @@
             if (!text) return;
 
             chatInput.value = '';
+            chatInput.style.height = 'auto';
             addUserMessage(text);
 
             if (articles.length === 0) {
@@ -1375,6 +1381,12 @@
                 });
             }
         }
+
+        // --- Auto-resize textarea ---
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
 
         // --- Boot ---
         init();
