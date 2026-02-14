@@ -955,10 +955,10 @@
                     var title = item['wp-block-post-title'] || item['_container'] || '';
                     var link = item['wp-block-post-title_link'] || item['_container_link'] || '';
                     var date = item['wp-block-post-date'] || '';
-                    // Extract article body paragraphs
+                    // Extract article body content (p, h2, h3, blockquote, li, etc.)
                     var contentParts = [];
                     Object.keys(item).forEach(function(key) {
-                        if (key.match(/^p(_\d+)?$/) && item[key]) {
+                        if (key.match(/^(p|h[2-6]|blockquote|li|ol|ul|figcaption)(_\d+)?$/) && item[key]) {
                             contentParts.push(item[key]);
                         }
                     });
@@ -1477,9 +1477,22 @@
             searchResults.forEach(function(r, i) {
                 const article = r.article;
                 sources.push({ title: article.title, date: article.date });
-                // Use best paragraph + surrounding content, capped per article
-                let excerpt = r.bestParagraph || article.description || '';
-                if (excerpt.length > 1500) excerpt = excerpt.substring(0, 1500) + '...';
+
+                var excerpt;
+                if (r.titleMatch && article.content) {
+                    // Strong title match: send full article content so AI can summarize
+                    excerpt = article.content;
+                    var cap = 6000;
+                    if (excerpt.length > cap) excerpt = excerpt.substring(0, cap) + '...';
+                } else if (r.titleMatch && article.paragraphs && article.paragraphs.length > 0) {
+                    // Title match with paragraphs but no content field
+                    excerpt = article.paragraphs.join('\n\n');
+                    if (excerpt.length > 6000) excerpt = excerpt.substring(0, 6000) + '...';
+                } else {
+                    // Keyword match: use best paragraph or description
+                    excerpt = r.bestParagraph || article.content || article.description || '';
+                    if (excerpt.length > 1500) excerpt = excerpt.substring(0, 1500) + '...';
+                }
                 context += '\n\n---\nArticle ' + (i + 1) + ': "' + article.title + '" (' + article.date + ')\n' + excerpt;
             });
 
