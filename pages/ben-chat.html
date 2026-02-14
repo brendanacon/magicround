@@ -911,9 +911,13 @@
                     topArrow.style.display = 'none';
                     return;
                 }
-                // Sort by date descending
+                // Sort by date descending (parse into Date objects for correct chronological order)
                 all.sort(function(a, b) {
-                    return (b.date || '').localeCompare(a.date || '');
+                    var da = a.date ? new Date(a.date).getTime() : 0;
+                    var db = b.date ? new Date(b.date).getTime() : 0;
+                    if (isNaN(da)) da = 0;
+                    if (isNaN(db)) db = 0;
+                    return db - da;
                 });
                 var listHTML = all.map(function(a) {
                     var title = escapeHTML(a.title || 'Untitled');
