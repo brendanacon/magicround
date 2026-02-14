@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ask Ben Thompson - NRL Magic Round 2025</title>
+    <link rel="icon" type="image/webp" href="../BC/wests-tigers-2005-nrl-retro-jersey-804.webp">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 5px solid #FFA500;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #FFA500, 0 0 20px #FFA500, 0 0 30px #FFA500;
+            position: relative;
+            z-index: 1;
+        }
+
+        .chat-section {
+            margin: 20px 0;
+        }
+
+        .feed-status {
+            background: linear-gradient(45deg, #000080, #4B0082);
+            border: 2px solid #ff00ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .feed-status-info {
+            color: #00ff00;
+            font-size: 0.9em;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .feed-status-info .status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .feed-status-info .status-dot.loaded {
+            background: #00ff00;
+            box-shadow: 0 0 6px #00ff00;
+        }
+
+        .feed-status-info .status-dot.empty {
+            background: #ff4444;
+            box-shadow: 0 0 6px #ff4444;
+        }
+
+        .feed-status-info .status-dot.loading {
+            background: #ffff00;
+            box-shadow: 0 0 6px #ffff00;
+            animation: blink 0.8s infinite;
+        }
+
+        .feed-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .feed-btn {
+            background: linear-gradient(45deg, #ff0000, #ff00ff);
+            color: white;
+            border: 2px outset #ffffff;
+            padding: 8px 14px;
+            font-size: 0.85em;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            text-shadow: 1px 1px #000;
+            transition: transform 0.2s;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+        }
+
+        .feed-btn:hover { transform: scale(1.05); }
+        .feed-btn:active { border-style: inset; }
+        .feed-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .feed-btn.secondary {
+            background: linear-gradient(45deg, #333, #555);
+        }
+
+        .chat-window {
+            background: #0a0a2e;
+            border: 3px solid #ff00ff;
+            border-radius: 10px;
+            height: 450px;
+            overflow-y: auto;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: inset 0 0 20px rgba(255, 0, 255, 0.1);
+            scroll-behavior: smooth;
+        }
+
+        .chat-window::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .chat-window::-webkit-scrollbar-track {
+            background: #0a0a2e;
+        }
+
+        .chat-window::-webkit-scrollbar-thumb {
+            background: #ff00ff;
+            border-radius: 5px;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-message.user {
+            text-align: right;
+        }
+
+        .chat-message.user .msg-bubble {
+            background: linear-gradient(45deg, #1a1a5e, #2a2a7e);
+            border: 2px solid #00aaff;
+            display: inline-block;
+            text-align: left;
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 12px 12px 2px 12px;
+            color: #00ccff;
+            text-shadow: 0 0 3px rgba(0, 204, 255, 0.3);
+        }
+
+        .chat-message.ben .msg-bubble {
+            background: linear-gradient(45deg, #1a0a3e, #2a1a5e);
+            border: 2px solid #ff00ff;
+            display: inline-block;
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 12px 12px 12px 2px;
+            color: #ffdd00;
+            text-shadow: 0 0 3px rgba(255, 221, 0, 0.3);
+        }
+
+        .chat-message .msg-sender {
+            font-size: 0.75em;
+            margin-bottom: 4px;
+            opacity: 0.7;
+        }
+
+        .chat-message.user .msg-sender {
+            color: #00aaff;
+        }
+
+        .chat-message.ben .msg-sender {
+            color: #ff00ff;
+        }
+
+        .msg-bubble .article-ref {
+            display: block;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 0, 255, 0.3);
+            font-size: 0.8em;
+            color: #ff88ff;
+        }
+
+        .msg-bubble .article-title {
+            color: #00ff00;
+            text-shadow: 0 0 3px rgba(0, 255, 0, 0.3);
+            font-weight: bold;
+        }
+
+        .msg-bubble .article-date {
+            color: #888;
+            font-size: 0.85em;
+        }
+
+        .msg-bubble .excerpt {
+            margin-top: 6px;
+            line-height: 1.5;
+            font-size: 0.95em;
+        }
+
+        .msg-bubble .excerpt mark {
+            background: rgba(255, 255, 0, 0.3);
+            color: #ffff00;
+            border-radius: 2px;
+            padding: 0 2px;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: #0a0a2e;
+            border: 3px solid #ff00ff;
+            border-radius: 8px;
+            padding: 12px 15px;
+            color: #ffdd00;
+            font-family: inherit;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .chat-input:focus {
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .chat-input::placeholder {
+            color: rgba(255, 221, 0, 0.4);
+        }
+
+        .send-btn {
+            background: linear-gradient(45deg, #ff0000, #ff00ff);
+            color: white;
+            border: 3px outset #ffffff;
+            padding: 12px 20px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            text-shadow: 1px 1px #000;
+            transition: transform 0.2s;
+            min-width: 80px;
+        }
+
+        .send-btn:hover { transform: scale(1.05); }
+        .send-btn:active { border-style: inset; }
+        .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .setup-panel {
+            background: linear-gradient(45deg, #1a0a3e, #0a0a2e);
+            border: 3px solid #ffff00;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .setup-panel.visible { display: block; }
+
+        .setup-panel h3 {
+            color: #ffff00;
+            text-shadow: 0 0 10px #ffff00;
+            margin-bottom: 15px;
+        }
+
+        .setup-panel label {
+            color: #00ff00;
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.9em;
+        }
+
+        .setup-panel input {
+            width: 100%;
+            box-sizing: border-box;
+            background: #0a0a2e;
+            border: 2px solid #ff00ff;
+            border-radius: 5px;
+            padding: 10px;
+            color: #ffdd00;
+            font-family: inherit;
+            font-size: 0.95em;
+            margin-bottom: 12px;
+        }
+
+        .setup-panel .hint {
+            color: #888;
+            font-size: 0.8em;
+            margin-top: -8px;
+            margin-bottom: 12px;
+        }
+
+        .topic-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 10px 0;
+        }
+
+        .topic-chip {
+            background: linear-gradient(45deg, #1a1a5e, #2a2a7e);
+            border: 2px solid #00aaff;
+            color: #00ccff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .topic-chip:hover {
+            background: linear-gradient(45deg, #2a2a7e, #3a3a9e);
+            transform: scale(1.05);
+            box-shadow: 0 0 8px rgba(0, 170, 255, 0.4);
+        }
+
+        .rainbow-text {
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: rainbow 3s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes rainbow {
+            0% { color: #ff0000; }
+            20% { color: #ff00ff; }
+            40% { color: #0000ff; }
+            60% { color: #00ffff; }
+            80% { color: #00ff00; }
+            100% { color: #ff0000; }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .how-it-works {
+            background: linear-gradient(45deg, #000080, #4B0082);
+            border: 2px solid #ff00ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #ddd;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .how-it-works summary {
+            color: #00ff00;
+            cursor: pointer;
+            font-weight: bold;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .how-it-works ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .how-it-works li {
+            margin: 5px 0;
+        }
+
+        .articles-count {
+            color: #ff00ff;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+                margin: 10px;
+            }
+
+            .rainbow-text {
+                font-size: 1.5em;
+            }
+
+            .chat-window {
+                height: 350px;
+            }
+
+            .chat-message.user .msg-bubble,
+            .chat-message.ben .msg-bubble {
+                max-width: 90%;
+            }
+
+            .chat-input-area {
+                flex-direction: column;
+            }
+
+            .send-btn {
+                width: 100%;
+            }
+
+            .feed-status {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <marquee behavior="alternate" scrollamount="8">
+                <h1>Ask Ben Thompson</h1>
+            </marquee>
+            <div class="flame-divider"></div>
+        </header>
+
+        <nav>
+            <div class="nav-button"><a href="../index.html">Home</a></div>
+            <div class="nav-button"><a href="weekend-details.html">Weekend Details</a></div>
+            <div class="nav-button"><a href="team-list.html">Team List</a></div>
+            <div class="nav-button"><a href="see-it-sip-it.html">See it, Sip it</a></div>
+            <div class="nav-button"><a href="spin-wheel.html">Spin the Wheel</a></div>
+            <div class="nav-button"><a href="word-game.html">Secret Word Game</a></div>
+            <div class="nav-button"><a href="fun-facts.html">Fun Facts</a></div>
+        </nav>
+
+        <div class="chat-section">
+            <h2 class="rainbow-text" style="text-align:center;">Chat with Stratechery</h2>
+
+            <details class="how-it-works">
+                <summary>How does this work?</summary>
+                <ul>
+                    <li>This page fetches Ben Thompson's Stratechery RSS feed and caches it locally in your browser.</li>
+                    <li>When you ask a question, it searches through the cached articles to find relevant passages.</li>
+                    <li>Responses are actual excerpts from Ben's writing - his real words and views.</li>
+                    <li>The feed is cached for <strong>6 hours</strong> to be respectful of the service. You can manually refresh once per hour.</li>
+                    <li>Your RSS feed URL and all data stays in your browser only - nothing is sent to any server.</li>
+                </ul>
+            </details>
+
+            <!-- Feed status bar -->
+            <div class="feed-status">
+                <div class="feed-status-info">
+                    <span class="status-dot empty" id="statusDot"></span>
+                    <span id="statusText">No feed loaded</span>
+                    <span id="articleCount"></span>
+                </div>
+                <div class="feed-actions">
+                    <button class="feed-btn" id="refreshBtn" onclick="refreshFeed()">Refresh Feed</button>
+                    <button class="feed-btn secondary" id="settingsBtn" onclick="toggleSetup()">Settings</button>
+                </div>
+            </div>
+
+            <!-- Setup panel (hidden by default, shown if no URL configured) -->
+            <div class="setup-panel" id="setupPanel">
+                <h3>Feed Setup</h3>
+                <label for="feedUrl">Stratechery RSS Feed URL:</label>
+                <input type="url" id="feedUrl" placeholder="https://stratechery.passport.online/feed/rss/..." />
+                <p class="hint">Your personal subscriber RSS URL from Stratechery. Stored locally in your browser only.</p>
+                <button class="feed-btn" onclick="saveFeedUrl()">Save & Fetch</button>
+            </div>
+
+            <!-- Chat window -->
+            <div class="chat-window" id="chatWindow">
+                <div class="chat-message ben">
+                    <div class="msg-sender">Stratechery Bot</div>
+                    <div class="msg-bubble">
+                        Welcome! I'll search through Ben Thompson's Stratechery articles to answer your questions using his actual words and analysis.
+                        <br><br>
+                        Load the RSS feed using the Refresh button above (you may need to set your feed URL in Settings first), then ask me anything about tech, strategy, Apple, Google, AI, regulation, or whatever Ben has been writing about.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suggested topics -->
+            <div class="topic-chips" id="topicChips">
+                <button class="topic-chip" onclick="askQuestion(this.textContent)">What does Ben think about AI?</button>
+                <button class="topic-chip" onclick="askQuestion(this.textContent)">Apple's strategy</button>
+                <button class="topic-chip" onclick="askQuestion(this.textContent)">Google and antitrust</button>
+                <button class="topic-chip" onclick="askQuestion(this.textContent)">aggregation theory</button>
+            </div>
+
+            <!-- Input area -->
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Ask about Ben's views on tech, strategy, AI..."
+                       onkeydown="if(event.key==='Enter')sendMessage()">
+                <button class="send-btn" onclick="sendMessage()">Ask</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>Best viewed in Internet Explorer 6.0 or Netscape Navigator</p>
+            <p>&copy; 2025 NRL Magic Round - Made with lots of animations</p>
+            <div class="construction-banner">UNDER CONSTRUCTION</div>
+        </footer>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // --- Constants ---
+        const CACHE_KEY = 'ben-chat-feed-cache';
+        const URL_KEY = 'ben-chat-feed-url';
+        const LAST_FETCH_KEY = 'ben-chat-last-fetch';
+        const CACHE_TTL = 6 * 60 * 60 * 1000;       // 6 hours
+        const REFRESH_COOLDOWN = 60 * 60 * 1000;     // 1 hour
+        const DEFAULT_FEED_URL = 'https://stratechery.passport.online/feed/rss/CKPS49J7qPJbN4eYcQDpR';
+        const CORS_PROXIES = [
+            url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+            url => 'https://corsproxy.io/?' + encodeURIComponent(url),
+        ];
+
+        // Stop words for search
+        const STOP_WORDS = new Set([
+            'a','an','the','is','are','was','were','be','been','being',
+            'have','has','had','do','does','did','will','would','could',
+            'should','may','might','shall','can','need','dare','ought',
+            'used','to','of','in','for','on','with','at','by','from',
+            'as','into','through','during','before','after','above',
+            'below','between','out','off','over','under','again',
+            'further','then','once','here','there','when','where',
+            'why','how','all','both','each','few','more','most',
+            'other','some','such','no','nor','not','only','own',
+            'same','so','than','too','very','just','because','but',
+            'and','or','if','while','about','up','what','which',
+            'who','whom','this','that','these','those','am','i',
+            'me','my','we','our','you','your','he','him','his',
+            'she','her','it','its','they','them','their','ben',
+            'thompson','think','does','say','said','like','also',
+            'really','much','many','get','got','make','thing','things',
+            'going','know','dont','want','way','one','well'
+        ]);
+
+        let articles = [];
+
+        // --- DOM refs ---
+        const chatWindow = document.getElementById('chatWindow');
+        const chatInput = document.getElementById('chatInput');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const articleCount = document.getElementById('articleCount');
+        const setupPanel = document.getElementById('setupPanel');
+        const feedUrlInput = document.getElementById('feedUrl');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const topicChips = document.getElementById('topicChips');
+
+        // --- Init ---
+        function init() {
+            // Set default URL if none saved
+            if (!localStorage.getItem(URL_KEY)) {
+                localStorage.setItem(URL_KEY, DEFAULT_FEED_URL);
+            }
+
+            const savedUrl = localStorage.getItem(URL_KEY);
+            feedUrlInput.value = savedUrl;
+
+            // Try loading cached feed
+            const cached = loadCache();
+            if (cached && cached.length > 0) {
+                articles = cached;
+                updateStatus('loaded', articles.length + ' articles cached', articles.length);
+                buildTopicChips();
+            } else {
+                updateStatus('empty', 'Click Refresh to load the feed');
+            }
+
+            updateRefreshButton();
+        }
+
+        // --- Cache ---
+        function loadCache() {
+            try {
+                const raw = localStorage.getItem(CACHE_KEY);
+                if (!raw) return null;
+                const data = JSON.parse(raw);
+                return data.articles || null;
+            } catch(e) {
+                return null;
+            }
+        }
+
+        function saveCache(arts) {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ articles: arts }));
+            localStorage.setItem(LAST_FETCH_KEY, Date.now().toString());
+        }
+
+        function getCacheAge() {
+            const last = parseInt(localStorage.getItem(LAST_FETCH_KEY) || '0');
+            return Date.now() - last;
+        }
+
+        function isCacheValid() {
+            return getCacheAge() < CACHE_TTL;
+        }
+
+        function canRefresh() {
+            return getCacheAge() >= REFRESH_COOLDOWN;
+        }
+
+        function updateRefreshButton() {
+            const age = getCacheAge();
+            if (age < REFRESH_COOLDOWN) {
+                const remaining = Math.ceil((REFRESH_COOLDOWN - age) / 60000);
+                refreshBtn.disabled = true;
+                refreshBtn.textContent = 'Cooldown: ' + remaining + 'm';
+                setTimeout(updateRefreshButton, 60000);
+            } else {
+                refreshBtn.disabled = false;
+                refreshBtn.textContent = 'Refresh Feed';
+            }
+        }
+
+        // --- Status ---
+        function updateStatus(state, text, count) {
+            statusDot.className = 'status-dot ' + state;
+            statusText.textContent = text;
+            if (count !== undefined) {
+                articleCount.textContent = ' (' + count + ' articles)';
+            } else {
+                articleCount.textContent = '';
+            }
+        }
+
+        // --- Setup ---
+        window.toggleSetup = function() {
+            setupPanel.classList.toggle('visible');
+        };
+
+        window.saveFeedUrl = function() {
+            const url = feedUrlInput.value.trim();
+            if (!url) return;
+            localStorage.setItem(URL_KEY, url);
+            setupPanel.classList.remove('visible');
+            refreshFeed();
+        };
+
+        // --- Fetch RSS ---
+        window.refreshFeed = async function() {
+            const feedUrl = localStorage.getItem(URL_KEY);
+            if (!feedUrl) {
+                setupPanel.classList.add('visible');
+                addBenMessage('Please set your Stratechery RSS feed URL in Settings first.');
+                return;
+            }
+
+            if (!canRefresh() && articles.length > 0) {
+                addBenMessage('Feed was refreshed recently. Please wait for the cooldown to expire.');
+                return;
+            }
+
+            updateStatus('loading', 'Fetching feed...');
+            refreshBtn.disabled = true;
+            refreshBtn.textContent = 'Fetching...';
+
+            let xml = null;
+            for (let i = 0; i < CORS_PROXIES.length; i++) {
+                try {
+                    const proxyUrl = CORS_PROXIES[i](feedUrl);
+                    const resp = await fetch(proxyUrl, {
+                        headers: { 'Accept': 'application/rss+xml, application/xml, text/xml, */*' }
+                    });
+                    if (resp.ok) {
+                        xml = await resp.text();
+                        break;
+                    }
+                } catch(e) {
+                    // Try next proxy
+                }
+            }
+
+            // Fallback: try direct fetch (works if CORS headers are present)
+            if (!xml) {
+                try {
+                    const resp = await fetch(feedUrl);
+                    if (resp.ok) {
+                        xml = await resp.text();
+                    }
+                } catch(e) {
+                    // Direct fetch also failed
+                }
+            }
+
+            if (!xml) {
+                updateStatus('empty', 'Failed to fetch feed. Check URL or try later.');
+                refreshBtn.textContent = 'Retry';
+                refreshBtn.disabled = false;
+                addBenMessage('Could not fetch the RSS feed. This could be a CORS issue or the URL may be incorrect. Check Settings and try again.');
+                return;
+            }
+
+            articles = parseRSS(xml);
+            if (articles.length === 0) {
+                updateStatus('empty', 'Feed loaded but no articles found');
+                refreshBtn.disabled = false;
+                refreshBtn.textContent = 'Refresh Feed';
+                addBenMessage('The feed was fetched but contained no recognizable articles. The URL might not be a valid RSS feed.');
+                return;
+            }
+
+            saveCache(articles);
+            updateStatus('loaded', 'Feed loaded', articles.length);
+            updateRefreshButton();
+            buildTopicChips();
+            addBenMessage('Feed loaded with ' + articles.length + ' articles. Ask me anything about what I\'ve been writing about!');
+        };
+
+        // --- Parse RSS XML ---
+        function parseRSS(xml) {
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(xml, 'text/xml');
+                const items = doc.querySelectorAll('item');
+                const parsed = [];
+
+                items.forEach(function(item) {
+                    const title = getTagText(item, 'title');
+                    const description = getTagText(item, 'description');
+                    const contentEncoded = getTagText(item, 'content\\:encoded') || getTagText(item, 'content:encoded');
+                    const pubDate = getTagText(item, 'pubDate');
+                    const link = getTagText(item, 'link');
+                    const categories = [];
+                    item.querySelectorAll('category').forEach(function(cat) {
+                        categories.push(cat.textContent.trim());
+                    });
+
+                    // Get best available content, strip HTML
+                    const rawContent = contentEncoded || description || '';
+                    const textContent = stripHTML(rawContent);
+                    const descText = stripHTML(description || '');
+
+                    if (title || textContent) {
+                        parsed.push({
+                            title: title || 'Untitled',
+                            description: descText.substring(0, 300),
+                            content: textContent,
+                            date: pubDate ? formatDate(pubDate) : '',
+                            link: link || '',
+                            categories: categories,
+                            // Pre-compute paragraphs for search
+                            paragraphs: splitIntoParagraphs(textContent)
+                        });
+                    }
+                });
+
+                return parsed;
+            } catch(e) {
+                return [];
+            }
+        }
+
+        function getTagText(parent, tagName) {
+            // Handle namespaced tags
+            const el = parent.querySelector(tagName) || parent.getElementsByTagName(tagName)[0];
+            if (!el) return '';
+            return el.textContent || el.innerHTML || '';
+        }
+
+        function stripHTML(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            return div.textContent || div.innerText || '';
+        }
+
+        function formatDate(dateStr) {
+            try {
+                const d = new Date(dateStr);
+                return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            } catch(e) {
+                return dateStr;
+            }
+        }
+
+        function splitIntoParagraphs(text) {
+            return text.split(/\n\n+|\.\s+/)
+                .map(function(p) { return p.trim(); })
+                .filter(function(p) { return p.length > 40; });
+        }
+
+        // --- Search Engine ---
+        function extractKeywords(query) {
+            return query.toLowerCase()
+                .replace(/[^\w\s]/g, '')
+                .split(/\s+/)
+                .filter(function(w) { return w.length > 1 && !STOP_WORDS.has(w); });
+        }
+
+        function scoreParagraph(paragraph, keywords) {
+            const lower = paragraph.toLowerCase();
+            let score = 0;
+            let matched = 0;
+
+            keywords.forEach(function(kw) {
+                const regex = new RegExp('\\b' + escapeRegex(kw) + '\\w*', 'gi');
+                const matches = lower.match(regex);
+                if (matches) {
+                    score += matches.length;
+                    matched++;
+                }
+            });
+
+            // Bonus for matching more distinct keywords
+            if (matched > 1) {
+                score *= (1 + matched * 0.3);
+            }
+
+            // Slight penalty for very long paragraphs (prefer focused content)
+            if (paragraph.length > 1000) {
+                score *= 0.9;
+            }
+
+            return { score: score, matched: matched };
+        }
+
+        function escapeRegex(s) {
+            return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function search(query) {
+            if (articles.length === 0) return [];
+
+            const keywords = extractKeywords(query);
+            if (keywords.length === 0) return [];
+
+            const results = [];
+
+            articles.forEach(function(article) {
+                // Score the title
+                const titleScore = scoreParagraph(article.title, keywords);
+
+                // Score each paragraph
+                let bestPara = null;
+                let bestParaScore = 0;
+
+                article.paragraphs.forEach(function(para) {
+                    const ps = scoreParagraph(para, keywords);
+                    if (ps.score > bestParaScore) {
+                        bestParaScore = ps.score;
+                        bestPara = para;
+                    }
+                });
+
+                // Also check description
+                const descScore = scoreParagraph(article.description, keywords);
+
+                const totalScore = (titleScore.score * 3) + bestParaScore + descScore.score;
+
+                if (totalScore > 0) {
+                    results.push({
+                        article: article,
+                        score: totalScore,
+                        bestParagraph: bestPara || article.description,
+                        titleMatch: titleScore.score > 0
+                    });
+                }
+            });
+
+            // Sort by score descending
+            results.sort(function(a, b) { return b.score - a.score; });
+
+            return results.slice(0, 5);
+        }
+
+        function highlightKeywords(text, query) {
+            const keywords = extractKeywords(query);
+            let result = escapeHTML(text);
+
+            keywords.forEach(function(kw) {
+                const regex = new RegExp('(' + escapeRegex(kw) + '\\w*)', 'gi');
+                result = result.replace(regex, '<mark>$1</mark>');
+            });
+
+            return result;
+        }
+
+        function escapeHTML(s) {
+            const div = document.createElement('div');
+            div.textContent = s;
+            return div.innerHTML;
+        }
+
+        // --- Chat Messages ---
+        function addUserMessage(text) {
+            const div = document.createElement('div');
+            div.className = 'chat-message user';
+            div.innerHTML = '<div class="msg-sender">You</div><div class="msg-bubble">' + escapeHTML(text) + '</div>';
+            chatWindow.appendChild(div);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function addBenMessage(html) {
+            const div = document.createElement('div');
+            div.className = 'chat-message ben';
+            div.innerHTML = '<div class="msg-sender">Stratechery Bot</div><div class="msg-bubble">' + html + '</div>';
+            chatWindow.appendChild(div);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function formatSearchResult(result, query) {
+            let excerpt = result.bestParagraph;
+            // Trim to reasonable length
+            if (excerpt.length > 500) {
+                // Try to find the most relevant window
+                const keywords = extractKeywords(query);
+                let bestStart = 0;
+                let bestCount = 0;
+                const windowSize = 400;
+
+                for (let i = 0; i < excerpt.length - windowSize; i += 50) {
+                    const window = excerpt.substring(i, i + windowSize).toLowerCase();
+                    let count = 0;
+                    keywords.forEach(function(kw) {
+                        const regex = new RegExp(escapeRegex(kw), 'gi');
+                        const matches = window.match(regex);
+                        if (matches) count += matches.length;
+                    });
+                    if (count > bestCount) {
+                        bestCount = count;
+                        bestStart = i;
+                    }
+                }
+
+                const start = Math.max(0, bestStart);
+                const end = Math.min(excerpt.length, start + windowSize);
+                excerpt = (start > 0 ? '...' : '') + excerpt.substring(start, end) + (end < excerpt.length ? '...' : '');
+            }
+
+            const highlighted = highlightKeywords(excerpt, query);
+
+            return '<div class="excerpt">' + highlighted + '</div>' +
+                   '<div class="article-ref">' +
+                   '<span class="article-title">' + escapeHTML(result.article.title) + '</span>' +
+                   (result.article.date ? ' <span class="article-date">(' + escapeHTML(result.article.date) + ')</span>' : '') +
+                   '</div>';
+        }
+
+        // --- Send Message ---
+        window.sendMessage = function() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            chatInput.value = '';
+            addUserMessage(text);
+
+            if (articles.length === 0) {
+                addBenMessage('I don\'t have any articles loaded yet. Please load the RSS feed first using the Refresh button above, or set your feed URL in Settings.');
+                return;
+            }
+
+            const results = search(text);
+
+            if (results.length === 0) {
+                addBenMessage('I couldn\'t find any articles matching that topic in the current feed. Try different keywords or browse the topics below.');
+                return;
+            }
+
+            // Build response
+            let response = '';
+
+            if (results.length === 1) {
+                response = 'Here\'s what I found on that topic:<br><br>';
+                response += formatSearchResult(results[0], text);
+            } else {
+                response = 'I found <strong>' + results.length + ' relevant articles</strong>. Here are the most relevant passages:<br><br>';
+                results.forEach(function(r, i) {
+                    if (i > 0) response += '<br><br>';
+                    response += formatSearchResult(r, text);
+                });
+            }
+
+            addBenMessage(response);
+        };
+
+        window.askQuestion = function(text) {
+            chatInput.value = text;
+            sendMessage();
+        };
+
+        // --- Build dynamic topic chips based on article content ---
+        function buildTopicChips() {
+            // Count category/keyword frequency across articles
+            const topicFreq = {};
+            articles.forEach(function(a) {
+                a.categories.forEach(function(cat) {
+                    const key = cat.toLowerCase().trim();
+                    if (key.length > 2 && key.length < 30) {
+                        topicFreq[key] = (topicFreq[key] || 0) + 1;
+                    }
+                });
+            });
+
+            // Sort by frequency
+            const sorted = Object.keys(topicFreq).sort(function(a, b) { return topicFreq[b] - topicFreq[a]; });
+            const topTopics = sorted.slice(0, 6);
+
+            if (topTopics.length > 0) {
+                topicChips.innerHTML = '';
+                topTopics.forEach(function(topic) {
+                    const btn = document.createElement('button');
+                    btn.className = 'topic-chip';
+                    btn.textContent = topic;
+                    btn.onclick = function() { askQuestion(topic); };
+                    topicChips.appendChild(btn);
+                });
+            }
+            // If no categories found, keep the default chips
+        }
+
+        // --- Boot ---
+        init();
+    })();
+    </script>
+</body>
+</html>
