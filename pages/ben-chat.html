@@ -751,6 +751,23 @@
                         if (!getReq.result) {
                             store.put(article);
                             added++;
+                        } else {
+                            // Backfill missing content/paragraphs on existing records
+                            var existing = getReq.result;
+                            var updated = false;
+                            if (!existing.paragraphs && article.paragraphs) {
+                                existing.paragraphs = article.paragraphs;
+                                updated = true;
+                            }
+                            if (!existing.description && article.description) {
+                                existing.description = article.description;
+                                updated = true;
+                            }
+                            if (!existing.content && article.content) {
+                                existing.content = article.content;
+                                updated = true;
+                            }
+                            if (updated) store.put(existing);
                         }
                     };
                 });
@@ -946,7 +963,12 @@
                         }
                     });
                     var result = { title: title, link: link, date: date };
-                    if (contentParts.length > 0) result.content = contentParts.join('\n\n');
+                    if (contentParts.length > 0) {
+                        var fullText = contentParts.join('\n\n');
+                        result.content = fullText;
+                        result.description = fullText.substring(0, 300);
+                        result.paragraphs = splitIntoParagraphs(fullText);
+                    }
                     return result;
                 }
                 return item;
