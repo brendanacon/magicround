@@ -522,11 +522,10 @@
         const REFRESH_COOLDOWN = 5 * 60 * 1000;        // 5 minutes
         const DEFAULT_FEED_URL = 'https://stratechery.passport.online/feed/rss/CKPS49J7qPJbN4eYcQDpR';
         const CORS_PROXIES = [
+            { name: 'cf-worker', url: url => 'https://rss-proxy.brendanaconnaughton.workers.dev/?url=' + encodeURIComponent(url), json: false },
             { name: 'allorigins-json', url: url => 'https://api.allorigins.win/get?url=' + encodeURIComponent(url), json: true },
             { name: 'allorigins-raw', url: url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url), json: false },
             { name: 'corsproxy', url: url => 'https://corsproxy.io/?' + encodeURIComponent(url), json: false },
-            { name: 'codetabs', url: url => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url), json: false },
-            { name: 'thingproxy', url: url => 'https://thingproxy.freeboard.io/fetch/' + url, json: false },
             { name: 'rss2json', url: url => 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(url), rss2json: true },
         ];
 
