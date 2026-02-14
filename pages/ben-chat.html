@@ -40,15 +40,14 @@
             width: 96px;
             height: 96px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #4F46E5, #7C3AED);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            font-weight: 700;
             margin: 0 auto 20px;
-            letter-spacing: 1px;
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .profile-header h1 {
@@ -181,7 +180,7 @@
 
         .setup-panel input[type="url"]:focus,
         .setup-panel input[type="password"]:focus {
-            border-color: #4F46E5;
+            border-color: #FAA634;
         }
 
         .setup-panel .hint {
@@ -210,7 +209,7 @@
         }
 
         .setup-panel textarea:focus {
-            border-color: #4F46E5;
+            border-color: #FAA634;
         }
 
         /* --- Chat Window --- */
@@ -304,8 +303,16 @@
         }
 
         .msg-bubble .article-title {
-            color: #4F46E5;
+            color: #FAA634;
             font-weight: 600;
+        }
+
+        a.article-title {
+            text-decoration: none;
+        }
+
+        a.article-title:hover {
+            text-decoration: underline;
         }
 
         .msg-bubble .article-date {
@@ -320,8 +327,8 @@
         }
 
         .msg-bubble .excerpt mark {
-            background: rgba(79, 70, 229, 0.12);
-            color: #4F46E5;
+            background: rgba(250, 166, 52, 0.12);
+            color: #FAA634;
             border-radius: 2px;
             padding: 0 2px;
         }
@@ -360,13 +367,13 @@
             padding: 0;
         }
         .msg-bubble blockquote {
-            border-left: 3px solid rgba(79,70,229,0.4);
+            border-left: 3px solid rgba(250,166,52,0.4);
             padding-left: 10px;
             margin: 6px 0;
             color: #555;
         }
         .msg-bubble a {
-            color: #4F46E5;
+            color: #FAA634;
             text-decoration: underline;
         }
         .msg-bubble hr {
@@ -389,8 +396,8 @@
         }
 
         .chat-input-wrapper:focus-within {
-            border-color: #4F46E5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08);
+            border-color: #FAA634;
+            box-shadow: 0 0 0 3px rgba(250, 166, 52, 0.08);
         }
 
         .chat-input-area {
@@ -420,7 +427,7 @@
         }
 
         .send-btn {
-            background: #4F46E5;
+            background: #FAA634;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -433,7 +440,7 @@
             white-space: nowrap;
         }
 
-        .send-btn:hover { background: #4338CA; }
+        .send-btn:hover { background: #E8922A; }
         .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
         /* --- Topic Chips --- */
@@ -492,7 +499,7 @@
         }
 
         .articles-count {
-            color: #4F46E5;
+            color: #FAA634;
             font-weight: 600;
         }
 
@@ -527,7 +534,7 @@
             white-space: nowrap;
         }
         .archive-item a:hover {
-            color: #4F46E5;
+            color: #FAA634;
         }
         .archive-item .archive-date {
             color: #999;
@@ -561,14 +568,16 @@
     <div class="page-wrapper">
         <!-- Profile Header -->
         <div class="profile-header">
-            <div class="avatar">BT</div>
+            <div class="avatar"><img src="https://raw.githubusercontent.com/brendanacon/magicround/refs/heads/main/ChatGPT%20Image%20Feb%2014%2C%202026%2C%2007_38_19%20PM.png" alt="Ben Thompson"></div>
             <h1>Ben Thompson</h1>
             <p class="tagline">Sharp analysis on tech strategy, platforms, and the business of technology</p>
-            <div class="feed-status-pill">
+            <div class="feed-status-pill" id="topPill" style="cursor:pointer;" onclick="toggleTopArticleList()">
                 <span class="status-dot empty" id="statusDot"></span>
                 <span id="statusText">No feed loaded</span>
                 <span id="articleCount"></span>
+                <span class="expand-arrow" id="topPillArrow" style="display:none;">&#9654;</span>
             </div>
+            <div id="topArticleList" style="display:none;max-height:320px;overflow-y:auto;margin-top:10px;border:1px solid #eee;border-radius:8px;background:#fff;text-align:left;"></div>
             <div class="feed-actions">
                 <button class="feed-btn primary" id="refreshBtn" onclick="refreshFeed()">Refresh Feed</button>
                 <button class="feed-btn" id="settingsBtn" onclick="toggleSetup()">Settings</button>
@@ -695,6 +704,7 @@
 
         let articles = [];
         let db = null;
+        let conversationHistory = []; // stores last 3 Q&A pairs as {role, content}
 
         // --- DOM refs ---
         const chatWindow = document.getElementById('chatWindow');
@@ -797,21 +807,29 @@
 
                 // Build article list
                 const listEl = document.getElementById('articleList');
+                const topListEl = document.getElementById('topArticleList');
+                const topArrow = document.getElementById('topPillArrow');
                 if (all.length === 0) {
                     listEl.style.display = 'none';
                     listEl.innerHTML = '';
+                    topListEl.style.display = 'none';
+                    topListEl.innerHTML = '';
+                    topArrow.style.display = 'none';
                     return;
                 }
                 // Sort by date descending
                 all.sort(function(a, b) {
                     return (b.date || '').localeCompare(a.date || '');
                 });
-                listEl.innerHTML = all.map(function(a) {
+                var listHTML = all.map(function(a) {
                     var title = escapeHTML(a.title || 'Untitled');
                     var date = a.date ? '<span class="archive-date">' + escapeHTML(a.date) + '</span>' : '';
                     var link = a.link ? '<a href="' + escapeHTML(a.link) + '" target="_blank" rel="noopener" title="' + title + '">' + title + '</a>' : '<span>' + title + '</span>';
                     return '<div class="archive-item">' + link + date + '</div>';
                 }).join('');
+                listEl.innerHTML = listHTML;
+                topListEl.innerHTML = listHTML;
+                topArrow.style.display = 'inline-block';
             });
         }
 
@@ -819,6 +837,15 @@
             const listEl = document.getElementById('articleList');
             const arrow = archiveStats.querySelector('.expand-arrow');
             if (!arrow) return;
+            const isOpen = listEl.style.display !== 'none';
+            listEl.style.display = isOpen ? 'none' : 'block';
+            arrow.classList.toggle('open', !isOpen);
+        };
+
+        window.toggleTopArticleList = function() {
+            const listEl = document.getElementById('topArticleList');
+            const arrow = document.getElementById('topPillArrow');
+            if (!arrow || arrow.style.display === 'none') return;
             const isOpen = listEl.style.display !== 'none';
             listEl.style.display = isOpen ? 'none' : 'block';
             arrow.classList.toggle('open', !isOpen);
@@ -1334,6 +1361,16 @@
         // =====================================================
         // Chat Messages
         // =====================================================
+        function isNearBottom() {
+            return chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.clientHeight < 80;
+        }
+
+        function scrollToBottomIfNear() {
+            if (isNearBottom()) {
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+        }
+
         function addUserMessage(text) {
             const div = document.createElement('div');
             div.className = 'chat-message user';
@@ -1347,7 +1384,7 @@
             div.className = 'chat-message ben';
             div.innerHTML = '<div class="msg-sender">Stratechery</div><div class="msg-bubble">' + html + '</div>';
             chatWindow.appendChild(div);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
+            scrollToBottomIfNear();
         }
 
         // Creates a streaming message element, returns an object to append text
@@ -1359,7 +1396,7 @@
             sender.textContent = 'Stratechery';
             const bubble = document.createElement('div');
             bubble.className = 'msg-bubble';
-            bubble.innerHTML = '<span class="streaming-cursor" style="display:inline-block;width:6px;height:14px;background:#4F46E5;border-radius:1px;animation:pulse 0.8s infinite;vertical-align:text-bottom;"></span>';
+            bubble.innerHTML = '<span class="streaming-cursor" style="display:inline-block;width:6px;height:14px;background:#FAA634;border-radius:1px;animation:pulse 0.8s infinite;vertical-align:text-bottom;"></span>';
             div.appendChild(sender);
             div.appendChild(bubble);
             chatWindow.appendChild(div);
@@ -1369,10 +1406,9 @@
             return {
                 append: function(chunk) {
                     fullText += chunk;
-                    // Simple markdown-ish rendering: convert newlines to <br>
                     bubble.innerHTML = formatAIResponse(fullText) +
-                        '<span class="streaming-cursor" style="display:inline-block;width:6px;height:14px;background:#4F46E5;border-radius:1px;animation:pulse 0.8s infinite;vertical-align:text-bottom;margin-left:2px;"></span>';
-                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                        '<span class="streaming-cursor" style="display:inline-block;width:6px;height:14px;background:#FAA634;border-radius:1px;animation:pulse 0.8s infinite;vertical-align:text-bottom;margin-left:2px;"></span>';
+                    scrollToBottomIfNear();
                 },
                 finish: function(sources) {
                     let html = formatAIResponse(fullText);
@@ -1380,14 +1416,19 @@
                         html += '<div class="article-ref" style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.08);">';
                         html += '<strong style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Sources</strong><br>';
                         sources.forEach(function(s) {
-                            html += '<span class="article-title">' + escapeHTML(s.title) + '</span>';
+                            var linkUrl = s.link ? escapeHTML(s.link) : '';
+                            if (linkUrl) {
+                                html += '<a href="' + linkUrl + '" target="_blank" rel="noopener" class="article-title">' + escapeHTML(s.title) + '</a>';
+                            } else {
+                                html += '<span class="article-title">' + escapeHTML(s.title) + '</span>';
+                            }
                             if (s.date) html += ' <span class="article-date">(' + escapeHTML(s.date) + ')</span>';
                             html += '<br>';
                         });
                         html += '</div>';
                     }
                     bubble.innerHTML = html;
-                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                    scrollToBottomIfNear();
                 },
                 getText: function() { return fullText; }
             };
@@ -1476,7 +1517,7 @@
             const sources = [];
             searchResults.forEach(function(r, i) {
                 const article = r.article;
-                sources.push({ title: article.title, date: article.date });
+                sources.push({ title: article.title, date: article.date, link: article.link });
 
                 var excerpt;
                 if (r.titleMatch && article.content) {
@@ -1517,9 +1558,10 @@
                     body: JSON.stringify({
                         model: 'gpt-5.2',
                         messages: [
-                            { role: 'system', content: systemPrompt },
+                            { role: 'system', content: systemPrompt }
+                        ].concat(conversationHistory).concat([
                             { role: 'user', content: query }
-                        ],
+                        ]),
                         stream: true,
                         max_completion_tokens: 1000
                     })
@@ -1565,6 +1607,13 @@
                 }
 
                 stream.finish(sources);
+
+                // Record this exchange in conversation history (keep last 3 pairs)
+                conversationHistory.push({ role: 'user', content: query });
+                conversationHistory.push({ role: 'assistant', content: stream.getText() });
+                while (conversationHistory.length > 6) {
+                    conversationHistory.shift();
+                }
             } catch(e) {
                 stream.finish();
                 addBenMessage('Failed to connect to OpenAI: ' + escapeHTML(e.message));
