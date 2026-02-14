@@ -929,13 +929,38 @@
             URL.revokeObjectURL(url);
         };
 
+        function normalizeImportedArticles(rawList) {
+            return rawList.map(function(item) {
+                // Already in internal format (has link + title)
+                if (item.link && item.title) return item;
+                // Stratechery scraped JSON format
+                if (item['wp-block-post-title'] || item['_container']) {
+                    var title = item['wp-block-post-title'] || item['_container'] || '';
+                    var link = item['wp-block-post-title_link'] || item['_container_link'] || '';
+                    var date = item['wp-block-post-date'] || '';
+                    // Extract article body paragraphs
+                    var contentParts = [];
+                    Object.keys(item).forEach(function(key) {
+                        if (key.match(/^p(_\d+)?$/) && item[key]) {
+                            contentParts.push(item[key]);
+                        }
+                    });
+                    var result = { title: title, link: link, date: date };
+                    if (contentParts.length > 0) result.content = contentParts.join('\n\n');
+                    return result;
+                }
+                return item;
+            }).filter(function(a) { return a.link; });
+        }
+
         window.importArchive = async function(input) {
             const file = input.files[0];
             if (!file) return;
             try {
                 const text = await file.text();
                 const data = JSON.parse(text);
-                const importedArticles = Array.isArray(data) ? data : (data.articles || []);
+                const rawList = Array.isArray(data) ? data : (data.articles || []);
+                const importedArticles = normalizeImportedArticles(rawList);
                 if (importedArticles.length === 0) {
                     addBenMessage('No articles found in that file. Expected a JSON array of articles or an object with an "articles" key.');
                     return;
