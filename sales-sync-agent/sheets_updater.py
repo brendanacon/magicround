@@ -6,33 +6,17 @@ for a given channel (Shopify or Etsy) when a new sale is detected.
 """
 
 import os
-import json
 import logging
-from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 
-logger = logging.getLogger(__name__)
+from auth import get_credentials
 
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+logger = logging.getLogger(__name__)
 
 
 def get_sheets_service():
     """Authenticate and return a Google Sheets API service."""
-    creds_path = os.environ.get("GOOGLE_SERVICE_ACCOUNT_KEY", "credentials.json")
-
-    if os.path.isfile(creds_path):
-        creds = Credentials.from_service_account_file(creds_path, scopes=SCOPES)
-    else:
-        # Try loading from env var as JSON string
-        creds_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
-        if not creds_json:
-            raise RuntimeError(
-                "No Google credentials found. Set GOOGLE_SERVICE_ACCOUNT_KEY "
-                "to a file path or GOOGLE_SERVICE_ACCOUNT_JSON to a JSON string."
-            )
-        creds_info = json.loads(creds_json)
-        creds = Credentials.from_service_account_info(creds_info, scopes=SCOPES)
-
+    creds = get_credentials()
     return build("sheets", "v4", credentials=creds)
 
 

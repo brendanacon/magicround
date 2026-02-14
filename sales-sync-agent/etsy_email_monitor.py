@@ -9,25 +9,16 @@ open a browser for consent; afterwards it uses a stored token.
 """
 
 import os
-import json
 import re
 import time
 import logging
-from datetime import datetime, timezone
 
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
+from auth import get_credentials
 from sheets_updater import increment_sales
 
 logger = logging.getLogger(__name__)
-
-GMAIL_SCOPES = ["https://www.googleapis.com/auth/gmail.readonly",
-                "https://www.googleapis.com/auth/gmail.modify"]
-
-TOKEN_FILE = "gmail_token.json"
 
 # Etsy order-confirmation emails typically come from this sender.
 # Adjust if your notifications differ.
@@ -39,23 +30,7 @@ PROCESSED_LABEL = os.environ.get("ETSY_PROCESSED_LABEL", "SalesSyncProcessed")
 
 def get_gmail_service():
     """Authenticate and return a Gmail API service."""
-    creds = None
-    oauth_creds_path = os.environ.get("GMAIL_OAUTH_CREDENTIALS", "gmail_credentials.json")
-
-    if os.path.exists(TOKEN_FILE):
-        creds = Credentials.from_authorized_user_file(TOKEN_FILE, GMAIL_SCOPES)
-
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                oauth_creds_path, GMAIL_SCOPES
-            )
-            creds = flow.run_local_server(port=0)
-        with open(TOKEN_FILE, "w") as f:
-            f.write(creds.to_json())
-
+    creds = get_credentials()
     return build("gmail", "v1", credentials=creds)
 
 
