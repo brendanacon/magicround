@@ -543,6 +543,35 @@
             flex-shrink: 0;
         }
 
+        /* --- Speaker Button --- */
+        .tts-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 12px;
+            color: #888;
+            cursor: pointer;
+            font-family: inherit;
+            margin-top: 8px;
+            transition: all 0.15s;
+        }
+        .tts-btn:hover {
+            border-color: #FAA634;
+            color: #FAA634;
+        }
+        .tts-btn.playing {
+            border-color: #FAA634;
+            color: #FAA634;
+        }
+        .tts-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
         /* --- Responsive --- */
         @media (max-width: 640px) {
             .profile-header {
@@ -598,6 +627,20 @@
             <input type="password" id="apiKeyInput" placeholder="sk-..." />
             <p class="hint">Your OpenAI API key for AI-powered responses. Stored locally in your browser only. Never sent anywhere except OpenAI.</p>
             <button class="feed-btn primary" onclick="saveApiKey()">Save Key</button>
+
+            <hr>
+            <h3>Voice (ElevenLabs)</h3>
+            <label for="elevenKeyInput">ElevenLabs API Key</label>
+            <input type="password" id="elevenKeyInput" placeholder="sk_..." />
+            <p class="hint">Your ElevenLabs API key for text-to-speech. Get one free at elevenlabs.io.</p>
+            <label for="elevenVoiceInput">Voice ID</label>
+            <input type="password" id="elevenVoiceInput" placeholder="F5BvNpkaTyWWSzDFXxgG" />
+            <p class="hint">Custom cloned voice ID. Leave blank to use the default Ben Thompson voice.</p>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <input type="checkbox" id="elevenAutoplay" style="margin:0;">
+                <label for="elevenAutoplay" style="margin:0;cursor:pointer;">Auto-play voice on new responses</label>
+            </div>
+            <button class="feed-btn primary" onclick="saveElevenLabsSettings()">Save Voice Settings</button>
 
             <hr>
             <h3>Article Archive</h3>
@@ -671,6 +714,10 @@
         const DB_NAME = 'ben-chat-archive';
         const DB_VERSION = 1;
         const STORE_NAME = 'articles';
+        const ELEVEN_KEY_KEY = 'ben-chat-elevenlabs-key';
+        const ELEVEN_VOICE_KEY = 'ben-chat-elevenlabs-voice';
+        const ELEVEN_AUTOPLAY_KEY = 'ben-chat-elevenlabs-autoplay';
+        const DEFAULT_VOICE_ID = 'F5BvNpkaTyWWSzDFXxgG';
         const REFRESH_COOLDOWN = 5 * 60 * 1000;        // 5 minutes
         const DEFAULT_FEED_URL = 'https://stratechery.passport.online/feed/rss/CKPS49J7qPJbN4eYcQDpR';
         const CORS_PROXIES = [
@@ -705,6 +752,7 @@
         let articles = [];
         let db = null;
         let conversationHistory = []; // stores last 3 Q&A pairs as {role, content}
+        let currentAudio = null;
 
         // --- DOM refs ---
         const chatWindow = document.getElementById('chatWindow');
@@ -718,6 +766,9 @@
         const topicChips = document.getElementById('topicChips');
         const apiKeyInput = document.getElementById('apiKeyInput');
         const archiveStats = document.getElementById('archiveStats');
+        const elevenKeyInput = document.getElementById('elevenKeyInput');
+        const elevenVoiceInput = document.getElementById('elevenVoiceInput');
+        const elevenAutoplay = document.getElementById('elevenAutoplay');
 
         // =====================================================
         // IndexedDB Article Archive
@@ -875,6 +926,13 @@
                 apiKeyInput.value = savedKey;
             }
 
+            // Load ElevenLabs settings
+            const savedElevenKey = localStorage.getItem(ELEVEN_KEY_KEY);
+            if (savedElevenKey) elevenKeyInput.value = savedElevenKey;
+            const savedVoice = localStorage.getItem(ELEVEN_VOICE_KEY);
+            if (savedVoice) elevenVoiceInput.value = savedVoice;
+            elevenAutoplay.checked = localStorage.getItem(ELEVEN_AUTOPLAY_KEY) === 'true';
+
             // Migrate old localStorage cache to IndexedDB
             try {
                 const oldCache = localStorage.getItem('ben-chat-feed-cache');
@@ -960,6 +1018,15 @@
             if (!key) return;
             localStorage.setItem(API_KEY_KEY, key);
             addBenMessage('API key saved. Your responses will now be powered by AI.');
+        };
+
+        window.saveElevenLabsSettings = function() {
+            const key = elevenKeyInput.value.trim();
+            if (key) localStorage.setItem(ELEVEN_KEY_KEY, key);
+            const voice = elevenVoiceInput.value.trim();
+            localStorage.setItem(ELEVEN_VOICE_KEY, voice || DEFAULT_VOICE_ID);
+            localStorage.setItem(ELEVEN_AUTOPLAY_KEY, elevenAutoplay.checked ? 'true' : 'false');
+            addBenMessage('Voice settings saved.' + (elevenAutoplay.checked ? ' Auto-play is enabled.' : ''));
         };
 
         window.exportArchive = async function() {
@@ -1428,6 +1495,18 @@
                         html += '</div>';
                     }
                     bubble.innerHTML = html;
+
+                    // Add speaker button if ElevenLabs is configured
+                    var speakerBtn = createSpeakerButton(fullText);
+                    if (speakerBtn) {
+                        bubble.appendChild(speakerBtn);
+                        // Auto-play if enabled
+                        var config = getElevenLabsConfig();
+                        if (config && config.autoPlay) {
+                            playTTS(fullText, speakerBtn);
+                        }
+                    }
+
                     scrollToBottomIfNear();
                 },
                 getText: function() { return fullText; }
@@ -1503,6 +1582,127 @@
             html = html.replace(/(<\/(?:h[1-4]|ul|ol|pre|blockquote)>|<hr>)<\/p>/g, '$1');
 
             return html;
+        }
+
+        // =====================================================
+        // ElevenLabs TTS
+        // =====================================================
+        function getElevenLabsConfig() {
+            const key = localStorage.getItem(ELEVEN_KEY_KEY);
+            if (!key) return null;
+            return {
+                apiKey: key,
+                voiceId: localStorage.getItem(ELEVEN_VOICE_KEY) || DEFAULT_VOICE_ID,
+                autoPlay: localStorage.getItem(ELEVEN_AUTOPLAY_KEY) === 'true'
+            };
+        }
+
+        function createSpeakerButton(text) {
+            const config = getElevenLabsConfig();
+            if (!config) return null;
+
+            const btn = document.createElement('button');
+            btn.className = 'tts-btn';
+            btn.innerHTML = '&#x1f50a; Listen';
+            btn.onclick = function() { playTTS(text, btn); };
+            return btn;
+        }
+
+        async function playTTS(text, btn) {
+            const config = getElevenLabsConfig();
+            if (!config) return;
+
+            // Stop any currently playing audio
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+                // Reset all playing buttons
+                document.querySelectorAll('.tts-btn.playing').forEach(function(b) {
+                    b.classList.remove('playing');
+                    b.innerHTML = '&#x1f50a; Listen';
+                });
+            }
+
+            // If this button was already playing, just stop
+            if (btn.dataset.playing === 'true') {
+                btn.dataset.playing = '';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '&#x23f3; Loading...';
+
+            try {
+                // Strip markdown/html for cleaner speech
+                var cleanText = text
+                    .replace(/```[\s\S]*?```/g, '')
+                    .replace(/\*\*(.+?)\*\*/g, '$1')
+                    .replace(/\*(.+?)\*/g, '$1')
+                    .replace(/#{1,4}\s*/g, '')
+                    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+                    .replace(/`([^`]+)`/g, '$1')
+                    .replace(/>\s*/g, '')
+                    .replace(/---/g, '')
+                    .trim();
+
+                // ElevenLabs has a limit; truncate if very long
+                if (cleanText.length > 4500) {
+                    cleanText = cleanText.substring(0, 4500) + '...';
+                }
+
+                const resp = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + config.voiceId + '/stream', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'xi-api-key': config.apiKey
+                    },
+                    body: JSON.stringify({
+                        text: cleanText,
+                        model_id: 'eleven_multilingual_v2',
+                        voice_settings: {
+                            stability: 0.5,
+                            similarity_boost: 0.75,
+                            style: 0.3
+                        }
+                    })
+                });
+
+                if (!resp.ok) {
+                    const errText = await resp.text();
+                    btn.disabled = false;
+                    btn.innerHTML = '&#x1f50a; Listen';
+                    if (resp.status === 401) {
+                        addBenMessage('ElevenLabs API key is invalid. Update it in Settings.');
+                    } else {
+                        addBenMessage('Voice error: HTTP ' + resp.status + '. ' + escapeHTML(errText.substring(0, 150)));
+                    }
+                    return;
+                }
+
+                const audioBlob = await resp.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                currentAudio = audio;
+
+                btn.disabled = false;
+                btn.classList.add('playing');
+                btn.innerHTML = '&#x23f9; Stop';
+                btn.dataset.playing = 'true';
+
+                audio.onended = function() {
+                    btn.classList.remove('playing');
+                    btn.innerHTML = '&#x1f50a; Listen';
+                    btn.dataset.playing = '';
+                    currentAudio = null;
+                    URL.revokeObjectURL(audioUrl);
+                };
+
+                audio.play();
+            } catch(e) {
+                btn.disabled = false;
+                btn.innerHTML = '&#x1f50a; Listen';
+                addBenMessage('Voice playback failed: ' + escapeHTML(e.message));
+            }
         }
 
         // =====================================================
