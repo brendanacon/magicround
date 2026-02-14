@@ -553,9 +553,11 @@
             <hr>
             <h3>Article Archive</h3>
             <p class="hint" id="archiveStats">Loading archive stats...</p>
-            <div style="display:flex;gap:8px;margin-top:8px;">
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+                <button class="feed-btn" onclick="document.getElementById('importJsonInput').click()">Import JSON</button>
                 <button class="feed-btn" onclick="exportArchive()">Export Archive</button>
                 <button class="feed-btn" onclick="clearArchive()">Clear Archive</button>
+                <input type="file" id="importJsonInput" accept=".json" style="display:none" onchange="importArchive(this)">
             </div>
 
             <hr>
@@ -854,6 +856,28 @@
             a.download = 'stratechery-archive-' + new Date().toISOString().slice(0, 10) + '.json';
             a.click();
             URL.revokeObjectURL(url);
+        };
+
+        window.importArchive = async function(input) {
+            const file = input.files[0];
+            if (!file) return;
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+                const importedArticles = Array.isArray(data) ? data : (data.articles || []);
+                if (importedArticles.length === 0) {
+                    addBenMessage('No articles found in that file. Expected a JSON array of articles or an object with an "articles" key.');
+                    return;
+                }
+                const added = await mergeArticles(importedArticles);
+                articles = await loadAllArticles();
+                updateStatus('loaded', 'Imported ' + added + ' new articles', articles.length);
+                updateArchiveStats();
+                addBenMessage('Imported <strong>' + added + ' new articles</strong> from file. Total archive: <strong>' + articles.length + ' articles</strong>. Ask me anything.');
+            } catch (e) {
+                addBenMessage('Failed to import: ' + e.message);
+            }
+            input.value = '';
         };
 
         window.clearArchive = async function() {
