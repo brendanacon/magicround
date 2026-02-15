@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ask Peter Attia</title>
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/brendanacon/magicround/refs/heads/main/ChatGPT%20Image%20Feb%2014%2C%202026%2C%2007_38_19%20PM.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            min-height: 100vh;
+        }
+
+        .page-wrapper {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- Profile Header --- */
+        .profile-header {
+            text-align: center;
+            padding: 48px 0 32px;
+        }
+
+        .avatar {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            overflow: hidden;
+            background: #e0f2fe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .profile-header .tagline {
+            font-size: 15px;
+            color: #666;
+            max-width: 440px;
+            margin: 0 auto 16px;
+            line-height: 1.5;
+        }
+
+        .feed-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 13px;
+            color: #555;
+            cursor: pointer;
+        }
+
+        .feed-status-pill .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .feed-status-pill .status-dot.loaded { background: #22c55e; }
+        .feed-status-pill .status-dot.empty { background: #ef4444; }
+        .feed-status-pill .status-dot.loading {
+            background: #f59e0b;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* --- Category Pills --- */
+        .category-pills {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .category-pill {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #555;
+            font-family: inherit;
+            font-weight: 500;
+        }
+
+        .category-pill .cat-count {
+            color: #0891b2;
+            font-weight: 600;
+        }
+
+        /* --- Feed Actions --- */
+        .feed-actions {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .feed-btn {
+            background: #fff;
+            color: #333;
+            border: 1px solid #ddd;
+            padding: 8px 16px;
+            font-size: 13px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
+            transition: all 0.15s;
+        }
+
+        .feed-btn:hover {
+            background: #f5f5f5;
+            border-color: #bbb;
+        }
+
+        .feed-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .feed-btn.primary {
+            background: #1a1a1a;
+            color: #fff;
+            border-color: #1a1a1a;
+        }
+
+        .feed-btn.primary:hover {
+            background: #333;
+        }
+
+        /* --- Setup Panel --- */
+        .setup-panel {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .setup-panel.visible { display: block; }
+
+        .setup-panel h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+
+        .setup-panel label {
+            color: #555;
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .setup-panel input[type="password"] {
+            width: 100%;
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: #1a1a1a;
+            font-family: inherit;
+            font-size: 14px;
+            margin-bottom: 8px;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .setup-panel input[type="password"]:focus {
+            border-color: #0891b2;
+        }
+
+        .setup-panel .hint {
+            color: #999;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+
+        .setup-panel hr {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 20px 0;
+        }
+
+        /* --- Chat Window --- */
+        .chat-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-window {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            height: 420px;
+            overflow-y: auto;
+            padding: 20px;
+            margin-bottom: 16px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-window::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-window::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-window::-webkit-scrollbar-thumb {
+            background: #ddd;
+            border-radius: 3px;
+        }
+
+        .chat-message {
+            margin-bottom: 16px;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-message.user {
+            text-align: right;
+        }
+
+        .chat-message.user .msg-bubble {
+            background: #1a1a1a;
+            display: inline-block;
+            text-align: left;
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 16px 16px 4px 16px;
+            color: #fff;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .chat-message.peter .msg-bubble {
+            background: #f5f5f5;
+            display: inline-block;
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 16px 16px 16px 4px;
+            color: #1a1a1a;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .chat-message .msg-sender {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            opacity: 0.5;
+            color: #666;
+        }
+
+        .chat-message.user .msg-sender { color: #999; }
+        .chat-message.peter .msg-sender { color: #666; }
+
+        .msg-bubble .article-ref {
+            display: block;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            font-size: 12px;
+            color: #888;
+        }
+
+        .msg-bubble .article-title {
+            color: #0891b2;
+            font-weight: 600;
+        }
+
+        a.article-title {
+            text-decoration: none;
+        }
+
+        a.article-title:hover {
+            text-decoration: underline;
+        }
+
+        .msg-bubble .article-date {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .msg-bubble .excerpt {
+            margin-top: 6px;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .msg-bubble .excerpt mark {
+            background: rgba(8, 145, 178, 0.12);
+            color: #0891b2;
+            border-radius: 2px;
+            padding: 0 2px;
+        }
+
+        .msg-bubble h1, .msg-bubble h2, .msg-bubble h3, .msg-bubble h4 {
+            margin: 8px 0 4px;
+            line-height: 1.3;
+        }
+        .msg-bubble h1 { font-size: 18px; }
+        .msg-bubble h2 { font-size: 16px; }
+        .msg-bubble h3 { font-size: 15px; }
+        .msg-bubble h4 { font-size: 14px; }
+        .msg-bubble ul, .msg-bubble ol {
+            margin: 4px 0 4px 20px;
+            padding: 0;
+        }
+        .msg-bubble li {
+            margin: 2px 0;
+        }
+        .msg-bubble code {
+            background: rgba(0,0,0,0.06);
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 13px;
+            font-family: 'SF Mono', Menlo, monospace;
+        }
+        .msg-bubble pre {
+            background: rgba(0,0,0,0.06);
+            padding: 8px 10px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 6px 0;
+        }
+        .msg-bubble pre code {
+            background: none;
+            padding: 0;
+        }
+        .msg-bubble blockquote {
+            border-left: 3px solid rgba(8,145,178,0.4);
+            padding-left: 10px;
+            margin: 6px 0;
+            color: #555;
+        }
+        .msg-bubble a {
+            color: #0891b2;
+            text-decoration: underline;
+        }
+        .msg-bubble hr {
+            border: none;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            margin: 8px 0;
+        }
+        .msg-bubble p {
+            margin: 4px 0;
+        }
+
+        /* --- Chat Input --- */
+        .chat-input-wrapper {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 16px;
+            transition: border-color 0.15s;
+        }
+
+        .chat-input-wrapper:focus-within {
+            border-color: #0891b2;
+            box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.08);
+        }
+
+        .chat-input-area {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 12px;
+            color: #1a1a1a;
+            font-family: inherit;
+            font-size: 16px;
+            outline: none;
+            resize: none;
+            min-height: 22px;
+            max-height: 120px;
+            overflow-y: auto;
+            line-height: 1.4;
+        }
+
+        .chat-input::placeholder {
+            color: #aaa;
+        }
+
+        .send-btn {
+            background: #0891b2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            transition: background 0.15s;
+            white-space: nowrap;
+        }
+
+        .send-btn:hover { background: #0e7490; }
+        .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* --- Topic Chips --- */
+        .topic-chips {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 0 32px;
+        }
+
+        .topic-chip {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            color: #444;
+            padding: 8px 16px;
+            border-radius: 24px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+            font-weight: 500;
+        }
+
+        .topic-chip:hover {
+            background: #f5f5f5;
+            border-color: #ccc;
+        }
+
+        /* --- How it works --- */
+        .how-it-works {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            color: #555;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .how-it-works summary {
+            color: #1a1a1a;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .how-it-works ul {
+            margin: 10px 0 0;
+            padding-left: 20px;
+        }
+
+        .how-it-works li {
+            margin: 5px 0;
+        }
+
+        .articles-count {
+            color: #0891b2;
+            font-weight: 600;
+        }
+
+        #archiveStats .expand-arrow {
+            display: inline-block;
+            transition: transform 0.2s;
+            margin-left: 4px;
+            font-size: 10px;
+        }
+        #archiveStats .expand-arrow.open {
+            transform: rotate(90deg);
+        }
+        .archive-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+            gap: 12px;
+        }
+        .archive-item:last-child {
+            border-bottom: none;
+        }
+        .archive-item span.archive-title {
+            color: #1a1a1a;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .archive-item .archive-cat {
+            color: #0891b2;
+            font-size: 11px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* --- Speaker Button --- */
+        .tts-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 12px;
+            color: #888;
+            cursor: pointer;
+            font-family: inherit;
+            margin-top: 8px;
+            transition: all 0.15s;
+        }
+        .tts-btn:hover {
+            border-color: #0891b2;
+            color: #0891b2;
+        }
+        .tts-btn.playing {
+            border-color: #0891b2;
+            color: #0891b2;
+        }
+        .tts-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* --- Response Format Chips --- */
+        .format-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 6px 12px 8px;
+        }
+        .format-chip {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            color: #888;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
+            transition: all 0.15s;
+            user-select: none;
+        }
+        .format-chip:hover {
+            border-color: #ccc;
+            color: #555;
+        }
+        .format-chip.active {
+            background: #0891b2;
+            border-color: #0891b2;
+            color: #fff;
+        }
+        .format-chip-divider {
+            width: 1px;
+            background: #e0e0e0;
+            margin: 2px 4px;
+        }
+
+        /* --- Fullscreen Mode --- */
+        .fullscreen-btn {
+            background: none;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            color: #888;
+            font-size: 16px;
+            line-height: 1;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fullscreen-btn:hover {
+            border-color: #0891b2;
+            color: #0891b2;
+        }
+
+        .chat-section.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+            background: #fafafa;
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-section.fullscreen .chat-window {
+            height: auto;
+            flex: 1;
+            border-radius: 12px 12px 0 0;
+            margin-bottom: 0;
+        }
+        .chat-section.fullscreen .chat-input-wrapper {
+            border-radius: 0 0 12px 12px;
+            margin-bottom: 12px;
+            border-top: none;
+        }
+        .chat-section.fullscreen .how-it-works {
+            display: none;
+        }
+        .chat-section.fullscreen .topic-chips {
+            display: none;
+        }
+        .chat-header-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 8px;
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 640px) {
+            .profile-header {
+                padding: 32px 0 24px;
+            }
+
+            .profile-header h1 {
+                font-size: 24px;
+            }
+
+            .chat-window {
+                height: 320px;
+            }
+
+            .chat-message.user .msg-bubble,
+            .chat-message.peter .msg-bubble {
+                max-width: 92%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="avatar"><img src="https://peterattiamd.com/wp-content/uploads/2019/02/peter-circle.png" alt="Peter Attia" onerror="this.parentElement.innerHTML='&#x1F9EC;'"></div>
+            <h1>Peter Attia</h1>
+            <p class="tagline">Deep dives on longevity, exercise, nutrition, sleep, and the science of living longer and better</p>
+            <div class="feed-status-pill" id="topPill" onclick="toggleTopArticleList()">
+                <span class="status-dot empty" id="statusDot"></span>
+                <span id="statusText">Loading...</span>
+                <span id="articleCount"></span>
+                <span class="expand-arrow" id="topPillArrow" style="display:none;">&#9654;</span>
+            </div>
+            <div id="topArticleList" style="display:none;max-height:320px;overflow-y:auto;margin-top:10px;border:1px solid #eee;border-radius:8px;background:#fff;text-align:left;"></div>
+            <div class="category-pills" id="categoryPills"></div>
+            <div class="feed-actions">
+                <button class="feed-btn" id="settingsBtn" onclick="toggleSetup()">Settings</button>
+            </div>
+        </div>
+
+        <!-- Setup panel -->
+        <div class="setup-panel" id="setupPanel">
+            <h3>OpenAI API Key</h3>
+            <label for="apiKeyInput">API Key</label>
+            <input type="password" id="apiKeyInput" placeholder="sk-..." />
+            <p class="hint">Your OpenAI API key for AI-powered responses. Stored locally in your browser only. Never sent anywhere except OpenAI.</p>
+            <button class="feed-btn primary" onclick="saveApiKey()">Save Key</button>
+
+            <hr>
+            <h3>Voice (ElevenLabs)</h3>
+            <label for="elevenKeyInput">ElevenLabs API Key</label>
+            <input type="password" id="elevenKeyInput" placeholder="sk_..." />
+            <p class="hint">Your ElevenLabs API key for text-to-speech. Get one free at elevenlabs.io.</p>
+            <label for="elevenVoiceInput">Voice ID</label>
+            <input type="password" id="elevenVoiceInput" placeholder="voice-id..." />
+            <p class="hint">Custom voice ID. Leave blank to use default.</p>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <input type="checkbox" id="elevenAutoplay" style="margin:0;">
+                <label for="elevenAutoplay" style="margin:0;cursor:pointer;">Auto-play voice on new responses</label>
+            </div>
+            <button class="feed-btn primary" onclick="saveElevenLabsSettings()">Save Voice Settings</button>
+
+            <hr>
+            <h3>Article Archive</h3>
+            <p class="hint" id="archiveStats" style="cursor:pointer;user-select:none;" onclick="toggleArticleList()">Loading archive stats...</p>
+            <div id="articleList" style="display:none;max-height:320px;overflow-y:auto;margin-bottom:10px;border:1px solid #eee;border-radius:8px;background:#fff;"></div>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+                <button class="feed-btn" onclick="exportArchive()">Export Archive</button>
+                <button class="feed-btn" onclick="reloadFromSource()">Reload from Source</button>
+            </div>
+        </div>
+
+        <div class="chat-section" id="chatSection">
+            <div class="chat-header-bar">
+                <button class="fullscreen-btn" id="fullscreenBtn" onclick="toggleFullscreen()" title="Toggle fullscreen">
+                    <svg id="fullscreenIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                    </svg>
+                </button>
+            </div>
+            <details class="how-it-works">
+                <summary>How does this work?</summary>
+                <ul>
+                    <li>This page contains Peter Attia's AMA episodes, podcast summaries, and premium articles from The Drive.</li>
+                    <li>When you ask a question, it searches through all content to find relevant passages.</li>
+                    <li>With an OpenAI API key, responses synthesize Peter's analysis into conversational answers.</li>
+                    <li>All data stays in your browser &mdash; nothing is sent to any server except your OpenAI queries.</li>
+                </ul>
+            </details>
+
+            <!-- Chat window -->
+            <div class="chat-window" id="chatWindow">
+                <div class="chat-message peter">
+                    <div class="msg-sender">The Drive</div>
+                    <div class="msg-bubble">
+                        Welcome! I'll search through Peter Attia's articles and AMA episodes to answer your questions about longevity, exercise, nutrition, metabolic health, and more.
+                        <br><br>
+                        Content is loading automatically. Ask me anything about healthspan, lifespan, or the science of living better.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input area -->
+            <div class="chat-input-wrapper">
+                <div class="chat-input-area">
+                    <textarea class="chat-input" id="chatInput" rows="1" placeholder="Ask about longevity, exercise, nutrition..."
+                             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+                    <button class="send-btn" onclick="sendMessage()">Ask</button>
+                </div>
+                <div class="format-chips">
+                    <button class="format-chip" data-group="words" data-value="50" onclick="toggleFormatChip(this)">50 words</button>
+                    <button class="format-chip active" data-group="words" data-value="100" onclick="toggleFormatChip(this)">100 words</button>
+                    <button class="format-chip" data-group="words" data-value="200" onclick="toggleFormatChip(this)">200 words</button>
+                    <button class="format-chip" data-group="words" data-value="500" onclick="toggleFormatChip(this)">500 words</button>
+                    <div class="format-chip-divider"></div>
+                    <button class="format-chip" data-group="format" data-value="bullets" onclick="toggleFormatChip(this)">Bullet points</button>
+                </div>
+            </div>
+
+            <!-- Suggested topics -->
+            <div class="topic-chips" id="topicChips">
+                <button class="topic-chip" onclick="askQuestion(this.textContent)">Zone 2 training</button>
+                <button class="topic-chip" onclick="askQuestion(this.textContent)">How to improve VO2 max</button>
+                <button class="topic-chip" onclick="askQuestion(this.textContent)">What does Peter think about GLP-1 drugs?</button>
+                <button class="topic-chip" onclick="askQuestion(this.textContent)">Optimal protein intake</button>
+                <button class="topic-chip" onclick="askQuestion(this.textContent)">Best supplements for longevity</button>
+                <button class="topic-chip" onclick="askQuestion(this.textContent)">Cardiovascular disease prevention</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // --- Constants ---
+        const API_KEY_KEY = 'pa-chat-openai-key';
+        const DB_NAME = 'pa-chat-archive';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'articles';
+        const ELEVEN_KEY_KEY = 'pa-chat-elevenlabs-key';
+        const ELEVEN_VOICE_KEY = 'pa-chat-elevenlabs-voice';
+        const ELEVEN_AUTOPLAY_KEY = 'pa-chat-elevenlabs-autoplay';
+        const DEFAULT_VOICE_ID = 'onwK4e9ZLuTAKqWW03F9'; // Default ElevenLabs voice
+        const DATA_URL = '../PA/pa_articles.json';
+        const DATA_LOADED_KEY = 'pa-chat-data-loaded';
+
+        // Stop words for search
+        const STOP_WORDS = new Set([
+            'a','an','the','is','are','was','were','be','been','being',
+            'have','has','had','do','does','did','will','would','could',
+            'should','may','might','shall','can','need','dare','ought',
+            'used','to','of','in','for','on','with','at','by','from',
+            'as','into','through','during','before','after','above',
+            'below','between','out','off','over','under','again',
+            'further','then','once','here','there','when','where',
+            'why','how','all','both','each','few','more','most',
+            'other','some','such','no','nor','not','only','own',
+            'same','so','than','too','very','just','because','but',
+            'and','or','if','while','about','up','what','which',
+            'who','whom','this','that','these','those','am','i',
+            'me','my','we','our','you','your','he','him','his',
+            'she','her','it','its','they','them','their','peter',
+            'attia','think','does','say','said','like','also',
+            'really','much','many','get','got','make','thing','things',
+            'going','know','dont','want','way','one','well'
+        ]);
+
+        let articles = [];
+        let db = null;
+        let conversationHistory = [];
+        let currentAudio = null;
+
+        // --- DOM refs ---
+        const chatWindow = document.getElementById('chatWindow');
+        const chatInput = document.getElementById('chatInput');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const articleCount = document.getElementById('articleCount');
+        const setupPanel = document.getElementById('setupPanel');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const archiveStats = document.getElementById('archiveStats');
+        const elevenKeyInput = document.getElementById('elevenKeyInput');
+        const elevenVoiceInput = document.getElementById('elevenVoiceInput');
+        const elevenAutoplay = document.getElementById('elevenAutoplay');
+        const categoryPills = document.getElementById('categoryPills');
+
+        // =====================================================
+        // IndexedDB Article Archive
+        // =====================================================
+        function openDB() {
+            return new Promise(function(resolve, reject) {
+                const req = indexedDB.open(DB_NAME, DB_VERSION);
+                req.onupgradeneeded = function(e) {
+                    const database = e.target.result;
+                    if (!database.objectStoreNames.contains(STORE_NAME)) {
+                        const store = database.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                        store.createIndex('category', 'category', { unique: false });
+                        store.createIndex('title', 'title', { unique: false });
+                    }
+                };
+                req.onsuccess = function(e) { resolve(e.target.result); };
+                req.onerror = function(e) { reject(e.target.error); };
+            });
+        }
+
+        function loadAllArticles() {
+            return new Promise(function(resolve, reject) {
+                const tx = db.transaction(STORE_NAME, 'readonly');
+                const store = tx.objectStore(STORE_NAME);
+                const req = store.getAll();
+                req.onsuccess = function() { resolve(req.result || []); };
+                req.onerror = function() { reject(req.error); };
+            });
+        }
+
+        function storeArticles(newArticles) {
+            return new Promise(function(resolve, reject) {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                store.clear();
+                newArticles.forEach(function(article, i) {
+                    article.id = article.title || ('article-' + i);
+                    store.put(article);
+                });
+                tx.oncomplete = function() { resolve(newArticles.length); };
+                tx.onerror = function() { reject(tx.error); };
+            });
+        }
+
+        function clearAllArticles() {
+            return new Promise(function(resolve, reject) {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                const req = store.clear();
+                req.onsuccess = function() { resolve(); };
+                req.onerror = function() { reject(req.error); };
+            });
+        }
+
+        function updateArchiveStats() {
+            if (!db) return;
+            loadAllArticles().then(function(all) {
+                const arrow = archiveStats.querySelector('.expand-arrow');
+                const isOpen = arrow && arrow.classList.contains('open');
+                archiveStats.innerHTML = all.length + ' articles in archive' +
+                    (all.length > 0 ? ' <span class="expand-arrow' + (isOpen ? ' open' : '') + '">&#9654;</span>' : '');
+
+                const listEl = document.getElementById('articleList');
+                const topListEl = document.getElementById('topArticleList');
+                const topArrow = document.getElementById('topPillArrow');
+                if (all.length === 0) {
+                    listEl.style.display = 'none';
+                    topListEl.style.display = 'none';
+                    topArrow.style.display = 'none';
+                    return;
+                }
+
+                all.sort(function(a, b) { return (a.title || '').localeCompare(b.title || ''); });
+                var listHTML = all.map(function(a) {
+                    var title = escapeHTML(a.title || 'Untitled');
+                    var cat = '<span class="archive-cat">' + escapeHTML(a.category || '') + '</span>';
+                    return '<div class="archive-item"><span class="archive-title" title="' + title + '">' + title + '</span>' + cat + '</div>';
+                }).join('');
+                listEl.innerHTML = listHTML;
+                topListEl.innerHTML = listHTML;
+                topArrow.style.display = 'inline-block';
+            });
+        }
+
+        function updateCategoryPills() {
+            var cats = {};
+            articles.forEach(function(a) {
+                var c = a.category || 'Other';
+                cats[c] = (cats[c] || 0) + 1;
+            });
+            categoryPills.innerHTML = '';
+            Object.keys(cats).sort().forEach(function(cat) {
+                var pill = document.createElement('span');
+                pill.className = 'category-pill';
+                pill.innerHTML = escapeHTML(cat) + ' <span class="cat-count">' + cats[cat] + '</span>';
+                categoryPills.appendChild(pill);
+            });
+        }
+
+        window.toggleArticleList = function() {
+            const listEl = document.getElementById('articleList');
+            const arrow = archiveStats.querySelector('.expand-arrow');
+            if (!arrow) return;
+            const isOpen = listEl.style.display !== 'none';
+            listEl.style.display = isOpen ? 'none' : 'block';
+            arrow.classList.toggle('open', !isOpen);
+        };
+
+        window.toggleTopArticleList = function() {
+            const listEl = document.getElementById('topArticleList');
+            const arrow = document.getElementById('topPillArrow');
+            if (!arrow || arrow.style.display === 'none') return;
+            const isOpen = listEl.style.display !== 'none';
+            listEl.style.display = isOpen ? 'none' : 'block';
+            arrow.classList.toggle('open', !isOpen);
+        };
+
+        // =====================================================
+        // Load data from JSON
+        // =====================================================
+        async function loadFromJSON() {
+            updateStatus('loading', 'Loading articles...');
+            try {
+                const resp = await fetch(DATA_URL);
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                const data = await resp.json();
+
+                // Process articles: split text into paragraphs
+                const processed = data.map(function(item, i) {
+                    return {
+                        id: item.title || ('article-' + i),
+                        title: item.title || 'Untitled',
+                        category: item.category || 'Other',
+                        text: item.text || '',
+                        paragraphs: splitIntoParagraphs(item.text || ''),
+                        charCount: item.charCount || 0
+                    };
+                });
+
+                if (db) {
+                    await storeArticles(processed);
+                    articles = await loadAllArticles();
+                } else {
+                    articles = processed;
+                }
+
+                localStorage.setItem(DATA_LOADED_KEY, 'true');
+                updateStatus('loaded', articles.length + ' articles loaded', articles.length);
+                updateCategoryPills();
+                updateArchiveStats();
+                return true;
+            } catch(e) {
+                updateStatus('empty', 'Failed to load: ' + e.message);
+                return false;
+            }
+        }
+
+        window.reloadFromSource = async function() {
+            await clearAllArticles();
+            localStorage.removeItem(DATA_LOADED_KEY);
+            await loadFromJSON();
+            addPeterMessage('Reloaded all articles from source.');
+        };
+
+        // =====================================================
+        // Init
+        // =====================================================
+        async function init() {
+            try {
+                db = await openDB();
+            } catch(e) {
+                console.error('IndexedDB failed:', e);
+            }
+
+            const savedKey = localStorage.getItem(API_KEY_KEY);
+            if (savedKey) apiKeyInput.value = savedKey;
+
+            const savedElevenKey = localStorage.getItem(ELEVEN_KEY_KEY);
+            if (savedElevenKey) elevenKeyInput.value = savedElevenKey;
+            const savedVoice = localStorage.getItem(ELEVEN_VOICE_KEY);
+            if (savedVoice) elevenVoiceInput.value = savedVoice;
+            elevenAutoplay.checked = localStorage.getItem(ELEVEN_AUTOPLAY_KEY) === 'true';
+
+            // Try loading from IndexedDB first
+            if (db) {
+                articles = await loadAllArticles();
+            }
+
+            if (articles.length > 0) {
+                updateStatus('loaded', articles.length + ' articles loaded', articles.length);
+                updateCategoryPills();
+                updateArchiveStats();
+            } else {
+                // Auto-load from JSON
+                await loadFromJSON();
+            }
+        }
+
+        // --- Status ---
+        function updateStatus(state, text, count) {
+            statusDot.className = 'status-dot ' + state;
+            statusText.textContent = text;
+            if (count !== undefined) {
+                articleCount.textContent = ' (' + count + ')';
+            } else {
+                articleCount.textContent = '';
+            }
+        }
+
+        // =====================================================
+        // Settings
+        // =====================================================
+        window.toggleSetup = function() {
+            setupPanel.classList.toggle('visible');
+            updateArchiveStats();
+        };
+
+        window.saveApiKey = function() {
+            const key = apiKeyInput.value.trim();
+            if (!key) return;
+            localStorage.setItem(API_KEY_KEY, key);
+            addPeterMessage('API key saved. Your responses will now be powered by AI.');
+        };
+
+        window.saveElevenLabsSettings = function() {
+            const key = elevenKeyInput.value.trim();
+            if (key) localStorage.setItem(ELEVEN_KEY_KEY, key);
+            const voice = elevenVoiceInput.value.trim();
+            localStorage.setItem(ELEVEN_VOICE_KEY, voice || DEFAULT_VOICE_ID);
+            localStorage.setItem(ELEVEN_AUTOPLAY_KEY, elevenAutoplay.checked ? 'true' : 'false');
+            addPeterMessage('Voice settings saved.' + (elevenAutoplay.checked ? ' Auto-play is enabled.' : ''));
+        };
+
+        window.exportArchive = async function() {
+            const all = await loadAllArticles();
+            const blob = new Blob([JSON.stringify(all, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'peter-attia-archive-' + new Date().toISOString().slice(0, 10) + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        // =====================================================
+        // Text Processing
+        // =====================================================
+        function splitIntoParagraphs(text) {
+            return text.split(/\n\n+|\.\s+/)
+                .map(function(p) { return p.trim(); })
+                .filter(function(p) { return p.length > 40; });
+        }
+
+        // =====================================================
+        // Search Engine
+        // =====================================================
+        function extractKeywords(query) {
+            return query.toLowerCase()
+                .replace(/[^\w\s]/g, '')
+                .split(/\s+/)
+                .filter(function(w) { return w.length > 1 && !STOP_WORDS.has(w); });
+        }
+
+        function scoreParagraph(paragraph, keywords) {
+            const lower = paragraph.toLowerCase();
+            let score = 0;
+            let matched = 0;
+
+            keywords.forEach(function(kw) {
+                const regex = new RegExp('\\b' + escapeRegex(kw) + '\\w*', 'gi');
+                const matches = lower.match(regex);
+                if (matches) {
+                    score += matches.length;
+                    matched++;
+                }
+            });
+
+            if (matched > 1) score *= (1 + matched * 0.3);
+            if (paragraph.length > 1000) score *= 0.9;
+
+            return { score: score, matched: matched };
+        }
+
+        function escapeRegex(s) {
+            return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function search(query, maxResults) {
+            if (articles.length === 0) return [];
+            const keywords = extractKeywords(query);
+            if (keywords.length === 0) return [];
+
+            const results = [];
+
+            articles.forEach(function(article) {
+                const titleScore = scoreParagraph(article.title, keywords);
+                let bestPara = null;
+                let bestParaScore = 0;
+
+                (article.paragraphs || []).forEach(function(para) {
+                    const ps = scoreParagraph(para, keywords);
+                    if (ps.score > bestParaScore) {
+                        bestParaScore = ps.score;
+                        bestPara = para;
+                    }
+                });
+
+                // Also search the full text for scoring
+                const fullTextScore = scoreParagraph((article.text || '').substring(0, 2000), keywords);
+                const totalScore = (titleScore.score * 3) + bestParaScore + fullTextScore.score;
+
+                if (totalScore > 0) {
+                    results.push({
+                        article: article,
+                        score: totalScore,
+                        bestParagraph: bestPara || (article.text || '').substring(0, 400),
+                        titleMatch: titleScore.score > 0
+                    });
+                }
+            });
+
+            results.sort(function(a, b) { return b.score - a.score; });
+            return results.slice(0, maxResults || 5);
+        }
+
+        function escapeHTML(s) {
+            const div = document.createElement('div');
+            div.textContent = s;
+            return div.innerHTML;
+        }
+
+        // =====================================================
+        // Chat Messages
+        // =====================================================
+        function isNearBottom() {
+            return chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.clientHeight < 80;
+        }
+
+        function scrollToBottomIfNear() {
+            if (isNearBottom()) {
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+        }
+
+        function addUserMessage(text) {
+            const div = document.createElement('div');
+            div.className = 'chat-message user';
+            div.innerHTML = '<div class="msg-sender">You</div><div class="msg-bubble">' + escapeHTML(text) + '</div>';
+            chatWindow.appendChild(div);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function addPeterMessage(html) {
+            const div = document.createElement('div');
+            div.className = 'chat-message peter';
+            div.innerHTML = '<div class="msg-sender">The Drive</div><div class="msg-bubble">' + html + '</div>';
+            chatWindow.appendChild(div);
+            scrollToBottomIfNear();
+        }
+
+        function addStreamingMessage() {
+            const div = document.createElement('div');
+            div.className = 'chat-message peter';
+            const sender = document.createElement('div');
+            sender.className = 'msg-sender';
+            sender.textContent = 'The Drive';
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble';
+            bubble.innerHTML = '<span class="streaming-cursor" style="display:inline-block;width:6px;height:14px;background:#0891b2;border-radius:1px;animation:pulse 0.8s infinite;vertical-align:text-bottom;"></span>';
+            div.appendChild(sender);
+            div.appendChild(bubble);
+            chatWindow.appendChild(div);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+
+            let fullText = '';
+            return {
+                append: function(chunk) {
+                    fullText += chunk;
+                    bubble.innerHTML = formatAIResponse(fullText) +
+                        '<span class="streaming-cursor" style="display:inline-block;width:6px;height:14px;background:#0891b2;border-radius:1px;animation:pulse 0.8s infinite;vertical-align:text-bottom;margin-left:2px;"></span>';
+                    scrollToBottomIfNear();
+                },
+                finish: function(sources) {
+                    let html = formatAIResponse(fullText);
+                    if (sources && sources.length > 0) {
+                        html += '<div class="article-ref" style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.08);">';
+                        html += '<strong style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Sources</strong><br>';
+                        sources.forEach(function(s) {
+                            html += '<span class="article-title">' + escapeHTML(s.title) + '</span>';
+                            if (s.category) html += ' <span class="article-date">(' + escapeHTML(s.category) + ')</span>';
+                            html += '<br>';
+                        });
+                        html += '</div>';
+                    }
+                    bubble.innerHTML = html;
+
+                    var speakerBtn = createSpeakerButton(fullText);
+                    if (speakerBtn) {
+                        bubble.appendChild(speakerBtn);
+                        var config = getElevenLabsConfig();
+                        if (config && config.autoPlay) {
+                            playTTS(fullText, speakerBtn);
+                        }
+                    }
+
+                    scrollToBottomIfNear();
+                },
+                getText: function() { return fullText; }
+            };
+        }
+
+        function formatAIResponse(text) {
+            var codeBlocks = [];
+            text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, function(m, lang, code) {
+                codeBlocks.push('<pre><code>' + escapeHTML(code.replace(/\n$/, '')) + '</code></pre>');
+                return '\x00CODEBLOCK' + (codeBlocks.length - 1) + '\x00';
+            });
+
+            let html = escapeHTML(text);
+
+            html = html.replace(/\x00CODEBLOCK(\d+)\x00/g, function(m, i) {
+                return codeBlocks[parseInt(i)];
+            });
+
+            html = html.replace(/!\[([^\]]*)\]\([^)]+\)/g, '');
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+            html = html.replace(/(^|\n)#### (.+)/g, '$1<h4>$2</h4>');
+            html = html.replace(/(^|\n)### (.+)/g, '$1<h3>$2</h3>');
+            html = html.replace(/(^|\n)## (.+)/g, '$1<h2>$2</h2>');
+            html = html.replace(/(^|\n)# (.+)/g, '$1<h1>$2</h1>');
+
+            html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+            html = html.replace(/(^|\n)&gt; (.+)/g, '$1<blockquote>$2</blockquote>');
+            html = html.replace(/(^|\n)---(\n|$)/g, '$1<hr>$2');
+
+            html = html.replace(/(^|\n)(- .+(?:\n- .+)*)/g, function(m, pre, block) {
+                var items = block.split('\n').map(function(line) {
+                    return '<li>' + line.replace(/^- /, '') + '</li>';
+                }).join('');
+                return pre + '<ul>' + items + '</ul>';
+            });
+
+            html = html.replace(/(^|\n)(\d+\. .+(?:\n\d+\. .+)*)/g, function(m, pre, block) {
+                var items = block.split('\n').map(function(line) {
+                    return '<li>' + line.replace(/^\d+\. /, '') + '</li>';
+                }).join('');
+                return pre + '<ol>' + items + '</ol>';
+            });
+
+            html = html.replace(/\n{2,}/g, '</p><p>');
+            html = html.replace(/\n/g, '<br>');
+            html = '<p>' + html + '</p>';
+
+            html = html.replace(/<p>\s*<\/p>/g, '');
+            html = html.replace(/<p>(<(?:h[1-4]|ul|ol|pre|blockquote|hr))/g, '$1');
+            html = html.replace(/(<\/(?:h[1-4]|ul|ol|pre|blockquote)>|<hr>)<\/p>/g, '$1');
+
+            return html;
+        }
+
+        // =====================================================
+        // ElevenLabs TTS
+        // =====================================================
+        function getElevenLabsConfig() {
+            const key = localStorage.getItem(ELEVEN_KEY_KEY);
+            if (!key) return null;
+            return {
+                apiKey: key,
+                voiceId: localStorage.getItem(ELEVEN_VOICE_KEY) || DEFAULT_VOICE_ID,
+                autoPlay: localStorage.getItem(ELEVEN_AUTOPLAY_KEY) === 'true'
+            };
+        }
+
+        function createSpeakerButton(text) {
+            const config = getElevenLabsConfig();
+            if (!config) return null;
+
+            const btn = document.createElement('button');
+            btn.className = 'tts-btn';
+            btn.innerHTML = '&#x1f50a; Listen';
+            btn.onclick = function() { playTTS(text, btn); };
+            return btn;
+        }
+
+        async function playTTS(text, btn) {
+            const config = getElevenLabsConfig();
+            if (!config) return;
+
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+                document.querySelectorAll('.tts-btn.playing').forEach(function(b) {
+                    b.classList.remove('playing');
+                    b.innerHTML = '&#x1f50a; Listen';
+                });
+            }
+
+            if (btn.dataset.playing === 'true') {
+                btn.dataset.playing = '';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '&#x23f3; Loading...';
+
+            try {
+                var cleanText = text
+                    .replace(/```[\s\S]*?```/g, '')
+                    .replace(/\*\*(.+?)\*\*/g, '$1')
+                    .replace(/\*(.+?)\*/g, '$1')
+                    .replace(/#{1,4}\s*/g, '')
+                    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+                    .replace(/`([^`]+)`/g, '$1')
+                    .replace(/>\s*/g, '')
+                    .replace(/---/g, '')
+                    .trim();
+
+                if (cleanText.length > 4500) {
+                    cleanText = cleanText.substring(0, 4500) + '...';
+                }
+
+                const resp = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + config.voiceId + '/stream', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'xi-api-key': config.apiKey
+                    },
+                    body: JSON.stringify({
+                        text: cleanText,
+                        model_id: 'eleven_turbo_v2_5',
+                        voice_settings: {
+                            stability: 0.45,
+                            similarity_boost: 0.8,
+                            style: 0.55,
+                            use_speaker_boost: true
+                        }
+                    })
+                });
+
+                if (!resp.ok) {
+                    const errText = await resp.text();
+                    btn.disabled = false;
+                    btn.innerHTML = '&#x1f50a; Listen';
+                    if (resp.status === 401) {
+                        addPeterMessage('ElevenLabs API key is invalid. Update it in Settings.');
+                    } else {
+                        addPeterMessage('Voice error: HTTP ' + resp.status + '. ' + escapeHTML(errText.substring(0, 150)));
+                    }
+                    return;
+                }
+
+                const audioBlob = await resp.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                audio.playbackRate = 0.8;
+                currentAudio = audio;
+
+                btn.disabled = false;
+                btn.classList.add('playing');
+                btn.innerHTML = '&#x23f9; Stop';
+                btn.dataset.playing = 'true';
+
+                audio.onended = function() {
+                    btn.classList.remove('playing');
+                    btn.innerHTML = '&#x1f50a; Listen';
+                    btn.dataset.playing = '';
+                    currentAudio = null;
+                    URL.revokeObjectURL(audioUrl);
+                };
+
+                audio.play();
+            } catch(e) {
+                btn.disabled = false;
+                btn.innerHTML = '&#x1f50a; Listen';
+                addPeterMessage('Voice playback failed: ' + escapeHTML(e.message));
+            }
+        }
+
+        // =====================================================
+        // OpenAI Integration
+        // =====================================================
+        async function chatWithAI(query, searchResults) {
+            const apiKey = localStorage.getItem(API_KEY_KEY);
+            if (!apiKey) return null;
+
+            let context = '';
+            const sources = [];
+            searchResults.forEach(function(r, i) {
+                const article = r.article;
+                sources.push({ title: article.title, category: article.category });
+
+                var excerpt;
+                if (r.titleMatch && article.text) {
+                    excerpt = article.text;
+                    var cap = 6000;
+                    if (excerpt.length > cap) excerpt = excerpt.substring(0, cap) + '...';
+                } else if (r.titleMatch && article.paragraphs && article.paragraphs.length > 0) {
+                    excerpt = article.paragraphs.join('\n\n');
+                    if (excerpt.length > 6000) excerpt = excerpt.substring(0, 6000) + '...';
+                } else {
+                    excerpt = r.bestParagraph || article.text || '';
+                    if (excerpt.length > 1500) excerpt = excerpt.substring(0, 1500) + '...';
+                }
+                context += '\n\n---\nArticle ' + (i + 1) + ': "' + article.title + '" (' + article.category + ')\n' + excerpt;
+            });
+
+            const prefs = getFormatPreferences();
+            var formatInstructions = 'Keep your response to approximately ' + prefs.wordCount + ' words. ';
+            if (prefs.bullets) {
+                formatInstructions += 'Format your response as bullet points. ';
+            }
+
+            const systemPrompt = 'You are an AI assistant that helps users understand Peter Attia\'s analysis and recommendations from The Drive podcast and his writing. ' +
+                'Answer the user\'s question based on the article/episode excerpts provided below. ' +
+                'Synthesize insights from across the excerpts into a coherent, conversational answer. ' +
+                'Present the analysis naturally as if explaining Peter\'s views on health, longevity, exercise, nutrition, and medicine. ' +
+                'If the excerpts don\'t fully address the question, say so honestly. ' +
+                formatInstructions +
+                'Use Peter\'s frameworks and terminology where appropriate (e.g., Medicine 3.0, Centenarian Decathlon, the four horsemen of chronic disease, healthspan, lifespan, zone 2, VO2 max, apoB). ' +
+                'Do not make up information that isn\'t in the excerpts.\n\n' +
+                'ARTICLE/EPISODE EXCERPTS:' + context;
+
+            const stream = addStreamingMessage();
+
+            try {
+                const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + apiKey
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-4o',
+                        messages: [
+                            { role: 'system', content: systemPrompt }
+                        ].concat(conversationHistory).concat([
+                            { role: 'user', content: query }
+                        ]),
+                        stream: true,
+                        max_tokens: 1000
+                    })
+                });
+
+                if (!resp.ok) {
+                    const errText = await resp.text();
+                    stream.finish();
+                    if (resp.status === 401) {
+                        addPeterMessage('OpenAI API key is invalid. Please update it in Settings.');
+                    } else {
+                        addPeterMessage('OpenAI API error: HTTP ' + resp.status + '. ' + escapeHTML(errText.substring(0, 200)));
+                    }
+                    return;
+                }
+
+                const reader = resp.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
+
+                    for (const line of lines) {
+                        const trimmed = line.trim();
+                        if (!trimmed || !trimmed.startsWith('data: ')) continue;
+                        const data = trimmed.slice(6);
+                        if (data === '[DONE]') break;
+
+                        try {
+                            const parsed = JSON.parse(data);
+                            const content = parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content;
+                            if (content) {
+                                stream.append(content);
+                            }
+                        } catch(e) {}
+                    }
+                }
+
+                stream.finish(sources);
+
+                conversationHistory.push({ role: 'user', content: query });
+                conversationHistory.push({ role: 'assistant', content: stream.getText() });
+                while (conversationHistory.length > 6) {
+                    conversationHistory.shift();
+                }
+            } catch(e) {
+                stream.finish();
+                addPeterMessage('Failed to connect to OpenAI: ' + escapeHTML(e.message));
+            }
+        }
+
+        // =====================================================
+        // Send Message
+        // =====================================================
+        window.sendMessage = async function() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+            addUserMessage(text);
+
+            if (articles.length === 0) {
+                addPeterMessage('Content is still loading. Please wait a moment and try again.');
+                return;
+            }
+
+            const results = search(text, 5);
+
+            if (results.length === 0) {
+                addPeterMessage('I couldn\'t find any articles matching that topic. Try different keywords &mdash; for example, "zone 2", "apoB", "GLP-1", "sleep", "fasting", or "VO2 max".');
+                return;
+            }
+
+            const apiKey = localStorage.getItem(API_KEY_KEY);
+            if (apiKey) {
+                await chatWithAI(text, results);
+                return;
+            }
+
+            // Fallback: show raw search results (no API key)
+            let response = 'I found <strong>' + results.length + ' relevant articles</strong>:<br><br>';
+            results.forEach(function(r, i) {
+                let excerpt = r.bestParagraph || '';
+                if (excerpt.length > 400) excerpt = excerpt.substring(0, 400) + '...';
+                if (i > 0) response += '<br><br>';
+                response += '<div class="excerpt">' + escapeHTML(excerpt) + '</div>';
+                response += '<div class="article-ref">';
+                response += '<span class="article-title">' + escapeHTML(r.article.title) + '</span>';
+                if (r.article.category) response += ' <span class="article-date">(' + escapeHTML(r.article.category) + ')</span>';
+                response += '</div>';
+            });
+            response += '<br><div style="font-size:12px;color:#999;">Add your OpenAI API key in Settings for AI-powered conversational answers.</div>';
+            addPeterMessage(response);
+        };
+
+        window.askQuestion = function(text) {
+            chatInput.value = text;
+            sendMessage();
+        };
+
+        // --- Format chips ---
+        window.toggleFormatChip = function(chip) {
+            const group = chip.dataset.group;
+            if (group === 'words') {
+                document.querySelectorAll('.format-chip[data-group="words"]').forEach(function(c) {
+                    c.classList.remove('active');
+                });
+                chip.classList.add('active');
+            } else {
+                chip.classList.toggle('active');
+            }
+        };
+
+        function getFormatPreferences() {
+            var wordChip = document.querySelector('.format-chip[data-group="words"].active');
+            var wordCount = wordChip ? wordChip.dataset.value : '100';
+            var bullets = document.querySelector('.format-chip[data-group="format"][data-value="bullets"].active') !== null;
+            return { wordCount: wordCount, bullets: bullets };
+        }
+
+        // --- Auto-resize textarea ---
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // --- Fullscreen toggle ---
+        window.toggleFullscreen = function() {
+            const section = document.getElementById('chatSection');
+            const icon = document.getElementById('fullscreenIcon');
+            section.classList.toggle('fullscreen');
+            if (section.classList.contains('fullscreen')) {
+                icon.innerHTML = '<path d="M4 14h6v6m10-10h-6V4m0 6l7-7M3 21l7-7"/>';
+                document.body.style.overflow = 'hidden';
+            } else {
+                icon.innerHTML = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>';
+                document.body.style.overflow = '';
+            }
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        };
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const section = document.getElementById('chatSection');
+                if (section.classList.contains('fullscreen')) {
+                    toggleFullscreen();
+                }
+            }
+        });
+
+        // --- Boot ---
+        init();
+    })();
+    </script>
+</body>
+</html>
