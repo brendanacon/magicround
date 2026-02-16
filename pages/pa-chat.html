@@ -1164,9 +1164,25 @@
         // Text Processing
         // =====================================================
         function splitIntoParagraphs(text) {
-            return text.split(/\n\n+|\.\s+/)
-                .map(function(p) { return p.trim(); })
-                .filter(function(p) { return p.length > 40; });
+            // Split into overlapping ~800-char chunks at sentence boundaries
+            // PDF text is pre-joined (no line wraps), so we chunk by size
+            var chunkSize = 800;
+            var overlap = 200;
+            var chunks = [];
+            var i = 0;
+            while (i < text.length) {
+                var chunk = text.substring(i, i + chunkSize);
+                // Try to break at a sentence boundary in the second half
+                var lastPeriod = chunk.lastIndexOf('. ');
+                if (lastPeriod > chunkSize / 2) {
+                    chunk = chunk.substring(0, lastPeriod + 1);
+                }
+                chunk = chunk.trim();
+                if (chunk.length > 40) chunks.push(chunk);
+                i += chunk.length - overlap;
+                if (i + overlap >= text.length) break;
+            }
+            return chunks;
         }
 
         // =====================================================
@@ -1212,16 +1228,16 @@
 
             articles.forEach(function(article) {
                 const titleScore = scoreParagraph(article.title, keywords);
-                let bestPara = null;
-                let bestParaScore = 0;
 
-                (article.paragraphs || []).forEach(function(para) {
-                    const ps = scoreParagraph(para, keywords);
-                    if (ps.score > bestParaScore) {
-                        bestParaScore = ps.score;
-                        bestPara = para;
-                    }
-                });
+                // Score all chunks and keep top 3
+                var scoredParas = (article.paragraphs || []).map(function(para) {
+                    return { text: para, score: scoreParagraph(para, keywords).score };
+                }).filter(function(p) { return p.score > 0; });
+                scoredParas.sort(function(a, b) { return b.score - a.score; });
+                var topParas = scoredParas.slice(0, 3);
+
+                var bestParaScore = topParas.length > 0 ? topParas[0].score : 0;
+                var bestChunks = topParas.map(function(p) { return p.text; });
 
                 // Also search the full text for scoring
                 const fullTextScore = scoreParagraph((article.text || '').substring(0, 2000), keywords);
@@ -1231,7 +1247,8 @@
                     results.push({
                         article: article,
                         score: totalScore,
-                        bestParagraph: bestPara || (article.text || '').substring(0, 400),
+                        bestParagraph: bestChunks.length > 0 ? bestChunks[0] : (article.text || '').substring(0, 400),
+                        bestChunks: bestChunks,
                         titleMatch: titleScore.score > 0
                     });
                 }
@@ -1515,14 +1532,15 @@
                 var excerpt;
                 if (r.titleMatch && article.text) {
                     excerpt = article.text;
-                    var cap = 6000;
+                    var cap = 8000;
                     if (excerpt.length > cap) excerpt = excerpt.substring(0, cap) + '...';
-                } else if (r.titleMatch && article.paragraphs && article.paragraphs.length > 0) {
-                    excerpt = article.paragraphs.join('\n\n');
-                    if (excerpt.length > 6000) excerpt = excerpt.substring(0, 6000) + '...';
+                } else if (r.bestChunks && r.bestChunks.length > 0) {
+                    // Send top 3 matching chunks for richer context
+                    excerpt = r.bestChunks.join('\n\n---\n\n');
+                    if (excerpt.length > 4000) excerpt = excerpt.substring(0, 4000) + '...';
                 } else {
                     excerpt = r.bestParagraph || article.text || '';
-                    if (excerpt.length > 1500) excerpt = excerpt.substring(0, 1500) + '...';
+                    if (excerpt.length > 2000) excerpt = excerpt.substring(0, 2000) + '...';
                 }
                 context += '\n\n---\nArticle ' + (i + 1) + ': "' + article.title + '" (' + article.category + ')\n' + excerpt;
             });
